@@ -16,6 +16,7 @@ import {
   resolveContentItemKey,
   type ContentItemKey,
 } from "@/lib/content-items";
+import { getCustomTavusLlmConfig } from "@/lib/tavus-custom-llms";
 import type {
   TavusAppMessage,
   TavusConversationCreateResponse,
@@ -47,6 +48,51 @@ function getErrorMessage(error: unknown) {
   }
 
   return "Something went wrong while starting the Tavus demo.";
+}
+
+function getRequestedLlmName() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return new URLSearchParams(window.location.search).get("llm");
+}
+
+async function playToolCallChime(audioContextRef: { current: AudioContext | null }) {
+  if (typeof window === "undefined" || typeof window.AudioContext === "undefined") {
+    return;
+  }
+
+  const audioContext = audioContextRef.current ?? new window.AudioContext();
+  audioContextRef.current = audioContext;
+
+  if (audioContext.state === "suspended") {
+    await audioContext.resume();
+  }
+
+  const now = audioContext.currentTime;
+  const masterGain = audioContext.createGain();
+  masterGain.connect(audioContext.destination);
+  masterGain.gain.setValueAtTime(0.0001, now);
+  masterGain.gain.exponentialRampToValueAtTime(0.024, now + 0.012);
+  masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
+
+  const lowTone = audioContext.createOscillator();
+  lowTone.type = "sine";
+  lowTone.frequency.setValueAtTime(784, now);
+  lowTone.frequency.exponentialRampToValueAtTime(1046, now + 0.18);
+  lowTone.connect(masterGain);
+
+  const highTone = audioContext.createOscillator();
+  highTone.type = "triangle";
+  highTone.frequency.setValueAtTime(1174, now + 0.03);
+  highTone.frequency.exponentialRampToValueAtTime(1318, now + 0.2);
+  highTone.connect(masterGain);
+
+  lowTone.start(now);
+  lowTone.stop(now + 0.26);
+  highTone.start(now + 0.028);
+  highTone.stop(now + 0.22);
 }
 
 function getConversationEcho(
@@ -423,6 +469,7 @@ export function TavusDemo() {
 
   const callObjectRef = useRef<DailyCall | null>(null);
   const conversationIdRef = useRef<string | null>(null);
+  const toolCallAudioContextRef = useRef<AudioContext | null>(null);
   const processedToolCallsRef = useRef<Set<string> | null>(null);
   const processedUtterancesRef = useRef<Set<string> | null>(null);
   const startInFlightRef = useRef(false);
@@ -555,6 +602,7 @@ export function TavusDemo() {
     }
 
     processedToolCallsRef.current?.add(toolCallKey);
+    void playToolCallChime(toolCallAudioContextRef);
 
     console.log("[Tavus tool call]", {
       fromId: event.fromId,
@@ -702,7 +750,12 @@ export function TavusDemo() {
   }, [callObject, syncMicMutedState]);
 
   const createConversation = useCallback(async () => {
-    const response = await fetch("/api/conversation", {
+    const llmName = getRequestedLlmName();
+    const conversationUrl = llmName
+      ? `/api/conversation?llm=${encodeURIComponent(llmName)}`
+      : "/api/conversation";
+
+    const response = await fetch(conversationUrl, {
       method: "POST",
       cache: "no-store",
     });
@@ -994,8 +1047,24 @@ export function TavusDemo() {
       callObjectRef.current = nextCallObject;
       setCallObject(nextCallObject);
 
+      const requestedLlmName = getRequestedLlmName();
+      const requestedLlmConfig = requestedLlmName ? getCustomTavusLlmConfig(requestedLlmName) : null;
+      const shouldDisableVideo = requestedLlmConfig?.disableVideo === true;
+
       setStatus("requesting-permissions");
-      await nextCallObject.startCamera();
+      await nextCallObject.startCamera(
+        shouldDisableVideo
+          ? {
+              audioSource: true,
+              videoSource: false,
+            }
+          : undefined,
+      );
+
+      if (shouldDisableVideo) {
+        nextCallObject.setLocalVideo(false);
+      }
+
       nextCallObject.setLocalAudio(!isMicMuted);
 
       setStatus("loading");
