@@ -10,6 +10,7 @@ import { DailyAudio, DailyProvider, DailyVideo, useParticipantIds } from "@daily
 import type { DailyAudioHandle } from "@daily-co/daily-react/dist/components/DailyAudio";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { ScheduleOverlay, type ScheduleOverlayColumn } from "@/components/schedule-overlay";
 import {
   CONTENT_ITEMS,
   resolveContentItemKey,
@@ -111,6 +112,17 @@ type TranscriptEntry = {
   text: string;
 };
 
+type OverlayState =
+  | {
+      kind: "content";
+      contentItemKey: ContentItemKey;
+    }
+  | {
+      kind: "schedule";
+      columns: ScheduleOverlayColumn[];
+      title?: string;
+    };
+
 function isTavusMessage(payload: unknown): payload is TavusAppMessage {
   return (
     typeof payload === "object" &&
@@ -191,11 +203,48 @@ function TranscriptPanelRow({ active, label, text }: TranscriptPanelRowProps) {
   );
 }
 
+type FloatingMicControlProps = {
+  isMuted: boolean;
+  onToggle(): void;
+};
+
+function FloatingMicControl({ isMuted, onToggle }: FloatingMicControlProps) {
+  return (
+    <div className="absolute left-4 top-4 z-40 flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/72 px-3 py-2 shadow-[0_18px_44px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+      <span
+        className={isMuted ? "size-2 rounded-full bg-rose-400" : "size-2 rounded-full bg-emerald-300"}
+      />
+      <div className="min-w-0">
+        <p className="text-[0.6rem] uppercase tracking-[0.26em] text-slate-400">Mic</p>
+        <p className="text-[0.72rem] font-medium uppercase tracking-[0.18em] text-white">
+          {isMuted ? "Muted" : "Live"}
+        </p>
+      </div>
+      <button
+        className={
+          isMuted
+            ? "rounded-full border border-emerald-300/30 bg-emerald-400/12 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-emerald-100 transition hover:bg-emerald-400/18"
+            : "rounded-full border border-rose-300/30 bg-rose-400/12 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-rose-100 transition hover:bg-rose-400/18"
+        }
+        onClick={onToggle}
+        type="button"
+      >
+        {isMuted ? "Unmute" : "Mute"}
+      </button>
+      <span className="hidden text-[0.58rem] uppercase tracking-[0.18em] text-slate-500 sm:block">
+        Ctrl+D
+      </span>
+    </div>
+  );
+}
+
 type TavusSessionProps = {
   audioBlocked: boolean;
-  contentItemKey: ContentItemKey | null;
+  isMicMuted: boolean;
   latestReplicaTranscript: TranscriptEntry | null;
   latestUserTranscript: TranscriptEntry | null;
+  onToggleMicMute(): void;
+  overlayState: OverlayState | null;
   replicaReady: boolean;
   replicaSpeaking: boolean;
   onAudioBlockedChange(nextValue: boolean): void;
@@ -204,9 +253,11 @@ type TavusSessionProps = {
 
 function TavusSession({
   audioBlocked,
-  contentItemKey,
+  isMicMuted,
   latestReplicaTranscript,
   latestUserTranscript,
+  onToggleMicMute,
+  overlayState,
   replicaReady,
   replicaSpeaking,
   onAudioBlockedChange,
@@ -216,12 +267,14 @@ function TavusSession({
   const audioHandleRef = useRef<DailyAudioHandle | null>(null);
 
   const activeContent = useMemo(() => {
-    if (!contentItemKey) {
+    if (!overlayState || overlayState.kind !== "content") {
       return null;
     }
 
-    return CONTENT_ITEMS[contentItemKey];
-  }, [contentItemKey]);
+    return CONTENT_ITEMS[overlayState.contentItemKey];
+  }, [overlayState]);
+
+  const activeSchedule = overlayState?.kind === "schedule" ? overlayState : null;
 
   const avatarSessionId = remoteParticipantIds[0] ?? null;
   const canRenderAvatar = replicaReady && Boolean(avatarSessionId);
@@ -241,10 +294,12 @@ function TavusSession({
     onAudioBlockedChange(playResults.some((result) => result.status === "rejected"));
   }, [onAudioBlockedChange]);
 
-  if (!activeContent) {
+  if (!overlayState) {
     return (
       <>
         <div className="relative h-screen w-screen overflow-hidden bg-black">
+          <FloatingMicControl isMuted={isMicMuted} onToggle={onToggleMicMute} />
+
           {canRenderAvatar && avatarSessionId ? (
             <DailyVideo
               className="h-full w-full bg-black object-cover"
@@ -295,13 +350,22 @@ function TavusSession({
   return (
     <>
       <div className="relative h-screen w-screen overflow-hidden bg-slate-950">
-        <iframe
-          className="absolute inset-0 h-full w-full bg-white"
-          src={activeContent.url}
-          title={activeContent.label}
-        />
+        <FloatingMicControl isMuted={isMicMuted} onToggle={onToggleMicMute} />
 
-        <div className="absolute bottom-6 right-6 z-20 h-[210px] w-[280px] overflow-hidden rounded-[1.75rem] border border-white/15 bg-slate-950/90 shadow-2xl backdrop-blur">
+        {activeContent ? (
+          <iframe
+            className="absolute inset-0 h-full w-full bg-white"
+            src={activeContent.url}
+            title={activeContent.label}
+          />
+        ) : activeSchedule ? (
+          <ScheduleOverlay
+            columns={activeSchedule.columns}
+            title={activeSchedule.title}
+          />
+        ) : null}
+
+        <div className="absolute right-4 top-4 z-20 h-[96px] w-[128px] overflow-hidden rounded-[1.1rem] border border-white/15 bg-slate-950/90 shadow-2xl backdrop-blur sm:h-[108px] sm:w-[144px] md:h-[120px] md:w-[160px]">
           {canRenderAvatar && avatarSessionId ? (
             <DailyVideo
               className="h-full w-full bg-slate-950 object-cover"
@@ -348,7 +412,8 @@ export function TavusDemo() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [callObject, setCallObject] = useState<DailyCall | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [contentItemKey, setContentItemKey] = useState<ContentItemKey | null>(null);
+  const [isMicMuted, setIsMicMuted] = useState(false);
+  const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
   const [replicaReady, setReplicaReady] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
   const [latestUserTranscript, setLatestUserTranscript] = useState<TranscriptEntry | null>(null);
@@ -378,6 +443,27 @@ export function TavusDemo() {
   useEffect(() => {
     conversationIdRef.current = conversationId;
   }, [conversationId]);
+
+  const syncMicMutedState = useCallback((currentCallObject: DailyCall | null) => {
+    if (!currentCallObject || currentCallObject.isDestroyed()) {
+      return;
+    }
+
+    setIsMicMuted(!currentCallObject.localAudio());
+  }, []);
+
+  const handleToggleMicMute = useCallback(() => {
+    setIsMicMuted((currentMuted) => {
+      const nextMuted = !currentMuted;
+      const currentCallObject = callObjectRef.current;
+
+      if (currentCallObject && !currentCallObject.isDestroyed()) {
+        currentCallObject.setLocalAudio(!nextMuted);
+      }
+
+      return nextMuted;
+    });
+  }, []);
 
   const handleAppMessage = useCallback((event: DailyEventObjectAppMessage<TavusAppMessage>) => {
     const payload = event.data;
@@ -481,9 +567,33 @@ export function TavusDemo() {
       const rawArguments = payload.properties.arguments;
       const parsedArguments =
         typeof rawArguments === "string" && rawArguments.length > 0
-          ? (JSON.parse(rawArguments) as { item?: string })
+          ? (JSON.parse(rawArguments) as {
+              item?: string;
+              columns?: Array<{
+                markdown?: string;
+                markdown_table?: string;
+                table?: string;
+                title?: string;
+              }>;
+              markdown?: string;
+              markdown_table?: string;
+              table?: string;
+              title?: string;
+            })
           : typeof rawArguments === "object" && rawArguments !== null
-            ? (rawArguments as { item?: string })
+            ? (rawArguments as {
+                item?: string;
+                columns?: Array<{
+                  markdown?: string;
+                  markdown_table?: string;
+                  table?: string;
+                  title?: string;
+                }>;
+                markdown?: string;
+                markdown_table?: string;
+                table?: string;
+                title?: string;
+              })
             : {};
 
       switch (payload.properties.name) {
@@ -494,12 +604,56 @@ export function TavusDemo() {
             break;
           }
 
-          setContentItemKey(nextContentItemKey);
+          setOverlayState({
+            kind: "content",
+            contentItemKey: nextContentItemKey,
+          });
           responseText = `Showing ${CONTENT_ITEMS[nextContentItemKey].label}.`;
           break;
         }
+        case "show_schedule": {
+          const columns = Array.isArray(parsedArguments.columns)
+            ? parsedArguments.columns
+              .map((column): ScheduleOverlayColumn | null => {
+                const markdownTable = column.markdown_table ?? column.markdown ?? column.table;
+
+                if (typeof markdownTable !== "string" || markdownTable.trim().length === 0) {
+                  return null;
+                }
+
+                return {
+                  markdownTable: markdownTable.trim(),
+                  title: column.title?.trim() || undefined,
+                };
+              })
+              .filter((column): column is ScheduleOverlayColumn => column !== null)
+              .slice(0, 3)
+            : [];
+
+          if (columns.length === 0) {
+            const markdownTable = parsedArguments.markdown_table ?? parsedArguments.markdown ?? parsedArguments.table;
+
+            if (typeof markdownTable !== "string" || markdownTable.trim().length === 0) {
+              responseText = "I could not generate the schedule table for the screen.";
+              break;
+            }
+
+            columns.push({
+              markdownTable: markdownTable.trim(),
+              title: parsedArguments.title?.trim() || undefined,
+            });
+          }
+
+          setOverlayState({
+            kind: "schedule",
+            columns,
+            title: parsedArguments.title?.trim() || "Schedule Snapshot",
+          });
+          responseText = "Showing the schedule on screen.";
+          break;
+        }
         case "dismiss_content": {
-          setContentItemKey(null);
+          setOverlayState(null);
           responseText = "Returning to the full conversation view.";
           break;
         }
@@ -526,6 +680,26 @@ export function TavusDemo() {
       callObject.off("app-message", handleAppMessage);
     };
   }, [callObject, handleAppMessage]);
+
+  useEffect(() => {
+    if (!callObject) {
+      return;
+    }
+
+    const syncFromCallObject = () => {
+      syncMicMutedState(callObject);
+    };
+
+    callObject.on("started-camera", syncFromCallObject);
+    callObject.on("joined-meeting", syncFromCallObject);
+    callObject.on("participant-updated", syncFromCallObject);
+
+    return () => {
+      callObject.off("started-camera", syncFromCallObject);
+      callObject.off("joined-meeting", syncFromCallObject);
+      callObject.off("participant-updated", syncFromCallObject);
+    };
+  }, [callObject, syncMicMutedState]);
 
   const createConversation = useCallback(async () => {
     const response = await fetch("/api/conversation", {
@@ -576,7 +750,7 @@ export function TavusDemo() {
   const resetUiState = useCallback(() => {
     setCallObject(null);
     setConversationId(null);
-    setContentItemKey(null);
+    setOverlayState(null);
     setReplicaReady(false);
     setAudioBlocked(false);
     setLatestUserTranscript(null);
@@ -609,7 +783,7 @@ export function TavusDemo() {
 
       conversationIdRef.current = null;
       setConversationId(null);
-      setContentItemKey(null);
+      setOverlayState(null);
       setReplicaReady(false);
       setAudioBlocked(false);
       setLatestUserTranscript(null);
@@ -679,6 +853,29 @@ export function TavusDemo() {
       window.removeEventListener("keydown", handleEscape);
     };
   }, [status, teardownDemo]);
+
+  useEffect(() => {
+    const handleMicHotkey = (event: KeyboardEvent) => {
+      if (
+        event.repeat ||
+        !event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.shiftKey ||
+        event.key.toLowerCase() !== "d"
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      handleToggleMicMute();
+    };
+
+    window.addEventListener("keydown", handleMicHotkey);
+    return () => {
+      window.removeEventListener("keydown", handleMicHotkey);
+    };
+  }, [handleToggleMicMute]);
 
   useEffect(() => {
     const currentCallObject = callObject;
@@ -778,7 +975,7 @@ export function TavusDemo() {
     isManualTeardownRef.current = false;
     setErrorMessage(null);
     setAudioBlocked(false);
-    setContentItemKey(null);
+    setOverlayState(null);
     setReplicaReady(false);
     setLatestUserTranscript(null);
     setLatestReplicaTranscript(null);
@@ -799,6 +996,7 @@ export function TavusDemo() {
 
       setStatus("requesting-permissions");
       await nextCallObject.startCamera();
+      nextCallObject.setLocalAudio(!isMicMuted);
 
       setStatus("loading");
       const conversation = await createConversation();
@@ -831,7 +1029,7 @@ export function TavusDemo() {
       startInFlightRef.current = false;
       isManualTeardownRef.current = false;
     }
-  }, [createConversation, destroyCallObject, endConversation, status, teardownDemo]);
+  }, [createConversation, destroyCallObject, endConversation, isMicMuted, status, teardownDemo]);
 
   const showStartScreen = !callObject || status === "idle" || status === "error";
   const showSession = Boolean(callObject) && !showStartScreen;
@@ -841,9 +1039,11 @@ export function TavusDemo() {
       <DailyProvider callObject={callObject}>
         <TavusSession
           audioBlocked={audioBlocked}
-          contentItemKey={contentItemKey}
+          isMicMuted={isMicMuted}
           latestReplicaTranscript={latestReplicaTranscript}
           latestUserTranscript={latestUserTranscript}
+          onToggleMicMute={handleToggleMicMute}
+          overlayState={overlayState}
           replicaReady={replicaReady}
           replicaSpeaking={replicaSpeaking}
           onAudioBlockedChange={setAudioBlocked}
@@ -855,6 +1055,8 @@ export function TavusDemo() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(41,80,200,0.35),_transparent_38%),linear-gradient(180deg,_#09101d_0%,_#060912_100%)] text-white">
+      <FloatingMicControl isMuted={isMicMuted} onToggle={handleToggleMicMute} />
+
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.04),transparent_38%),radial-gradient(circle_at_bottom,_rgba(123,204,163,0.2),_transparent_35%)]" />
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 md:px-10">

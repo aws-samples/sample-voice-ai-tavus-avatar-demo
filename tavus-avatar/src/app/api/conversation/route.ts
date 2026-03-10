@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { getTavusConfig, getTavusErrorMessage, readResponsePayload, tavusFetch } from "@/lib/tavus-api";
 import type { TavusConversationCreateResponse } from "@/types/tavus";
 
+// Tavus knowledge base document for prompts/aws-gtc-schedule-kb-1.md.
+const AWS_GTC_SCHEDULE_DOCUMENT_ID = "d5-a250fbf7c53f";
+
 export async function POST() {
   try {
     const { personaId } = getTavusConfig();
@@ -11,6 +14,7 @@ export async function POST() {
       method: "POST",
       body: JSON.stringify({
         persona_id: personaId,
+        document_ids: [AWS_GTC_SCHEDULE_DOCUMENT_ID],
         custom_greeting:
           "Hi, welcome to the AWS booth. Ask me about voice AI, or ask me to show a diagram.",
         properties: {
