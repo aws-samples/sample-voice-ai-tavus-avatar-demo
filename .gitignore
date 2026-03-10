@@ -39,3 +39,4 @@ tavus-avatar/.git.local-backup/
 
 # local references not intended for deployment repo
 src-reference/
+.vercel

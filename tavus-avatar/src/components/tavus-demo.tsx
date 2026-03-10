@@ -19,6 +19,7 @@ import type {
   TavusAppMessage,
   TavusConversationCreateResponse,
   TavusConversationEchoMessage,
+  TavusConversationUtteranceMessage,
   TavusToolCallMessage,
 } from "@/types/tavus";
 
@@ -73,20 +74,30 @@ function getToolCallKey(toolCall: TavusToolCallMessage) {
   });
 }
 
-function getProcessedToolCallStore() {
+function getUtteranceKey(utterance: TavusConversationUtteranceMessage) {
+  return JSON.stringify({
+    conversationId: utterance.conversation_id ?? "",
+    inferenceId: utterance.inference_id ?? "",
+    role: utterance.properties.role,
+    speech: utterance.properties.speech,
+  });
+}
+
+function getProcessedMessageStore(storeName: "__tavusProcessedToolCalls__" | "__tavusProcessedUtterances__") {
   if (typeof window === "undefined") {
     return new Set<string>();
   }
 
   const globalWindow = window as Window & {
     __tavusProcessedToolCalls__?: Set<string>;
+    __tavusProcessedUtterances__?: Set<string>;
   };
 
-  if (!globalWindow.__tavusProcessedToolCalls__) {
-    globalWindow.__tavusProcessedToolCalls__ = new Set<string>();
+  if (!globalWindow[storeName]) {
+    globalWindow[storeName] = new Set<string>();
   }
 
-  return globalWindow.__tavusProcessedToolCalls__;
+  return globalWindow[storeName];
 }
 
 const REPLICA_READY_EVENT_TYPES = new Set([
@@ -94,6 +105,11 @@ const REPLICA_READY_EVENT_TYPES = new Set([
   "system.replica_joined",
   "conversation.replica.started_speaking",
 ]);
+
+type TranscriptEntry = {
+  inferenceId?: string;
+  text: string;
+};
 
 function isTavusMessage(payload: unknown): payload is TavusAppMessage {
   return (
@@ -108,18 +124,93 @@ function isToolCallMessage(payload: TavusAppMessage): payload is TavusToolCallMe
   return payload.event_type === "conversation.tool_call";
 }
 
+function isUtteranceMessage(payload: TavusAppMessage): payload is TavusConversationUtteranceMessage {
+  return payload.event_type === "conversation.utterance";
+}
+
+type TranscriptPanelProps = {
+  latestReplicaTranscript: TranscriptEntry | null;
+  latestUserTranscript: TranscriptEntry | null;
+  replicaSpeaking: boolean;
+  userSpeaking: boolean;
+};
+
+function TranscriptPanel({
+  latestReplicaTranscript,
+  latestUserTranscript,
+  replicaSpeaking,
+  userSpeaking,
+}: TranscriptPanelProps) {
+  const showPanel =
+    userSpeaking || replicaSpeaking || Boolean(latestUserTranscript?.text || latestReplicaTranscript?.text);
+
+  if (!showPanel) {
+    return null;
+  }
+
+  const userText = userSpeaking && !latestUserTranscript?.text
+    ? "Listening..."
+    : latestUserTranscript?.text ?? "Waiting for your first question.";
+  const replicaText = replicaSpeaking && !latestReplicaTranscript?.text
+    ? "Speaking..."
+    : latestReplicaTranscript?.text ?? "Tavus responses appear here.";
+
+  return (
+    <div className="absolute bottom-6 left-6 z-20 w-[min(34rem,calc(100vw-3rem))] rounded-[1.75rem] border border-white/10 bg-slate-950/55 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+      <div className="space-y-3">
+        <TranscriptPanelRow active={userSpeaking} label="You" text={userText} />
+        <TranscriptPanelRow active={replicaSpeaking} label="Tavus" text={replicaText} />
+      </div>
+    </div>
+  );
+}
+
+type TranscriptPanelRowProps = {
+  active: boolean;
+  label: string;
+  text: string;
+};
+
+function TranscriptPanelRow({ active, label, text }: TranscriptPanelRowProps) {
+  return (
+    <div
+      className={
+        active
+          ? "rounded-[1.25rem] border border-sky-300/20 bg-sky-400/10 px-4 py-3"
+          : "rounded-[1.25rem] border border-white/8 bg-white/5 px-4 py-3"
+      }
+    >
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-slate-400">
+        <span className={active ? "size-2 rounded-full bg-sky-300" : "size-2 rounded-full bg-slate-500"} />
+        {label}
+      </div>
+      <p className={active ? "mt-2 text-sm leading-6 text-slate-50" : "mt-2 text-sm leading-6 text-slate-200/90"}>
+        {text}
+      </p>
+    </div>
+  );
+}
+
 type TavusSessionProps = {
   audioBlocked: boolean;
   contentItemKey: ContentItemKey | null;
+  latestReplicaTranscript: TranscriptEntry | null;
+  latestUserTranscript: TranscriptEntry | null;
   replicaReady: boolean;
+  replicaSpeaking: boolean;
   onAudioBlockedChange(nextValue: boolean): void;
+  userSpeaking: boolean;
 };
 
 function TavusSession({
   audioBlocked,
   contentItemKey,
+  latestReplicaTranscript,
+  latestUserTranscript,
   replicaReady,
+  replicaSpeaking,
   onAudioBlockedChange,
+  userSpeaking,
 }: TavusSessionProps) {
   const remoteParticipantIds = useParticipantIds({ filter: "remote" });
   const audioHandleRef = useRef<DailyAudioHandle | null>(null);
@@ -179,6 +270,13 @@ function TavusSession({
               </button>
             </div>
           ) : null}
+
+          <TranscriptPanel
+            latestReplicaTranscript={latestReplicaTranscript}
+            latestUserTranscript={latestUserTranscript}
+            replicaSpeaking={replicaSpeaking}
+            userSpeaking={userSpeaking}
+          />
         </div>
 
         <div className="pointer-events-none absolute size-0 overflow-hidden opacity-0">
@@ -253,15 +351,24 @@ export function TavusDemo() {
   const [contentItemKey, setContentItemKey] = useState<ContentItemKey | null>(null);
   const [replicaReady, setReplicaReady] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
+  const [latestUserTranscript, setLatestUserTranscript] = useState<TranscriptEntry | null>(null);
+  const [latestReplicaTranscript, setLatestReplicaTranscript] = useState<TranscriptEntry | null>(null);
+  const [userSpeaking, setUserSpeaking] = useState(false);
+  const [replicaSpeaking, setReplicaSpeaking] = useState(false);
 
   const callObjectRef = useRef<DailyCall | null>(null);
   const conversationIdRef = useRef<string | null>(null);
   const processedToolCallsRef = useRef<Set<string> | null>(null);
+  const processedUtterancesRef = useRef<Set<string> | null>(null);
   const startInFlightRef = useRef(false);
   const isManualTeardownRef = useRef(false);
 
   if (processedToolCallsRef.current == null) {
-    processedToolCallsRef.current = getProcessedToolCallStore();
+    processedToolCallsRef.current = getProcessedMessageStore("__tavusProcessedToolCalls__");
+  }
+
+  if (processedUtterancesRef.current == null) {
+    processedUtterancesRef.current = getProcessedMessageStore("__tavusProcessedUtterances__");
   }
 
   useEffect(() => {
@@ -286,6 +393,60 @@ export function TavusDemo() {
 
     if (REPLICA_READY_EVENT_TYPES.has(payload.event_type)) {
       setReplicaReady(true);
+    }
+
+    switch (payload.event_type) {
+      case "conversation.user.started_speaking":
+        setUserSpeaking(true);
+        setReplicaSpeaking(false);
+        break;
+      case "conversation.user.stopped_speaking":
+        setUserSpeaking(false);
+        break;
+      case "conversation.replica.started_speaking":
+        setReplicaSpeaking(true);
+        setUserSpeaking(false);
+        break;
+      case "conversation.replica.stopped_speaking":
+      case "conversation.replica_interrupted":
+        setReplicaSpeaking(false);
+        break;
+      default:
+        break;
+    }
+
+    if (isUtteranceMessage(payload)) {
+      const speech = payload.properties.speech.trim();
+
+      if (!speech) {
+        return;
+      }
+
+      const utteranceKey = getUtteranceKey(payload);
+
+      if (processedUtterancesRef.current?.has(utteranceKey)) {
+        return;
+      }
+
+      if (processedUtterancesRef.current && processedUtterancesRef.current.size >= 100) {
+        processedUtterancesRef.current.clear();
+      }
+
+      processedUtterancesRef.current?.add(utteranceKey);
+
+      const transcriptEntry = {
+        inferenceId: payload.inference_id,
+        text: speech,
+      };
+
+      if (payload.properties.role === "user") {
+        setLatestUserTranscript(transcriptEntry);
+        setUserSpeaking(false);
+      } else if (payload.properties.role === "replica") {
+        setLatestReplicaTranscript(transcriptEntry);
+      }
+
+      return;
     }
 
     if (!isToolCallMessage(payload)) {
@@ -418,6 +579,10 @@ export function TavusDemo() {
     setContentItemKey(null);
     setReplicaReady(false);
     setAudioBlocked(false);
+    setLatestUserTranscript(null);
+    setLatestReplicaTranscript(null);
+    setUserSpeaking(false);
+    setReplicaSpeaking(false);
     setErrorMessage(null);
     setStatus("idle");
   }, []);
@@ -447,6 +612,10 @@ export function TavusDemo() {
       setContentItemKey(null);
       setReplicaReady(false);
       setAudioBlocked(false);
+      setLatestUserTranscript(null);
+      setLatestReplicaTranscript(null);
+      setUserSpeaking(false);
+      setReplicaSpeaking(false);
 
       if (!currentCallObject) {
         if (activeConversationId) {
@@ -611,6 +780,10 @@ export function TavusDemo() {
     setAudioBlocked(false);
     setContentItemKey(null);
     setReplicaReady(false);
+    setLatestUserTranscript(null);
+    setLatestReplicaTranscript(null);
+    setUserSpeaking(false);
+    setReplicaSpeaking(false);
 
     let nextCallObject: DailyCall | null = null;
     let nextConversationId: string | null = null;
@@ -669,8 +842,12 @@ export function TavusDemo() {
         <TavusSession
           audioBlocked={audioBlocked}
           contentItemKey={contentItemKey}
+          latestReplicaTranscript={latestReplicaTranscript}
+          latestUserTranscript={latestUserTranscript}
           replicaReady={replicaReady}
+          replicaSpeaking={replicaSpeaking}
           onAudioBlockedChange={setAudioBlocked}
+          userSpeaking={userSpeaking}
         />
       </DailyProvider>
     );
@@ -681,15 +858,23 @@ export function TavusDemo() {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.04),transparent_38%),radial-gradient(circle_at_bottom,_rgba(123,204,163,0.2),_transparent_35%)]" />
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 md:px-10">
-        <header className="flex items-center justify-between gap-4">
+        <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-sky-200/80">AWS Booth Demo</p>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-4xl">
               Tavus Conversational Video Interface
             </h1>
           </div>
-          <div className="rounded-full border border-white/15 bg-white/6 px-4 py-2 text-sm text-slate-200 backdrop-blur">
-            {status}
+
+          <div className="flex flex-col items-start gap-2 md:items-end">
+            <button
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-400 px-6 py-3 text-base font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300"
+              disabled={startInFlightRef.current || status === "leaving"}
+              onClick={() => void handleStart()}
+              type="button"
+            >
+              {START_BUTTON_LABELS[status as keyof typeof START_BUTTON_LABELS] ?? "Start demo"}
+            </button>
           </div>
         </header>
 
@@ -710,20 +895,6 @@ export function TavusDemo() {
                     content while the avatar keeps speaking.
                   </p>
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                <button
-                  className="inline-flex items-center justify-center rounded-full bg-sky-400 px-6 py-3 text-base font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300"
-                  disabled={startInFlightRef.current || status === "leaving"}
-                  onClick={() => void handleStart()}
-                  type="button"
-                >
-                  {START_BUTTON_LABELS[status as keyof typeof START_BUTTON_LABELS] ?? "Start demo"}
-                </button>
-                <p className="text-sm text-slate-400">
-                  Browser prompt expected. The Tavus CVI does not load until you approve access.
-                </p>
               </div>
 
               {errorMessage ? (

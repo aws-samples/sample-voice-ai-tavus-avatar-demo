@@ -23,16 +23,47 @@ export interface TavusConversationEchoMessage {
 export interface TavusSystemMessage {
   message_type: "system";
   event_type: string;
-  conversation_id: string;
+  conversation_id?: string;
   properties?: Record<string, unknown>;
 }
 
 export interface TavusConversationEventMessage {
   message_type: "conversation";
   event_type: string;
-  conversation_id: string;
+  conversation_id?: string;
   inference_id?: string;
   properties?: Record<string, unknown>;
+}
+
+export type TavusConversationRole = "user" | "replica";
+
+export interface TavusConversationUtteranceMessage {
+  message_type: "conversation";
+  event_type: "conversation.utterance";
+  conversation_id?: string;
+  inference_id?: string;
+  properties: {
+    speech: string;
+    role: TavusConversationRole;
+    user_audio_analysis?: string;
+    user_visual_analysis?: string;
+  };
+}
+
+export interface TavusConversationSpeakingStateMessage {
+  message_type: "conversation";
+  event_type:
+    | "conversation.user.started_speaking"
+    | "conversation.user.stopped_speaking"
+    | "conversation.replica.started_speaking"
+    | "conversation.replica.stopped_speaking"
+    | "conversation.replica_interrupted";
+  conversation_id?: string;
+  inference_id?: string;
+  properties?: {
+    duration?: number | null;
+    inference_id?: string;
+  };
 }
 
 export interface TavusToolCallMessage {
@@ -48,6 +79,8 @@ export interface TavusToolCallMessage {
 
 export type TavusAppMessage =
   | TavusToolCallMessage
+  | TavusConversationUtteranceMessage
+  | TavusConversationSpeakingStateMessage
   | TavusConversationEchoMessage
   | TavusSystemMessage
   | TavusConversationEventMessage;

@@ -11,8 +11,10 @@ export async function POST() {
       method: "POST",
       body: JSON.stringify({
         persona_id: personaId,
+        custom_greeting:
+          "Hi, welcome to the AWS booth. Ask me about voice AI, or ask me to show a diagram.",
         properties: {
-          max_call_duration: 600,
+          max_call_duration: 3600,
           participant_left_timeout: 30,
           participant_absent_timeout: 300,
         },
