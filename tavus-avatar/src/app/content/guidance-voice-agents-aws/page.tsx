@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { ExpandableQr } from "@/components/expandable-qr";
+
 export default function GuidanceVoiceAgentsAwsPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.14),_transparent_34%),linear-gradient(180deg,_#06101b_0%,_#02060d_100%)] p-6">
@@ -27,18 +29,11 @@ export default function GuidanceVoiceAgentsAwsPage() {
           Get started on GitHub
           <span aria-hidden="true">&rarr;</span>
         </a>
-        <div className="flex items-center gap-3">
-          <Image
-            alt="Scan to open on GitHub"
-            className="rounded-lg"
-            height={80}
-            src="/content/qr-voice-agent-guidance.png"
-            width={80}
-          />
-          <span className="text-xs leading-5 text-slate-400">
-            Scan to open<br />on your device
-          </span>
-        </div>
+        <ExpandableQr
+          alt="Scan to open on GitHub"
+          href="https://github.com/aws-samples/sample-voice-agent"
+          src="/content/qr-voice-agent-guidance.png"
+        />
       </div>
     </main>
   );
