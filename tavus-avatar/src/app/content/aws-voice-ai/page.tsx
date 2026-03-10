@@ -35,7 +35,7 @@ export default function AwsVoiceAiContentPage() {
               Real-time multimodal voice agents on AWS.
             </h1>
             <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
-              This proof-of-concept page is designed for the Tavus tool-call demo. It is same-origin,
+              This proof-of-concept page is designed for the voice AI tool-call demo. It is same-origin,
               safe to embed in an iframe, and concise enough to display while the avatar keeps talking
               in the corner overlay.
             </p>
@@ -75,7 +75,7 @@ export default function AwsVoiceAiContentPage() {
               </p>
               <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-200">
                 <li>What services are involved in this demo?</li>
-                <li>How does Tavus fit into the voice pipeline?</li>
+                <li>How does the avatar fit into the voice pipeline?</li>
                 <li>Can the avatar understand what it sees through the camera?</li>
               </ul>
             </div>
@@ -90,7 +90,7 @@ export default function AwsVoiceAiContentPage() {
             <div className="mt-6 space-y-4 text-sm leading-7 text-slate-700">
               <p>
                 User audio and video enter through Daily WebRTC. Pipecat coordinates the real-time flow,
-                Amazon Bedrock handles reasoning, and Tavus renders the visual avatar.
+                Amazon Bedrock handles reasoning, and the avatar engine renders the visual avatar.
               </p>
               <p>
                 The booth scenario is deliberately small and private, but the same architecture scales to
@@ -114,7 +114,7 @@ export default function AwsVoiceAiContentPage() {
               <div className="rounded-[1.5rem] border border-white/70 bg-white/80 p-5">
                 <p className="text-base font-semibold text-slate-950">Concise</p>
                 <p className="mt-3 text-sm leading-7 text-slate-700">
-                  The content is lightweight enough for the main stage while the Tavus avatar remains
+                  The content is lightweight enough for the main stage while the AI avatar remains
                   visible in a smaller overlay.
                 </p>
               </div>

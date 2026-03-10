@@ -7,6 +7,14 @@ export const CONTENT_ITEMS = {
     url: "/content/daniel-voice-ai-architecture-diagram",
     label: "Daniel's Voice AI Architecture Diagram",
   },
+  guidance_voice_agents_aws: {
+    url: "/content/guidance-voice-agents-aws",
+    label: "Guidance for Voice Agents on AWS",
+  },
+  guidance_voice_agents_nvidia: {
+    url: "/content/guidance-voice-agents-nvidia",
+    label: "Guidance for Voice Agents on AWS with NVIDIA",
+  },
 } as const;
 
 export type ContentItemKey = keyof typeof CONTENT_ITEMS;
@@ -30,6 +38,25 @@ const CONTENT_ITEM_ALIASES: Record<ContentItemKey, string[]> = {
     "reference architecture",
     "pipecat architecture diagram",
     "architecture diagram",
+  ],
+  guidance_voice_agents_aws: [
+    "guidance_voice_agents_aws",
+    "guidance for voice agents",
+    "guidance for voice agents on aws",
+    "voice agents guidance",
+    "voice agent guidance aws",
+    "aws guidance",
+    "aws voice agent guidance",
+    "sample voice agent",
+  ],
+  guidance_voice_agents_nvidia: [
+    "guidance_voice_agents_nvidia",
+    "guidance for voice agents nvidia",
+    "guidance for voice agents on aws with nvidia",
+    "nvidia guidance",
+    "nvidia voice agent guidance",
+    "voice agents nvidia",
+    "nvidia voice agents",
   ],
 };
 

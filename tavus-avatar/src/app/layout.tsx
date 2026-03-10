@@ -15,8 +15,8 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tavus Avatar Demo",
-  description: "Private Tavus CVI booth demo with Daily React and tool-driven content overlays.",
+  title: "AWS Voice AI Demo",
+  description: "Private AWS Voice AI booth demo with Daily React and tool-driven content overlays.",
 };
 
 export default function RootLayout({
