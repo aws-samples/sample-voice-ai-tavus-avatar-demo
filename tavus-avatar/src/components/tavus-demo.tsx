@@ -466,6 +466,8 @@ export function TavusDemo() {
   const [latestReplicaTranscript, setLatestReplicaTranscript] = useState<TranscriptEntry | null>(null);
   const [userSpeaking, setUserSpeaking] = useState(false);
   const [replicaSpeaking, setReplicaSpeaking] = useState(false);
+  const [personas, setPersonas] = useState<{ persona_id: string; persona_name: string }[]>([]);
+  const [selectedPersonaId, setSelectedPersonaId] = useState<string>("");
 
   const callObjectRef = useRef<DailyCall | null>(null);
   const conversationIdRef = useRef<string | null>(null);
@@ -482,6 +484,29 @@ export function TavusDemo() {
   if (processedUtterancesRef.current == null) {
     processedUtterancesRef.current = getProcessedMessageStore("__tavusProcessedUtterances__");
   }
+
+  const showPersonaSelector = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("personas");
+
+  useEffect(() => {
+    if (!showPersonaSelector) return;
+
+    let cancelled = false;
+    fetch("/api/personas", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: { personas?: { persona_id: string; persona_name: string }[]; default_persona_id?: string }) => {
+        if (cancelled) return;
+        if (data.personas) {
+          setPersonas(data.personas);
+        }
+        if (data.default_persona_id) {
+          setSelectedPersonaId(data.default_persona_id);
+        }
+      })
+      .catch(() => {
+        // Persona list is best-effort; the default env var persona will still be used.
+      });
+    return () => { cancelled = true; };
+  }, [showPersonaSelector]);
 
   useEffect(() => {
     callObjectRef.current = callObject;
@@ -751,9 +776,11 @@ export function TavusDemo() {
 
   const createConversation = useCallback(async () => {
     const llmName = getRequestedLlmName();
-    const conversationUrl = llmName
-      ? `/api/conversation?llm=${encodeURIComponent(llmName)}`
-      : "/api/conversation";
+    const params = new URLSearchParams();
+    if (llmName) params.set("llm", llmName);
+    if (selectedPersonaId) params.set("persona", selectedPersonaId);
+    const qs = params.toString();
+    const conversationUrl = qs ? `/api/conversation?${qs}` : "/api/conversation";
 
     const response = await fetch(conversationUrl, {
       method: "POST",
@@ -774,7 +801,7 @@ export function TavusDemo() {
     }
 
     return responseJson;
-  }, []);
+  }, [selectedPersonaId]);
 
   const endConversation = useCallback(async (id: string, keepalive = false) => {
     try {
@@ -1138,6 +1165,19 @@ export function TavusDemo() {
           </div>
 
           <div className="flex flex-col items-start gap-2 md:items-end">
+            {showPersonaSelector && personas.length > 0 ? (
+              <select
+                className="min-h-10 rounded-full border border-white/15 bg-slate-800/80 px-4 py-2 text-sm text-white backdrop-blur transition hover:border-white/25 focus:border-sky-400/60 focus:outline-none"
+                value={selectedPersonaId}
+                onChange={(e) => setSelectedPersonaId(e.target.value)}
+              >
+                {personas.map((p) => (
+                  <option key={p.persona_id} value={p.persona_id}>
+                    {p.persona_name}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <button
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-400 px-6 py-3 text-base font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300"
               disabled={startInFlightRef.current || status === "leaving"}
