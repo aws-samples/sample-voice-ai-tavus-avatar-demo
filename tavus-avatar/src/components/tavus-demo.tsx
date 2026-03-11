@@ -8,7 +8,7 @@ import type {
 } from "@daily-co/daily-js";
 import { DailyAudio, DailyProvider, DailyVideo, useParticipantIds } from "@daily-co/daily-react";
 import type { DailyAudioHandle } from "@daily-co/daily-react/dist/components/DailyAudio";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { ScheduleOverlay, type ScheduleOverlayColumn } from "@/components/schedule-overlay";
 import {
@@ -25,6 +25,10 @@ import type {
   TavusToolCallMessage,
 } from "@/types/tavus";
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 type DemoStatus =
   | "idle"
   | "requesting-permissions"
@@ -34,6 +38,26 @@ type DemoStatus =
   | "leaving"
   | "error";
 
+type TranscriptEntry = {
+  inferenceId?: string;
+  text: string;
+};
+
+type OverlayState =
+  | {
+      kind: "content";
+      contentItemKey: ContentItemKey;
+    }
+  | {
+      kind: "schedule";
+      columns: ScheduleOverlayColumn[];
+      title?: string;
+    };
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
 const START_BUTTON_LABELS: Record<Exclude<DemoStatus, "connected" | "error">, string> = {
   idle: "Start demo",
   "requesting-permissions": "Approve camera and microphone",
@@ -41,6 +65,18 @@ const START_BUTTON_LABELS: Record<Exclude<DemoStatus, "connected" | "error">, st
   joining: "Joining session",
   leaving: "Ending current session",
 };
+
+const REPLICA_READY_EVENT_TYPES = new Set([
+  "system.replica_present",
+  "system.replica_joined",
+  "conversation.replica.started_speaking",
+]);
+
+const START_TIMEOUT_MS = 30_000;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -147,27 +183,27 @@ function getProcessedMessageStore(storeName: "__tavusProcessedToolCalls__" | "__
   return globalWindow[storeName];
 }
 
-const REPLICA_READY_EVENT_TYPES = new Set([
-  "system.replica_present",
-  "system.replica_joined",
-  "conversation.replica.started_speaking",
-]);
+/** Race a promise against an AbortSignal so that hung Daily methods can be escaped. */
+function raceAbortSignal<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) {
+    return Promise.reject(new Error("The connection timed out."));
+  }
 
-type TranscriptEntry = {
-  inferenceId?: string;
-  text: string;
-};
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      signal.addEventListener(
+        "abort",
+        () => reject(new Error("The connection timed out.")),
+        { once: true },
+      );
+    }),
+  ]);
+}
 
-type OverlayState =
-  | {
-      kind: "content";
-      contentItemKey: ContentItemKey;
-    }
-  | {
-      kind: "schedule";
-      columns: ScheduleOverlayColumn[];
-      title?: string;
-    };
+// ---------------------------------------------------------------------------
+// Type guards
+// ---------------------------------------------------------------------------
 
 function isTavusMessage(payload: unknown): payload is TavusAppMessage {
   return (
@@ -185,6 +221,127 @@ function isToolCallMessage(payload: TavusAppMessage): payload is TavusToolCallMe
 function isUtteranceMessage(payload: TavusAppMessage): payload is TavusConversationUtteranceMessage {
   return payload.event_type === "conversation.utterance";
 }
+
+// ---------------------------------------------------------------------------
+// Reducer
+// ---------------------------------------------------------------------------
+
+type DemoState = {
+  status: DemoStatus;
+  errorMessage: string | null;
+  callObject: DailyCall | null;
+  conversationId: string | null;
+  isMicMuted: boolean;
+  overlayState: OverlayState | null;
+  replicaReady: boolean;
+  audioBlocked: boolean;
+  latestUserTranscript: TranscriptEntry | null;
+  latestReplicaTranscript: TranscriptEntry | null;
+  userSpeaking: boolean;
+  replicaSpeaking: boolean;
+};
+
+const INITIAL_DEMO_STATE: DemoState = {
+  status: "idle",
+  errorMessage: null,
+  callObject: null,
+  conversationId: null,
+  isMicMuted: false,
+  overlayState: null,
+  replicaReady: false,
+  audioBlocked: false,
+  latestUserTranscript: null,
+  latestReplicaTranscript: null,
+  userSpeaking: false,
+  replicaSpeaking: false,
+};
+
+type DemoAction =
+  | { type: "RESET" }
+  | { type: "PREPARE_START" }
+  | { type: "CLEAR_SESSION" }
+  | { type: "SET_STATUS"; status: DemoStatus }
+  | { type: "CONNECTED" }
+  | { type: "ERROR"; message: string }
+  | { type: "SET_CALL_OBJECT"; callObject: DailyCall | null }
+  | { type: "SET_CONVERSATION_ID"; id: string | null }
+  | { type: "SET_MIC_MUTED"; muted: boolean }
+  | { type: "SET_OVERLAY"; overlay: OverlayState | null }
+  | { type: "SET_REPLICA_READY" }
+  | { type: "SET_AUDIO_BLOCKED"; blocked: boolean }
+  | { type: "SET_USER_TRANSCRIPT"; transcript: TranscriptEntry }
+  | { type: "SET_REPLICA_TRANSCRIPT"; transcript: TranscriptEntry }
+  | { type: "USER_STARTED_SPEAKING" }
+  | { type: "USER_STOPPED_SPEAKING" }
+  | { type: "REPLICA_STARTED_SPEAKING" }
+  | { type: "REPLICA_STOPPED_SPEAKING" };
+
+function demoReducer(state: DemoState, action: DemoAction): DemoState {
+  switch (action.type) {
+    case "RESET":
+      return { ...INITIAL_DEMO_STATE, isMicMuted: state.isMicMuted };
+    case "PREPARE_START":
+      return {
+        ...state,
+        errorMessage: null,
+        audioBlocked: false,
+        overlayState: null,
+        replicaReady: false,
+        latestUserTranscript: null,
+        latestReplicaTranscript: null,
+        userSpeaking: false,
+        replicaSpeaking: false,
+      };
+    case "CLEAR_SESSION":
+      return {
+        ...state,
+        conversationId: null,
+        overlayState: null,
+        replicaReady: false,
+        audioBlocked: false,
+        latestUserTranscript: null,
+        latestReplicaTranscript: null,
+        userSpeaking: false,
+        replicaSpeaking: false,
+      };
+    case "SET_STATUS":
+      return { ...state, status: action.status };
+    case "CONNECTED":
+      return { ...state, status: "connected", errorMessage: null };
+    case "ERROR":
+      return { ...state, status: "error", errorMessage: action.message };
+    case "SET_CALL_OBJECT":
+      return { ...state, callObject: action.callObject };
+    case "SET_CONVERSATION_ID":
+      return { ...state, conversationId: action.id };
+    case "SET_MIC_MUTED":
+      return { ...state, isMicMuted: action.muted };
+    case "SET_OVERLAY":
+      return { ...state, overlayState: action.overlay };
+    case "SET_REPLICA_READY":
+      return { ...state, replicaReady: true };
+    case "SET_AUDIO_BLOCKED":
+      return { ...state, audioBlocked: action.blocked };
+    case "SET_USER_TRANSCRIPT":
+      return { ...state, latestUserTranscript: action.transcript, userSpeaking: false };
+    case "SET_REPLICA_TRANSCRIPT":
+      return { ...state, latestReplicaTranscript: action.transcript };
+    case "USER_STARTED_SPEAKING":
+      return { ...state, userSpeaking: true, replicaSpeaking: false };
+    case "USER_STOPPED_SPEAKING":
+      return { ...state, userSpeaking: false };
+    case "REPLICA_STARTED_SPEAKING":
+      return { ...state, replicaSpeaking: true, userSpeaking: false };
+    case "REPLICA_STOPPED_SPEAKING":
+      return { ...state, replicaSpeaking: false };
+    default:
+      return state;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
 
 type TranscriptPanelProps = {
   latestReplicaTranscript: TranscriptEntry | null;
@@ -284,6 +441,10 @@ function FloatingMicControl({ isMuted, onToggle }: FloatingMicControlProps) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// TavusSession – renders the active call with video, overlays, and audio
+// ---------------------------------------------------------------------------
+
 type TavusSessionProps = {
   audioBlocked: boolean;
   isMicMuted: boolean;
@@ -340,91 +501,64 @@ function TavusSession({
     onAudioBlockedChange(playResults.some((result) => result.status === "rejected"));
   }, [onAudioBlockedChange]);
 
-  if (!overlayState) {
-    return (
-      <>
-        <div className="relative h-screen w-screen overflow-hidden bg-black">
-          <FloatingMicControl isMuted={isMicMuted} onToggle={onToggleMicMute} />
-
-          {canRenderAvatar && avatarSessionId ? (
-            <DailyVideo
-              className="h-full w-full bg-black object-cover"
-              fit="cover"
-              sessionId={avatarSessionId}
-              type="video"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-black text-sm uppercase tracking-[0.25em] text-slate-400">
-              {replicaReady ? "Waiting for video track" : "Waiting for avatar"}
-            </div>
-          )}
-
-          {audioBlocked ? (
-            <div className="absolute inset-x-0 bottom-6 z-30 mx-auto flex w-fit items-center gap-3 rounded-full border border-amber-300/30 bg-amber-400/15 px-4 py-3 text-sm text-amber-50 backdrop-blur">
-              <span>Browser blocked audio playback.</span>
-              <button
-                className="rounded-full bg-amber-300 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-slate-950 transition hover:bg-amber-200"
-                onClick={() => void handleResumeAudio()}
-                type="button"
-              >
-                Enable audio
-              </button>
-            </div>
-          ) : null}
-
-          <TranscriptPanel
-            latestReplicaTranscript={latestReplicaTranscript}
-            latestUserTranscript={latestUserTranscript}
-            replicaSpeaking={replicaSpeaking}
-            userSpeaking={userSpeaking}
-          />
-        </div>
-
-        <div className="pointer-events-none absolute size-0 overflow-hidden opacity-0">
-          <DailyAudio
-            maxSpeakers={1}
-            onPlayFailed={() => {
-              onAudioBlockedChange(true);
-            }}
-            ref={audioHandleRef}
-          />
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
-      <div className="relative h-screen w-screen overflow-hidden bg-slate-950">
+      <div className={`relative h-screen w-screen overflow-hidden ${overlayState ? "bg-slate-950" : "bg-black"}`}>
         <FloatingMicControl isMuted={isMicMuted} onToggle={onToggleMicMute} />
 
-        {activeContent ? (
-          <iframe
-            className="absolute inset-0 h-full w-full bg-white"
-            src={activeContent.url}
-            title={activeContent.label}
-          />
-        ) : activeSchedule ? (
-          <ScheduleOverlay
-            columns={activeSchedule.columns}
-            title={activeSchedule.title}
-          />
-        ) : null}
+        {overlayState ? (
+          <>
+            {activeContent ? (
+              <iframe
+                className="absolute inset-0 h-full w-full bg-white"
+                src={activeContent.url}
+                title={activeContent.label}
+              />
+            ) : activeSchedule ? (
+              <ScheduleOverlay
+                columns={activeSchedule.columns}
+                title={activeSchedule.title}
+              />
+            ) : null}
 
-        <div className="absolute right-4 top-4 z-20 h-[96px] w-[128px] overflow-hidden rounded-[1.1rem] border border-white/15 bg-slate-950/90 shadow-2xl backdrop-blur sm:h-[108px] sm:w-[144px] md:h-[120px] md:w-[160px]">
-          {canRenderAvatar && avatarSessionId ? (
-            <DailyVideo
-              className="h-full w-full bg-slate-950 object-cover"
-              fit="cover"
-              sessionId={avatarSessionId}
-              type="video"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.2),_transparent_45%),linear-gradient(180deg,_rgba(15,23,42,0.96)_0%,_rgba(2,6,23,1)_100%)] p-6 text-center text-sm text-slate-300">
-              {replicaReady ? "Waiting for video." : "Waiting for avatar."}
+            <div className="absolute right-4 top-4 z-20 h-[96px] w-[128px] overflow-hidden rounded-[1.1rem] border border-white/15 bg-slate-950/90 shadow-2xl backdrop-blur sm:h-[108px] sm:w-[144px] md:h-[120px] md:w-[160px]">
+              {canRenderAvatar && avatarSessionId ? (
+                <DailyVideo
+                  className="h-full w-full bg-slate-950 object-cover"
+                  fit="cover"
+                  sessionId={avatarSessionId}
+                  type="video"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.2),_transparent_45%),linear-gradient(180deg,_rgba(15,23,42,0.96)_0%,_rgba(2,6,23,1)_100%)] p-6 text-center text-sm text-slate-300">
+                  {replicaReady ? "Waiting for video." : "Waiting for avatar."}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <>
+            {canRenderAvatar && avatarSessionId ? (
+              <DailyVideo
+                className="h-full w-full bg-black object-cover"
+                fit="cover"
+                sessionId={avatarSessionId}
+                type="video"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-black text-sm uppercase tracking-[0.25em] text-slate-400">
+                {replicaReady ? "Waiting for video track" : "Waiting for avatar"}
+              </div>
+            )}
+
+            <TranscriptPanel
+              latestReplicaTranscript={latestReplicaTranscript}
+              latestUserTranscript={latestUserTranscript}
+              replicaSpeaking={replicaSpeaking}
+              userSpeaking={userSpeaking}
+            />
+          </>
+        )}
 
         {audioBlocked ? (
           <div className="absolute inset-x-0 bottom-6 z-30 mx-auto flex w-fit items-center gap-3 rounded-full border border-amber-300/30 bg-amber-400/15 px-4 py-3 text-sm text-amber-50 backdrop-blur">
@@ -453,30 +587,49 @@ function TavusSession({
   );
 }
 
+// ---------------------------------------------------------------------------
+// TavusDemo – top-level component managing the full session lifecycle
+// ---------------------------------------------------------------------------
+
 export function TavusDemo() {
-  const [status, setStatus] = useState<DemoStatus>("idle");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [callObject, setCallObject] = useState<DailyCall | null>(null);
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [isMicMuted, setIsMicMuted] = useState(false);
-  const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
-  const [replicaReady, setReplicaReady] = useState(false);
-  const [audioBlocked, setAudioBlocked] = useState(false);
-  const [latestUserTranscript, setLatestUserTranscript] = useState<TranscriptEntry | null>(null);
-  const [latestReplicaTranscript, setLatestReplicaTranscript] = useState<TranscriptEntry | null>(null);
-  const [userSpeaking, setUserSpeaking] = useState(false);
-  const [replicaSpeaking, setReplicaSpeaking] = useState(false);
+  const [state, dispatch] = useReducer(demoReducer, INITIAL_DEMO_STATE);
+  const {
+    status,
+    errorMessage,
+    callObject,
+    conversationId,
+    isMicMuted,
+    overlayState,
+    replicaReady,
+    audioBlocked,
+    latestUserTranscript,
+    latestReplicaTranscript,
+    userSpeaking,
+    replicaSpeaking,
+  } = state;
   const [personas, setPersonas] = useState<{ persona_id: string; persona_name: string }[]>([]);
   const [selectedPersonaId, setSelectedPersonaId] = useState<string>("");
 
+  // Refs that mirror state for use inside async callbacks where reading state
+  // directly would capture a stale closure.
   const callObjectRef = useRef<DailyCall | null>(null);
   const conversationIdRef = useRef<string | null>(null);
+  const statusRef = useRef<DemoStatus>("idle");
+  const isMicMutedRef = useRef(false);
+
   const toolCallAudioContextRef = useRef<AudioContext | null>(null);
   const processedToolCallsRef = useRef<Set<string> | null>(null);
   const processedUtterancesRef = useRef<Set<string> | null>(null);
   const startInFlightRef = useRef(false);
   const isManualTeardownRef = useRef(false);
 
+  // Keep refs in sync with state
+  useEffect(() => { callObjectRef.current = callObject; }, [callObject]);
+  useEffect(() => { conversationIdRef.current = conversationId; }, [conversationId]);
+  useEffect(() => { statusRef.current = status; }, [status]);
+  useEffect(() => { isMicMutedRef.current = isMicMuted; }, [isMicMuted]);
+
+  // Initialize global deduplication stores
   if (processedToolCallsRef.current == null) {
     processedToolCallsRef.current = getProcessedMessageStore("__tavusProcessedToolCalls__");
   }
@@ -508,35 +661,33 @@ export function TavusDemo() {
     return () => { cancelled = true; };
   }, [showPersonaSelector]);
 
-  useEffect(() => {
-    callObjectRef.current = callObject;
-  }, [callObject]);
-
-  useEffect(() => {
-    conversationIdRef.current = conversationId;
-  }, [conversationId]);
+  // -------------------------------------------------------------------------
+  // Mic control
+  // -------------------------------------------------------------------------
 
   const syncMicMutedState = useCallback((currentCallObject: DailyCall | null) => {
     if (!currentCallObject || currentCallObject.isDestroyed()) {
       return;
     }
 
-    setIsMicMuted(!currentCallObject.localAudio());
+    dispatch({ type: "SET_MIC_MUTED", muted: !currentCallObject.localAudio() });
   }, []);
 
   const handleToggleMicMute = useCallback(() => {
-    setIsMicMuted((currentMuted) => {
-      const nextMuted = !currentMuted;
-      const currentCallObject = callObjectRef.current;
+    const nextMuted = !isMicMutedRef.current;
+    dispatch({ type: "SET_MIC_MUTED", muted: nextMuted });
 
-      if (currentCallObject && !currentCallObject.isDestroyed()) {
-        currentCallObject.setLocalAudio(!nextMuted);
-      }
-
-      return nextMuted;
-    });
+    const currentCallObject = callObjectRef.current;
+    if (currentCallObject && !currentCallObject.isDestroyed()) {
+      currentCallObject.setLocalAudio(!nextMuted);
+    }
   }, []);
 
+  // -------------------------------------------------------------------------
+  // Tavus app-message handler
+  // -------------------------------------------------------------------------
+
+  // All values accessed are either stable (dispatch) or refs, so deps are empty.
   const handleAppMessage = useCallback((event: DailyEventObjectAppMessage<TavusAppMessage>) => {
     const payload = event.data;
 
@@ -550,24 +701,22 @@ export function TavusDemo() {
     });
 
     if (REPLICA_READY_EVENT_TYPES.has(payload.event_type)) {
-      setReplicaReady(true);
+      dispatch({ type: "SET_REPLICA_READY" });
     }
 
     switch (payload.event_type) {
       case "conversation.user.started_speaking":
-        setUserSpeaking(true);
-        setReplicaSpeaking(false);
+        dispatch({ type: "USER_STARTED_SPEAKING" });
         break;
       case "conversation.user.stopped_speaking":
-        setUserSpeaking(false);
+        dispatch({ type: "USER_STOPPED_SPEAKING" });
         break;
       case "conversation.replica.started_speaking":
-        setReplicaSpeaking(true);
-        setUserSpeaking(false);
+        dispatch({ type: "REPLICA_STARTED_SPEAKING" });
         break;
       case "conversation.replica.stopped_speaking":
       case "conversation.replica_interrupted":
-        setReplicaSpeaking(false);
+        dispatch({ type: "REPLICA_STOPPED_SPEAKING" });
         break;
       default:
         break;
@@ -598,10 +747,9 @@ export function TavusDemo() {
       };
 
       if (payload.properties.role === "user") {
-        setLatestUserTranscript(transcriptEntry);
-        setUserSpeaking(false);
+        dispatch({ type: "SET_USER_TRANSCRIPT", transcript: transcriptEntry });
       } else if (payload.properties.role === "replica") {
-        setLatestReplicaTranscript(transcriptEntry);
+        dispatch({ type: "SET_REPLICA_TRANSCRIPT", transcript: transcriptEntry });
       }
 
       return;
@@ -677,9 +825,9 @@ export function TavusDemo() {
             break;
           }
 
-          setOverlayState({
-            kind: "content",
-            contentItemKey: nextContentItemKey,
+          dispatch({
+            type: "SET_OVERLAY",
+            overlay: { kind: "content", contentItemKey: nextContentItemKey },
           });
           responseText = `Showing ${CONTENT_ITEMS[nextContentItemKey].label}.`;
           break;
@@ -717,16 +865,19 @@ export function TavusDemo() {
             });
           }
 
-          setOverlayState({
-            kind: "schedule",
-            columns,
-            title: parsedArguments.title?.trim() || "Schedule Snapshot",
+          dispatch({
+            type: "SET_OVERLAY",
+            overlay: {
+              kind: "schedule",
+              columns,
+              title: parsedArguments.title?.trim() || "Schedule Snapshot",
+            },
           });
           responseText = "Showing the schedule on screen.";
           break;
         }
         case "dismiss_content": {
-          setOverlayState(null);
+          dispatch({ type: "SET_OVERLAY", overlay: null });
           responseText = "Returning to the full conversation view.";
           break;
         }
@@ -741,6 +892,10 @@ export function TavusDemo() {
     callObjectRef.current?.sendAppMessage(getConversationEcho(payload, responseText), event.fromId);
   }, []);
 
+  // -------------------------------------------------------------------------
+  // Register app-message handler on callObject
+  // -------------------------------------------------------------------------
+
   useEffect(() => {
     if (!callObject) {
       return;
@@ -753,6 +908,10 @@ export function TavusDemo() {
       callObject.off("app-message", handleAppMessage);
     };
   }, [callObject, handleAppMessage]);
+
+  // -------------------------------------------------------------------------
+  // Sync mic muted state from Daily events
+  // -------------------------------------------------------------------------
 
   useEffect(() => {
     if (!callObject) {
@@ -774,7 +933,11 @@ export function TavusDemo() {
     };
   }, [callObject, syncMicMutedState]);
 
-  const createConversation = useCallback(async () => {
+  // -------------------------------------------------------------------------
+  // API helpers
+  // -------------------------------------------------------------------------
+
+  const createConversation = useCallback(async (signal?: AbortSignal) => {
     const llmName = getRequestedLlmName();
     const params = new URLSearchParams();
     if (llmName) params.set("llm", llmName);
@@ -785,6 +948,7 @@ export function TavusDemo() {
     const response = await fetch(conversationUrl, {
       method: "POST",
       cache: "no-store",
+      signal,
     });
 
     const responseText = await response.text();
@@ -827,19 +991,9 @@ export function TavusDemo() {
     }
   }, []);
 
-  const resetUiState = useCallback(() => {
-    setCallObject(null);
-    setConversationId(null);
-    setOverlayState(null);
-    setReplicaReady(false);
-    setAudioBlocked(false);
-    setLatestUserTranscript(null);
-    setLatestReplicaTranscript(null);
-    setUserSpeaking(false);
-    setReplicaSpeaking(false);
-    setErrorMessage(null);
-    setStatus("idle");
-  }, []);
+  // -------------------------------------------------------------------------
+  // Session lifecycle
+  // -------------------------------------------------------------------------
 
   const cleanupAfterLeave = useCallback(
     async (currentCallObject: DailyCall | null) => {
@@ -850,9 +1004,9 @@ export function TavusDemo() {
       }
 
       conversationIdRef.current = null;
-      resetUiState();
+      dispatch({ type: "RESET" });
     },
-    [destroyCallObject, resetUiState],
+    [destroyCallObject],
   );
 
   const teardownDemo = useCallback(
@@ -862,14 +1016,7 @@ export function TavusDemo() {
       const currentCallObject = callObjectRef.current;
 
       conversationIdRef.current = null;
-      setConversationId(null);
-      setOverlayState(null);
-      setReplicaReady(false);
-      setAudioBlocked(false);
-      setLatestUserTranscript(null);
-      setLatestReplicaTranscript(null);
-      setUserSpeaking(false);
-      setReplicaSpeaking(false);
+      dispatch({ type: "CLEAR_SESSION" });
 
       if (!currentCallObject) {
         if (activeConversationId) {
@@ -877,7 +1024,7 @@ export function TavusDemo() {
         }
 
         if (!keepalive) {
-          setStatus("idle");
+          dispatch({ type: "SET_STATUS", status: "idle" });
         }
         return;
       }
@@ -885,11 +1032,11 @@ export function TavusDemo() {
       if (keepalive) {
         await destroyCallObject(currentCallObject);
         callObjectRef.current = null;
-        setCallObject(null);
+        dispatch({ type: "SET_CALL_OBJECT", callObject: null });
         return;
       }
 
-      setStatus("leaving");
+      dispatch({ type: "SET_STATUS", status: "leaving" });
       isManualTeardownRef.current = true;
 
       try {
@@ -908,10 +1055,107 @@ export function TavusDemo() {
       }
 
       isManualTeardownRef.current = false;
-      return;
     },
     [cleanupAfterLeave, destroyCallObject, endConversation],
   );
+
+  // -------------------------------------------------------------------------
+  // Start / restart
+  // -------------------------------------------------------------------------
+
+  const handleStart = useCallback(async () => {
+    if (startInFlightRef.current || statusRef.current === "leaving") {
+      return;
+    }
+
+    startInFlightRef.current = true;
+    isManualTeardownRef.current = false;
+    dispatch({ type: "PREPARE_START" });
+
+    // Clear deduplication stores for the new session so stale keys from a
+    // previous session can never suppress a legitimate message in this one.
+    processedToolCallsRef.current?.clear();
+    processedUtterancesRef.current?.clear();
+
+    let nextCallObject: DailyCall | null = null;
+    let nextConversationId: string | null = null;
+
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), START_TIMEOUT_MS);
+
+    try {
+      if (callObjectRef.current) {
+        await teardownDemo();
+      }
+
+      nextCallObject = DailyIframe.createCallObject();
+      callObjectRef.current = nextCallObject;
+      dispatch({ type: "SET_CALL_OBJECT", callObject: nextCallObject });
+
+      const requestedLlmName = getRequestedLlmName();
+      const requestedLlmConfig = requestedLlmName ? getCustomTavusLlmConfig(requestedLlmName) : null;
+      const shouldDisableVideo = requestedLlmConfig?.disableVideo === true;
+
+      dispatch({ type: "SET_STATUS", status: "requesting-permissions" });
+      await raceAbortSignal(
+        nextCallObject.startCamera(
+          shouldDisableVideo
+            ? { audioSource: true, videoSource: false }
+            : undefined,
+        ),
+        abortController.signal,
+      );
+
+      if (shouldDisableVideo) {
+        nextCallObject.setLocalVideo(false);
+      }
+
+      nextCallObject.setLocalAudio(!isMicMutedRef.current);
+
+      dispatch({ type: "SET_STATUS", status: "loading" });
+      const conversation = await createConversation(abortController.signal);
+      nextConversationId = conversation.conversation_id;
+      conversationIdRef.current = conversation.conversation_id;
+      dispatch({ type: "SET_CONVERSATION_ID", id: conversation.conversation_id });
+
+      dispatch({ type: "SET_STATUS", status: "joining" });
+      await raceAbortSignal(
+        nextCallObject.join({ url: conversation.conversation_url }),
+        abortController.signal,
+      );
+
+    } catch (error) {
+      if (nextConversationId) {
+        await endConversation(nextConversationId);
+      }
+
+      conversationIdRef.current = null;
+
+      const message = abortController.signal.aborted
+        ? "The connection timed out."
+        : getErrorMessage(error);
+      dispatch({ type: "ERROR", message });
+      dispatch({ type: "SET_CALL_OBJECT", callObject: null });
+      dispatch({ type: "SET_CONVERSATION_ID", id: null });
+
+      if (nextCallObject) {
+        await destroyCallObject(nextCallObject);
+      }
+
+      if (callObjectRef.current === nextCallObject) {
+        callObjectRef.current = null;
+      }
+
+    } finally {
+      clearTimeout(timeoutId);
+      startInFlightRef.current = false;
+      isManualTeardownRef.current = false;
+    }
+  }, [createConversation, destroyCallObject, endConversation, teardownDemo]);
+
+  // -------------------------------------------------------------------------
+  // Keyboard shortcuts
+  // -------------------------------------------------------------------------
 
   useEffect(() => {
     return () => {
@@ -921,7 +1165,7 @@ export function TavusDemo() {
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || !callObjectRef.current || status !== "connected") {
+      if (event.key !== "Escape" || !callObjectRef.current || statusRef.current !== "connected") {
         return;
       }
 
@@ -932,7 +1176,7 @@ export function TavusDemo() {
     return () => {
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [status, teardownDemo]);
+  }, [teardownDemo]);
 
   useEffect(() => {
     const handleMicHotkey = (event: KeyboardEvent) => {
@@ -957,6 +1201,10 @@ export function TavusDemo() {
     };
   }, [handleToggleMicMute]);
 
+  // -------------------------------------------------------------------------
+  // Meeting state change & camera-error handlers
+  // -------------------------------------------------------------------------
+
   useEffect(() => {
     const currentCallObject = callObject;
 
@@ -969,8 +1217,7 @@ export function TavusDemo() {
 
       switch (meetingState) {
         case "joined-meeting":
-          setStatus("connected");
-          setErrorMessage(null);
+          dispatch({ type: "CONNECTED" });
           break;
         case "left-meeting":
           if (isManualTeardownRef.current) {
@@ -980,7 +1227,7 @@ export function TavusDemo() {
           void cleanupAfterLeave(currentCallObject);
           break;
         case "error":
-          setStatus("error");
+          dispatch({ type: "ERROR", message: "The Daily call encountered an error." });
           break;
         default:
           break;
@@ -988,10 +1235,10 @@ export function TavusDemo() {
     };
 
     const handleCameraError = (event: DailyEventObjectCameraError) => {
-      setStatus("error");
-      setErrorMessage(
-        event.error?.msg ?? event.errorMsg?.errorMsg ?? "Daily could not access the selected camera or microphone.",
-      );
+      dispatch({
+        type: "ERROR",
+        message: event.error?.msg ?? event.errorMsg?.errorMsg ?? "Daily could not access the selected camera or microphone.",
+      });
     };
 
     currentCallObject.on("joined-meeting", handleMeetingStateChange);
@@ -1007,6 +1254,10 @@ export function TavusDemo() {
       currentCallObject.off("camera-error", handleCameraError);
     };
   }, [callObject, cleanupAfterLeave]);
+
+  // -------------------------------------------------------------------------
+  // Page-hide & unmount cleanup
+  // -------------------------------------------------------------------------
 
   useEffect(() => {
     const handlePageHide = () => {
@@ -1046,89 +1297,21 @@ export function TavusDemo() {
     };
   }, [endConversation]);
 
-  const handleStart = useCallback(async () => {
-    if (startInFlightRef.current || status === "leaving") {
-      return;
-    }
-
-    startInFlightRef.current = true;
-    isManualTeardownRef.current = false;
-    setErrorMessage(null);
-    setAudioBlocked(false);
-    setOverlayState(null);
-    setReplicaReady(false);
-    setLatestUserTranscript(null);
-    setLatestReplicaTranscript(null);
-    setUserSpeaking(false);
-    setReplicaSpeaking(false);
-
-    let nextCallObject: DailyCall | null = null;
-    let nextConversationId: string | null = null;
-
-    try {
-      if (callObjectRef.current) {
-        await teardownDemo();
-      }
-
-      nextCallObject = DailyIframe.createCallObject();
-      callObjectRef.current = nextCallObject;
-      setCallObject(nextCallObject);
-
-      const requestedLlmName = getRequestedLlmName();
-      const requestedLlmConfig = requestedLlmName ? getCustomTavusLlmConfig(requestedLlmName) : null;
-      const shouldDisableVideo = requestedLlmConfig?.disableVideo === true;
-
-      setStatus("requesting-permissions");
-      await nextCallObject.startCamera(
-        shouldDisableVideo
-          ? {
-              audioSource: true,
-              videoSource: false,
-            }
-          : undefined,
-      );
-
-      if (shouldDisableVideo) {
-        nextCallObject.setLocalVideo(false);
-      }
-
-      nextCallObject.setLocalAudio(!isMicMuted);
-
-      setStatus("loading");
-      const conversation = await createConversation();
-      nextConversationId = conversation.conversation_id;
-      conversationIdRef.current = conversation.conversation_id;
-      setConversationId(conversation.conversation_id);
-
-      setStatus("joining");
-      await nextCallObject.join({ url: conversation.conversation_url });
-    } catch (error) {
-      if (nextConversationId) {
-        await endConversation(nextConversationId);
-      }
-
-      conversationIdRef.current = null;
-      setConversationId(null);
-      setStatus("error");
-      setErrorMessage(getErrorMessage(error));
-
-      if (nextCallObject) {
-        await destroyCallObject(nextCallObject);
-      }
-
-      if (callObjectRef.current === nextCallObject) {
-        callObjectRef.current = null;
-      }
-
-      setCallObject(null);
-    } finally {
-      startInFlightRef.current = false;
-      isManualTeardownRef.current = false;
-    }
-  }, [createConversation, destroyCallObject, endConversation, isMicMuted, status, teardownDemo]);
+  // -------------------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------------------
 
   const showStartScreen = !callObject || status === "idle" || status === "error";
   const showSession = Boolean(callObject) && !showStartScreen;
+
+  const handleManualStart = useCallback(() => {
+    void handleStart();
+  }, [handleStart]);
+
+  const handleAudioBlockedChange = useCallback(
+    (blocked: boolean) => dispatch({ type: "SET_AUDIO_BLOCKED", blocked }),
+    [],
+  );
 
   if (showSession && callObject) {
     return (
@@ -1142,7 +1325,7 @@ export function TavusDemo() {
           overlayState={overlayState}
           replicaReady={replicaReady}
           replicaSpeaking={replicaSpeaking}
-          onAudioBlockedChange={setAudioBlocked}
+          onAudioBlockedChange={handleAudioBlockedChange}
           userSpeaking={userSpeaking}
         />
       </DailyProvider>
@@ -1150,12 +1333,12 @@ export function TavusDemo() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(41,80,200,0.35),_transparent_38%),linear-gradient(180deg,_#09101d_0%,_#060912_100%)] text-white">
+    <div className="relative h-screen overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(41,80,200,0.35),_transparent_38%),linear-gradient(180deg,_#09101d_0%,_#060912_100%)] text-white">
       <FloatingMicControl isMuted={isMicMuted} onToggle={handleToggleMicMute} />
 
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.04),transparent_38%),radial-gradient(circle_at_bottom,_rgba(123,204,163,0.2),_transparent_35%)]" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 md:px-10">
+      <div className="relative z-10 mx-auto flex min-h-full w-full max-w-7xl flex-col px-6 py-8 md:px-10">
         <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-sky-200/80">AWS Booth Demo</p>
@@ -1180,8 +1363,8 @@ export function TavusDemo() {
             ) : null}
             <button
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-400 px-6 py-3 text-base font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300"
-              disabled={startInFlightRef.current || status === "leaving"}
-              onClick={() => void handleStart()}
+              disabled={status !== "idle" && status !== "error"}
+              onClick={handleManualStart}
               type="button"
             >
               {START_BUTTON_LABELS[status as keyof typeof START_BUTTON_LABELS] ?? "Start demo"}
@@ -1210,7 +1393,16 @@ export function TavusDemo() {
 
               {errorMessage ? (
                 <div className="rounded-3xl border border-rose-300/20 bg-rose-500/10 px-5 py-4 text-sm text-rose-100">
-                  {errorMessage}
+                  <p>{errorMessage}</p>
+                  <div className="mt-3">
+                    <button
+                      className="rounded-full border border-rose-300/30 bg-rose-400/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-rose-100 transition hover:bg-rose-400/30"
+                      onClick={handleManualStart}
+                      type="button"
+                    >
+                      Retry
+                    </button>
+                  </div>
                 </div>
               ) : null}
             </div>
