@@ -10,8 +10,10 @@ const AWS_GTC_SCHEDULE_DOCUMENT_ID = "d5-a250fbf7c53f";
 
 export async function POST(request: Request) {
   try {
-    const { personaId } = getTavusConfig();
-    const llmName = new URL(request.url).searchParams.get("llm");
+    const { personaId: defaultPersonaId } = getTavusConfig();
+    const params = new URL(request.url).searchParams;
+    const llmName = params.get("llm");
+    const personaId = params.get("persona") || defaultPersonaId;
 
     if (llmName && !getCustomTavusLlmConfig(llmName)) {
       return NextResponse.json(
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
         persona_id: conversationPersonaId,
         document_ids: [AWS_GTC_SCHEDULE_DOCUMENT_ID],
         custom_greeting:
-          "Hi, welcome to the AWS booth. Ask me about voice AI, or ask me to show a diagram.",
+          "Hi, welcome to the AWS booth! I'm here to help you explore voice AI on AWS. Before we get started, what's your name and which company are you with? I can also show you diagrams, walk you through the GTC schedule, and answer questions about our tech stack.",
         properties: {
           max_call_duration: 3600,
           participant_left_timeout: 30,
