@@ -59,8 +59,12 @@ Built for the AWS booth at NVIDIA GTC 2026.
 4. Ask the avatar to show content (e.g., "show me the architecture diagram") to see overlay tool calls in action.
 5. Press **Escape** to end the session.
 
+For kiosk use, the Electron shell in `agent-kiosk-shell/` can load the app full-screen and pass `autostart=1` so the session starts immediately on page load without clicking the start button.
+
 **Keyboard shortcuts:**
 - `Ctrl+D` -- Toggle microphone mute
+- `Ctrl+F` -- Cycle microphone devices
+- `Ctrl+G` -- Cycle speaker devices
 
 **URL parameters:**
 - `?llm=super-4-modal` -- Use the Modal-hosted Nemotron LLM backend instead of the default
@@ -80,6 +84,7 @@ Ask the avatar "show me the voice agent guidance" or "show the NVIDIA guidance" 
 
 ```
 prompts/                          # System prompts and knowledge base documents
+agent-kiosk-shell/                # Generic Electron kiosk wrapper for browser-based agent UIs
 tavus-avatar/                     # Next.js application
   src/
     app/
@@ -106,3 +111,21 @@ cd tavus-avatar
 npm run build
 npm run start
 ```
+
+## Electron Kiosk Shell
+
+```bash
+cd agent-kiosk-shell
+npm install
+npm start -- --target-url=http://localhost:3000
+```
+
+Optional:
+
+```bash
+npm start -- --target-url=https://your-app.vercel.app --display-number=2
+```
+
+Remote targets must use `https://`; plain `http://` is only allowed for `localhost` and other loopback addresses. `display-number` is a 1-based physical-display index, and `display-id` is still available if you want to target Electron's raw display ID directly.
+
+The shell opens the target app in a borderless macOS simple-fullscreen window, appends `autostart=1&shell=electron`, maps `Cmd+R` to reload, maps `Cmd+B` to a local disconnected screen until the next reload, and maps `Cmd+Q` to quit.

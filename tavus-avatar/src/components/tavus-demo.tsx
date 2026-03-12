@@ -6,7 +6,7 @@ import type {
   DailyEventObjectAppMessage,
   DailyEventObjectCameraError,
 } from "@daily-co/daily-js";
-import { DailyAudio, DailyProvider, DailyVideo, useParticipantIds } from "@daily-co/daily-react";
+import { DailyAudio, DailyProvider, DailyVideo, useDevices, useParticipantIds } from "@daily-co/daily-react";
 import type { DailyAudioHandle } from "@daily-co/daily-react/dist/components/DailyAudio";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
@@ -92,6 +92,37 @@ function getRequestedLlmName() {
   }
 
   return new URLSearchParams(window.location.search).get("llm");
+}
+
+function hasEnabledQueryFlag(name: string) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const value = new URLSearchParams(window.location.search).get(name);
+  return value === "1" || value === "true";
+}
+
+function hasAutoStartAlreadyBeenClaimed() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const globalWindow = window as Window & {
+    __tavusAutoStartClaimed__?: boolean;
+  };
+
+  if (globalWindow.__tavusAutoStartClaimed__) {
+    return true;
+  }
+
+  globalWindow.__tavusAutoStartClaimed__ = true;
+  return false;
+}
+
+function getDeviceDisplayName(label: string | null | undefined, fallback: string) {
+  const trimmedLabel = label?.trim();
+  return trimmedLabel ? trimmedLabel : fallback;
 }
 
 async function playToolCallChime(audioContextRef: { current: AudioContext | null }) {
@@ -408,35 +439,77 @@ function TranscriptPanelRow({ active, label, text }: TranscriptPanelRowProps) {
 
 type FloatingMicControlProps = {
   isMuted: boolean;
+  micName?: string | null;
   onToggle(): void;
+  onCycleMic?(): void;
+  onCycleSpeaker?(): void;
+  speakerName?: string | null;
 };
 
-function FloatingMicControl({ isMuted, onToggle }: FloatingMicControlProps) {
+function FloatingMicControl({
+  isMuted,
+  micName,
+  onToggle,
+  onCycleMic,
+  onCycleSpeaker,
+  speakerName,
+}: FloatingMicControlProps) {
   return (
-    <div className="absolute left-4 top-4 z-40 flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/72 px-3 py-2 shadow-[0_18px_44px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-      <span
-        className={isMuted ? "size-2 rounded-full bg-rose-400" : "size-2 rounded-full bg-emerald-300"}
-      />
-      <div className="min-w-0">
-        <p className="text-[0.6rem] uppercase tracking-[0.26em] text-slate-400">Mic</p>
-        <p className="text-[0.72rem] font-medium uppercase tracking-[0.18em] text-white">
-          {isMuted ? "Muted" : "Live"}
+    <div className="absolute left-4 top-4 z-40 w-[11.5rem] rounded-[1rem] border border-white/10 bg-slate-950/78 px-2.5 py-2 shadow-[0_18px_44px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+      <div className="flex items-center gap-2">
+        <span
+          className={isMuted ? "size-1.5 rounded-full bg-rose-400" : "size-1.5 rounded-full bg-emerald-300"}
+        />
+        <div className="min-w-0 flex-1">
+          <p className="text-[0.45rem] uppercase tracking-[0.32em] text-slate-500">Mic</p>
+          <p className="text-[0.6rem] font-medium uppercase tracking-[0.16em] text-white">
+            {isMuted ? "Muted" : "Live"}
+          </p>
+        </div>
+        <button
+          className={
+            isMuted
+              ? "rounded-full border border-emerald-300/30 bg-emerald-400/12 px-2 py-0.5 text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-emerald-100 transition hover:bg-emerald-400/18"
+              : "rounded-full border border-rose-300/30 bg-rose-400/12 px-2 py-0.5 text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-rose-100 transition hover:bg-rose-400/18"
+          }
+          onClick={onToggle}
+          type="button"
+        >
+          {isMuted ? "Unmute" : "Mute"}
+        </button>
+      </div>
+
+      <div className="mt-1.5 space-y-1 border-t border-white/8 pt-1.5">
+        <button
+          className="flex w-full items-center gap-2 rounded-[0.75rem] bg-white/5 px-2 py-1 text-left transition hover:bg-white/8 disabled:cursor-default disabled:hover:bg-white/5"
+          disabled={!onCycleMic}
+          onClick={onCycleMic}
+          type="button"
+        >
+          <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.26em] text-slate-500">Mic</span>
+          <span className="min-w-0 flex-1 truncate text-[0.54rem] text-slate-200">
+            {getDeviceDisplayName(micName, "Waiting")}
+          </span>
+          <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">^F</span>
+        </button>
+
+        <button
+          className="flex w-full items-center gap-2 rounded-[0.75rem] bg-white/5 px-2 py-1 text-left transition hover:bg-white/8 disabled:cursor-default disabled:hover:bg-white/5"
+          disabled={!onCycleSpeaker}
+          onClick={onCycleSpeaker}
+          type="button"
+        >
+          <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.22em] text-slate-500">Out</span>
+          <span className="min-w-0 flex-1 truncate text-[0.54rem] text-slate-200">
+            {getDeviceDisplayName(speakerName, "Waiting")}
+          </span>
+          <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">^G</span>
+        </button>
+
+        <p className="px-1 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">
+          Ctrl+D mute
         </p>
       </div>
-      <button
-        className={
-          isMuted
-            ? "rounded-full border border-emerald-300/30 bg-emerald-400/12 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-emerald-100 transition hover:bg-emerald-400/18"
-            : "rounded-full border border-rose-300/30 bg-rose-400/12 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-rose-100 transition hover:bg-rose-400/18"
-        }
-        onClick={onToggle}
-        type="button"
-      >
-        {isMuted ? "Unmute" : "Mute"}
-      </button>
-      <span className="hidden text-[0.58rem] uppercase tracking-[0.18em] text-slate-500 sm:block">
-        Ctrl+D
-      </span>
     </div>
   );
 }
@@ -447,6 +520,7 @@ function FloatingMicControl({ isMuted, onToggle }: FloatingMicControlProps) {
 
 type TavusSessionProps = {
   audioBlocked: boolean;
+  callObject: DailyCall;
   isMicMuted: boolean;
   latestReplicaTranscript: TranscriptEntry | null;
   latestUserTranscript: TranscriptEntry | null;
@@ -460,6 +534,7 @@ type TavusSessionProps = {
 
 function TavusSession({
   audioBlocked,
+  callObject,
   isMicMuted,
   latestReplicaTranscript,
   latestUserTranscript,
@@ -471,6 +546,7 @@ function TavusSession({
   userSpeaking,
 }: TavusSessionProps) {
   const remoteParticipantIds = useParticipantIds({ filter: "remote" });
+  const { currentMic, currentSpeaker, refreshDevices, setSpeaker, speakers } = useDevices();
   const audioHandleRef = useRef<DailyAudioHandle | null>(null);
 
   const activeContent = useMemo(() => {
@@ -485,6 +561,68 @@ function TavusSession({
 
   const avatarSessionId = remoteParticipantIds[0] ?? null;
   const canRenderAvatar = replicaReady && Boolean(avatarSessionId);
+
+  useEffect(() => {
+    void refreshDevices();
+  }, [refreshDevices]);
+
+  const handleCycleMic = useCallback(async () => {
+    if (callObject.isDestroyed()) {
+      return;
+    }
+
+    await callObject.cycleMic();
+  }, [callObject]);
+
+  const handleCycleSpeaker = useCallback(async () => {
+    if (speakers.length === 0) {
+      return;
+    }
+
+    const selectedSpeakerIndex = speakers.findIndex((speaker) => speaker.selected);
+    const currentSpeakerIndex = selectedSpeakerIndex >= 0
+      ? selectedSpeakerIndex
+      : speakers.findIndex((speaker) => speaker.device.deviceId === currentSpeaker?.device.deviceId);
+    const nextSpeaker = speakers[(currentSpeakerIndex + 1 + speakers.length) % speakers.length];
+
+    if (!nextSpeaker?.device.deviceId) {
+      return;
+    }
+
+    await setSpeaker(nextSpeaker.device.deviceId);
+  }, [currentSpeaker?.device.deviceId, setSpeaker, speakers]);
+
+  useEffect(() => {
+    const handleDeviceHotkeys = (event: KeyboardEvent) => {
+      if (
+        event.repeat ||
+        !event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.shiftKey
+      ) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+
+      if (key === "f") {
+        event.preventDefault();
+        void handleCycleMic();
+        return;
+      }
+
+      if (key === "g") {
+        event.preventDefault();
+        void handleCycleSpeaker();
+      }
+    };
+
+    window.addEventListener("keydown", handleDeviceHotkeys);
+    return () => {
+      window.removeEventListener("keydown", handleDeviceHotkeys);
+    };
+  }, [handleCycleMic, handleCycleSpeaker]);
 
   const handleResumeAudio = useCallback(async () => {
     const audioElements = audioHandleRef.current?.getAllAudio() ?? [];
@@ -504,7 +642,18 @@ function TavusSession({
   return (
     <>
       <div className={`relative h-screen w-screen overflow-hidden ${overlayState ? "bg-slate-950" : "bg-black"}`}>
-        <FloatingMicControl isMuted={isMicMuted} onToggle={onToggleMicMute} />
+        <FloatingMicControl
+          isMuted={isMicMuted}
+          micName={currentMic?.device.label}
+          onCycleMic={() => {
+            void handleCycleMic();
+          }}
+          onCycleSpeaker={() => {
+            void handleCycleSpeaker();
+          }}
+          onToggle={onToggleMicMute}
+          speakerName={currentSpeaker?.device.label}
+        />
 
         {overlayState ? (
           <>
@@ -622,6 +771,7 @@ export function TavusDemo() {
   const processedUtterancesRef = useRef<Set<string> | null>(null);
   const startInFlightRef = useRef(false);
   const isManualTeardownRef = useRef(false);
+  const autoStartAttemptedRef = useRef(false);
 
   // Keep refs in sync with state
   useEffect(() => { callObjectRef.current = callObject; }, [callObject]);
@@ -1297,6 +1447,19 @@ export function TavusDemo() {
     };
   }, [endConversation]);
 
+  useEffect(() => {
+    if (
+      !hasEnabledQueryFlag("autostart") ||
+      autoStartAttemptedRef.current ||
+      hasAutoStartAlreadyBeenClaimed()
+    ) {
+      return;
+    }
+
+    autoStartAttemptedRef.current = true;
+    void handleStart();
+  }, [handleStart]);
+
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
@@ -1318,6 +1481,7 @@ export function TavusDemo() {
       <DailyProvider callObject={callObject}>
         <TavusSession
           audioBlocked={audioBlocked}
+          callObject={callObject}
           isMicMuted={isMicMuted}
           latestReplicaTranscript={latestReplicaTranscript}
           latestUserTranscript={latestUserTranscript}
@@ -1334,7 +1498,12 @@ export function TavusDemo() {
 
   return (
     <div className="relative h-screen overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(41,80,200,0.35),_transparent_38%),linear-gradient(180deg,_#09101d_0%,_#060912_100%)] text-white">
-      <FloatingMicControl isMuted={isMicMuted} onToggle={handleToggleMicMute} />
+      <FloatingMicControl
+        isMuted={isMicMuted}
+        micName="Join to detect"
+        onToggle={handleToggleMicMute}
+        speakerName="Join to detect"
+      />
 
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.04),transparent_38%),radial-gradient(circle_at_bottom,_rgba(123,204,163,0.2),_transparent_35%)]" />
 
