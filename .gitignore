@@ -40,3 +40,11 @@ tavus-avatar/.git.local-backup/
 # local references not intended for deployment repo
 src-reference/
 .vercel
+
+# local Next.js starter files not used in this repo
+tavus-avatar/README.md
+tavus-avatar/public/file.svg
+tavus-avatar/public/globe.svg
+tavus-avatar/public/next.svg
+tavus-avatar/public/vercel.svg
+tavus-avatar/public/window.svg
