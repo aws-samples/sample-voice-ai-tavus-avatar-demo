@@ -117,6 +117,7 @@ npm run start
 ```bash
 cd agent-kiosk-shell
 npm install
+cp .env.example .env
 npm start -- --target-url=http://localhost:3000
 ```
 
@@ -126,6 +127,18 @@ Optional:
 npm start -- --target-url=https://your-app.vercel.app --display-number=2
 ```
 
+To auto-click a hosted app's own connect button after load:
+
+```bash
+npm start -- --target-url=https://rxconnect-deepgram-sagemaker-pipecat.fly.dev/ --auto-click-text=Connect
+```
+
+For Gradient Bang, the shell has a built-in login-and-character-selection sequence:
+
+```bash
+npm start -- --target-url=https://game.gradient-bang.com --automation=gradient-bang
+```
+
 Remote targets must use `https://`; plain `http://` is only allowed for `localhost` and other loopback addresses. `display-number` is a 1-based physical-display index, and `display-id` is still available if you want to target Electron's raw display ID directly.
 
-The shell opens the target app in a borderless macOS simple-fullscreen window, appends `autostart=1&shell=electron`, maps `Cmd+R` to reload, maps `Cmd+B` to a local disconnected screen until the next reload, and maps `Cmd+Q` to quit.
+The shell opens the target app in a borderless macOS simple-fullscreen window, appends `autostart=1&shell=electron`, can optionally auto-click a target app's own connect control by exact text or selector, can optionally enable a built-in Gradient Bang sign-in profile via `--automation=gradient-bang` with credentials from `agent-kiosk-shell/.env`, maps `Cmd+R` to reload, maps `Cmd+B` to a local disconnected screen until the next reload, and maps `Cmd+Q` to quit.
