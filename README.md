@@ -1,8 +1,8 @@
-# Building Real-time Voice Agents Using NVIDIA Speech Models, Pipecat and AWS
+# Building Real-time Voice Agents Using Deepgram, Pipecat and AWS
 
 An interactive conversational video demo built with [Tavus](https://www.tavus.io/) CVI (Conversational Video Interface) and [Daily](https://www.daily.co/) WebRTC. An AI-powered video avatar engages visitors in real-time voice conversations and can display content overlays (architecture diagrams, schedules) via tool calls.
 
-Built for the AWS booth at NVIDIA GTC 2026.
+Built for the AWS booth at AWS Summit Sydney 2026 (13–14 May, ICC Sydney).
 
 ## Prerequisites
 
@@ -10,13 +10,51 @@ Built for the AWS booth at NVIDIA GTC 2026.
 - A **Tavus** account with an API key and a configured persona
 - A modern browser with camera and microphone access
 
+## API Keys
+
+| Key | Where to set | How to obtain |
+|---|---|---|
+| `TAVUS_API_KEY` | `tavus-avatar/.env.local` | Sign up at [platform.tavus.io](https://platform.tavus.io) |
+| `TAVUS_PERSONA_ID` | `tavus-avatar/.env.local` | Create a persona in the Tavus dashboard (default: `p2bb5fbde523`) |
+| **Deepgram API Key** | Tavus persona settings (not in `.env.local`) | Sign up at [deepgram.com](https://deepgram.com) |
+
+The **Deepgram API key** is configured inside the Tavus persona's pipeline settings, not in this app's environment variables. To set it up:
+
+1. Log in to [platform.tavus.io](https://platform.tavus.io).
+2. Navigate to your persona and open the pipeline settings.
+3. Add your Deepgram API key in the credentials section.
+
+## Model Configuration
+
+This demo uses a cascaded voice agent pipeline: STT → LLM → TTS.
+
+| Layer | Model | Provider |
+|---|---|---|
+| Speech-to-Text (STT) | Nova-3 | [Deepgram](https://deepgram.com) |
+| LLM | Configurable (Claude, Nova, Llama, Mistral, etc.) | [Amazon Bedrock](https://aws.amazon.com/bedrock/) |
+| Text-to-Speech (TTS) | Aura | [Deepgram](https://deepgram.com) |
+
+### Switching STT and TTS to Deepgram
+
+The STT and TTS models are managed through the Tavus persona configuration, not through this app's environment variables:
+
+1. Log in to [platform.tavus.io](https://platform.tavus.io).
+2. Navigate to your persona and open the pipeline settings.
+3. Set the **STT provider** to **Deepgram** and the model to **nova-3**.
+4. Set the **TTS provider** to **Deepgram** and select your preferred **Aura** voice.
+5. Add your **Deepgram API key** in the Tavus persona credentials section.
+
+### Switching the LLM
+
+The LLM is Amazon Bedrock and is configured in the Tavus persona's LLM layer settings. You can change the model (Claude, Nova, Llama, Mistral, etc.) from within the Tavus persona dashboard without any code changes.
+
 ## Getting Started
 
 1. **Clone the repository:**
 
    ```bash
    git clone <repo-url>
-   cd aws-gtc-2026
+   cd voice-ai-demo
    ```
 
 2. **Install dependencies:**
@@ -41,7 +79,7 @@ Built for the AWS booth at NVIDIA GTC 2026.
 
 4. **Upload the knowledge base (if using a new Tavus account):**
 
-   The demo references a pre-uploaded knowledge base document. Upload the contents of `prompts/aws-gtc-schedule-kb-1.md` to your Tavus persona as a document, then update the document ID in `src/app/api/conversation/route.ts` if it differs.
+   The demo references a pre-uploaded knowledge base document. Upload the contents of `prompts/aws-summit-sydney-schedule-kb.md` to your Tavus persona as a document, then update the document ID in `src/app/api/conversation/route.ts` if it differs.
 
 5. **Start the development server:**
 
@@ -51,6 +89,59 @@ Built for the AWS booth at NVIDIA GTC 2026.
 
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Electron Kiosk Shell
+
+The `agent-kiosk-shell/` directory contains a generic Electron wrapper for running the demo in a borderless full-screen kiosk window. It automatically appends `autostart=1&shell=electron` so sessions start immediately on load.
+
+### Setup
+
+```bash
+cd agent-kiosk-shell
+npm install
+cp .env.example .env
+```
+
+### Run (local dev server)
+
+```bash
+npm start -- --target-url=http://localhost:3000
+```
+
+### Run (deployed app)
+
+```bash
+npm start -- --target-url=https://your-app.vercel.app --display-number=2
+```
+
+### Auto-click a hosted app's connect button
+
+```bash
+npm start -- --target-url=https://your-app.fly.dev/ --auto-click-text=Connect
+```
+
+### Keyboard shortcuts (kiosk shell)
+
+- `Cmd+R` — Reload the target app
+- `Cmd+B` — Show a local disconnected screen until the next reload
+- `Cmd+Q` — Quit the shell
+
+### Notes
+
+- Remote targets must use `https://`; plain `http://` is only allowed for `localhost` and other loopback addresses.
+- `--display-number` is a 1-based physical-display index (sorted left-to-right, then top-to-bottom).
+- `--display-id` targets Electron's raw display ID directly.
+- `--auto-click-text` clicks the first enabled clickable element whose text matches exactly.
+- `--auto-click-selector` targets a specific DOM selector instead.
+
+### Hosted App Contract
+
+The hosted app should support:
+
+- `autostart=1` to immediately start a new session on page load
+- Page unload cleanup so reloads and `Cmd+B` cleanly end active sessions
+
+The `tavus-avatar` app supports this contract.
+
 ## Usage
 
 1. Click **Start demo** on the landing page.
@@ -59,24 +150,16 @@ Built for the AWS booth at NVIDIA GTC 2026.
 4. Ask the avatar to show content (e.g., "show me the architecture diagram") to see overlay tool calls in action.
 5. Press **Escape** to end the session.
 
-For kiosk use, the Electron shell in `agent-kiosk-shell/` can load the app full-screen and pass `autostart=1` so the session starts immediately on page load without clicking the start button.
-
 **Keyboard shortcuts:**
-- `Ctrl+D` -- Toggle microphone mute
-- `Ctrl+F` -- Cycle microphone devices
-- `Ctrl+G` -- Cycle speaker devices
-
-**URL parameters:**
-- `?llm=super-4-modal` -- Use the Modal-hosted Nemotron LLM backend instead of the default
+- `Ctrl+D` — Toggle microphone mute
+- `Ctrl+F` — Cycle microphone devices
+- `Ctrl+G` — Cycle speaker devices
 
 ## Guidance for Voice Agents
 
-This demo promotes the [Guidance for Voice Agents on AWS](https://github.com/aws-samples/sample-voice-agent) reference architecture. During a conversation, the avatar can display two reference architecture overlays:
+This demo promotes the [Guidance for Voice Agents on AWS](https://github.com/aws-samples/sample-voice-agent) reference architecture. During a conversation, the avatar can display a reference architecture overlay showing the general architecture for deploying voice agents using speech-to-text and cascaded models on AWS.
 
-- **Guidance for Voice Agents on AWS** -- general architecture for deploying voice agents using speech-to-text and cascaded models on AWS.
-- **Guidance for Voice Agents on AWS with NVIDIA** -- the same architecture using NVIDIA open models on SageMaker with NVIDIA TTS NIM.
-
-Ask the avatar "show me the voice agent guidance" or "show the NVIDIA guidance" to display them. Each overlay includes a call-to-action linking to the sample repository:
+Ask the avatar "show me the voice agent guidance" or "show the AWS guidance" to display it. The overlay includes a call-to-action linking to the sample repository:
 
 > **https://github.com/aws-samples/sample-voice-agent**
 
@@ -104,6 +187,15 @@ tavus-avatar/                     # Next.js application
 - **Daily WebRTC** (`@daily-co/daily-js`, `@daily-co/daily-react`)
 - **Tavus API** for conversational video AI
 
+## TODO
+
+| # | Task | Where | Details |
+|---|---|---|---|
+| 1 | Upload schedule knowledge base | [platform.tavus.io](https://platform.tavus.io) | Upload `prompts/aws-summit-sydney-schedule-kb.md` as a persona document, then replace `TODO-upload-new-schedule-to-tavus` in `tavus-avatar/src/app/api/conversation/route.ts` with the new document ID |
+| 2 | Update persona system prompt | [platform.tavus.io](https://platform.tavus.io) | Copy contents of `prompts/tavus-system-instruction-1.md` into the persona's system prompt field |
+| 3 | Configure Deepgram in persona pipeline | [platform.tavus.io](https://platform.tavus.io) | Set STT to Deepgram Nova-3, TTS to Deepgram Aura, and add your Deepgram API key |
+| 4 | Push updated tool definitions | App deployment | After deploying, call `POST /api/persona/setup-tools` to sync the updated tool schema |
+
 ## Production Build
 
 ```bash
@@ -111,34 +203,3 @@ cd tavus-avatar
 npm run build
 npm run start
 ```
-
-## Electron Kiosk Shell
-
-```bash
-cd agent-kiosk-shell
-npm install
-cp .env.example .env
-npm start -- --target-url=http://localhost:3000
-```
-
-Optional:
-
-```bash
-npm start -- --target-url=https://your-app.vercel.app --display-number=2
-```
-
-To auto-click a hosted app's own connect button after load:
-
-```bash
-npm start -- --target-url=https://rxconnect-deepgram-sagemaker-pipecat.fly.dev/ --auto-click-text=Connect
-```
-
-For Gradient Bang, the shell has a built-in login-and-character-selection sequence:
-
-```bash
-npm start -- --target-url=https://game.gradient-bang.com --automation=gradient-bang
-```
-
-Remote targets must use `https://`; plain `http://` is only allowed for `localhost` and other loopback addresses. `display-number` is a 1-based physical-display index, and `display-id` is still available if you want to target Electron's raw display ID directly.
-
-The shell opens the target app in a borderless macOS simple-fullscreen window, appends `autostart=1&shell=electron`, can optionally auto-click a target app's own connect control by exact text or selector, can optionally enable a built-in Gradient Bang sign-in profile via `--automation=gradient-bang` with credentials from `agent-kiosk-shell/.env`, maps `Cmd+R` to reload, maps `Cmd+B` to a local disconnected screen until the next reload, and maps `Cmd+Q` to quit.

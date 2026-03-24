@@ -18,10 +18,9 @@ export const PERSONA_TOOL_PATCH = [
                   "aws_voice_ai_overview",
                   "daniel_voice_ai_architecture_diagram",
                   "guidance_voice_agents_aws",
-                  "guidance_voice_agents_nvidia",
                 ],
                 description:
-                  "The item to display. Options: aws_voice_ai_overview = local AWS voice AI overview page; daniel_voice_ai_architecture_diagram = Daniel's voice AI architecture diagram image; guidance_voice_agents_aws = Guidance for Voice Agents on AWS reference architecture; guidance_voice_agents_nvidia = Guidance for Voice Agents on AWS with NVIDIA reference architecture",
+                  "The item to display. Options: aws_voice_ai_overview = local AWS voice AI overview page; daniel_voice_ai_architecture_diagram = Daniel's voice AI architecture diagram image; guidance_voice_agents_aws = Guidance for Voice Agents on AWS reference architecture",
               },
             },
             required: ["item"],
@@ -33,7 +32,7 @@ export const PERSONA_TOOL_PATCH = [
         function: {
           name: "show_schedule",
           description:
-            "Shows one to three schedule boxes on the main display while moving the video conversation to a small overlay. Use this when the user asks about the AWS at GTC schedule, booth demos, kiosk locations, theater sessions, what is happening on a given day, or which related demos to visit. First consult the schedule knowledge base, then decide whether the answer fits best as 1, 2, or 3 boxes. Each box should contain a concise pipe-delimited Markdown table. Aim for 8 body rows or fewer per box, but you may use up to 11 body rows when needed to show a full day's scheduled demos in one box. If the content would be taller than that, split it across multiple boxes with clear titles such as Monday, Tuesday, Wednesday, Scheduled Demos, or Drop-in Demos.",
+            "Shows one to three schedule boxes on the main display while moving the video conversation to a small overlay. Use this when the user asks about the AWS Summit Sydney schedule, booth sessions, what is happening on a given day, or which sessions to visit. First consult the schedule knowledge base, then decide whether the answer fits best as 1, 2, or 3 boxes. Each box should contain a concise pipe-delimited Markdown table. Aim for 8 body rows or fewer per box, but you may use up to 11 body rows when needed. If the content would be taller than that, split it across multiple boxes with clear titles such as Day 1, Day 2, or by topic.",
           parameters: {
             type: "object",
             properties: {

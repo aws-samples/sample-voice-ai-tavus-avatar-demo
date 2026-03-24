@@ -5,8 +5,9 @@ import { resolveConversationPersonaId } from "@/lib/tavus-personas";
 import { getTavusConfig, getTavusErrorMessage, readResponsePayload, tavusFetch } from "@/lib/tavus-api";
 import type { TavusConversationCreateResponse } from "@/types/tavus";
 
-// Tavus knowledge base document for prompts/aws-gtc-schedule-kb-1.md.
-const AWS_GTC_SCHEDULE_DOCUMENT_ID = "d5-a250fbf7c53f";
+// Tavus knowledge base document for the AWS Summit Sydney schedule.
+// TODO: Upload the updated Summit Sydney schedule to Tavus and replace this ID.
+const AWS_SUMMIT_SCHEDULE_DOCUMENT_ID = "TODO-upload-new-schedule-to-tavus";
 
 export async function POST(request: Request) {
   try {
@@ -35,9 +36,9 @@ export async function POST(request: Request) {
       method: "POST",
       body: JSON.stringify({
         persona_id: conversationPersonaId,
-        document_ids: [AWS_GTC_SCHEDULE_DOCUMENT_ID],
+        document_ids: [AWS_SUMMIT_SCHEDULE_DOCUMENT_ID],
         custom_greeting:
-          "Hi, welcome to the AWS booth! I'm here to help you explore voice AI on AWS. Before we get started, what's your name and which company are you with? I can also show you diagrams, walk you through the GTC schedule, and answer questions about our tech stack.",
+          "Hi, welcome to the AWS booth at Summit Sydney! I'm here to help you explore voice AI on AWS. Before we get started, what's your name and which company are you with? I can also show you diagrams, walk you through the Summit schedule, and answer questions about our tech stack.",
         properties: {
           max_call_duration: 3600,
           participant_left_timeout: 30,

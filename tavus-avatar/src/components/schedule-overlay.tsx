@@ -192,7 +192,7 @@ export function ScheduleOverlay({ columns, title }: ScheduleOverlayProps) {
         <header className="flex items-start gap-6">
           <div className="space-y-3">
             <p className="text-[0.72rem] font-medium uppercase tracking-[0.34em] text-sky-200/75">
-              AWS At GTC Schedule
+              AWS Summit Sydney Schedule
             </p>
             <h2 className={titleClassName}>{title?.trim() || "Schedule Snapshot"}</h2>
           </div>

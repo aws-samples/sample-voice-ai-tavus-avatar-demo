@@ -18,7 +18,7 @@ const stackHighlights = [
   "Amazon Bedrock",
   "Daily WebRTC",
   "Tavus CVI",
-  "NVIDIA speech models",
+  "Deepgram speech models",
   "Pipecat orchestration",
 ];
 
