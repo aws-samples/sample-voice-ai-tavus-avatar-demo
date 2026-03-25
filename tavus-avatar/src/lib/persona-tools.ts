@@ -8,7 +8,7 @@ export const PERSONA_TOOL_PATCH = [
         function: {
           name: "show_content",
           description:
-            "Shows content on the main display while moving the video conversation to a small overlay. Use this when the user asks to see, show, or look at something.",
+            "Shows content on the main display while moving the video conversation to a small overlay. Use this when the user asks to see, show, or look at something — including requests for diagrams, architecture diagrams, or the reference architecture.",
           parameters: {
             type: "object",
             properties: {

@@ -32,6 +32,10 @@ const CONTENT_ITEM_ALIASES: Record<ContentItemKey, string[]> = {
     "sample voice agent",
     "architecture diagram",
     "reference architecture",
+    "diagram",
+    "the diagram",
+    "show diagram",
+    "voice agent architecture",
   ],
 };
 
