@@ -102,11 +102,18 @@ This is critical for booth environments where ambient noise would otherwise degr
 
    The demo references a pre-uploaded knowledge base document. Upload the contents of `prompts/aws-summit-sydney-schedule-kb.md` to your Tavus persona as a document, then update the document ID in `src/app/api/conversation/route.ts` if it differs.
 
-5. **Start the development server:**
+5. **Sync tool definitions to Tavus:**
+
+   Start the dev server first, then push the tool definitions so the LLM knows how to trigger screen overlays:
 
    ```bash
-   npm run dev
+   npm run dev &
+   curl -X POST http://localhost:3000/api/persona/setup-tools
    ```
+
+   This PATCHes the Tavus persona with the tool schemas defined in `src/lib/persona-tools.ts` (e.g., `show_content`, `show_schedule`, `dismiss_content`). You need to re-run this whenever tool definitions change.
+
+6. **Open the app:**
 
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
