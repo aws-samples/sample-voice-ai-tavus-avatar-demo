@@ -23,12 +23,12 @@ STT and TTS models are managed entirely within the Tavus persona pipeline — no
 
 This demo uses a cascaded voice agent pipeline orchestrated by [Pipecat](https://github.com/pipecat-ai/pipecat) inside Tavus:
 
-**Audio In → Noise Cancellation → VAD → STT → LLM → TTS → Audio Out**
+**Audio In → Noise Cancellation (local) → VAD → STT → LLM → TTS → Audio Out**
 
 | Layer | Engine | Role |
 |---|---|---|
-| Noise Cancellation | [Krisp](https://krisp.ai) (via Tavus) | Filters background noise server-side before audio reaches STT, critical for noisy environments like conference booths |
-| Voice Activity Detection (VAD) | Silero VAD (via Tavus/Pipecat) | Detects when the user starts and stops speaking to manage turn-taking and interruptions |
+| Noise Cancellation | [Krisp](https://krisp.ai) (local macOS) | Filters background noise via a virtual microphone device before audio enters the pipeline |
+| Voice Activity Detection (VAD) | Tavus Sparrow | Detects when the user starts and stops speaking to manage turn-taking and interruptions |
 | Speech-to-Text (STT) | `tavus-deepgram-medical` ([Deepgram](https://deepgram.com) via Tavus) | Transcribes speech to text in real time |
 | LLM | `tavus-claude-haiku-4.5` ([Anthropic](https://anthropic.com) via Tavus) | Reasons about user input and generates responses |
 | Text-to-Speech (TTS) | `sonic-3` ([Cartesia](https://cartesia.ai) via Tavus) | Converts text responses into natural-sounding speech |
@@ -54,6 +54,20 @@ curl -X PATCH "https://tavusapi.com/v2/personas/$TAVUS_PERSONA_ID" \
 ### Switching the LLM
 
 The LLM is managed by Tavus and configured in the persona's LLM layer. You can switch between Tavus-hosted models (e.g., `tavus-llama-4`, `tavus-gpt-4o`, `tavus-claude-haiku-4.5`) from the Tavus persona dashboard without code changes. To use Amazon Bedrock or another provider instead, configure a custom OpenAI-compatible LLM endpoint in the persona's LLM layer settings.
+
+### Noise cancellation
+
+Noise cancellation runs **locally on the kiosk Mac** using [Krisp](https://krisp.ai), not inside the Tavus pipeline. Krisp installs a virtual audio device that filters background noise before audio reaches the browser.
+
+**Setup:**
+
+1. Install the [Krisp desktop app](https://krisp.ai) on the kiosk Mac.
+2. Open Krisp and enable **Noise Cancellation** for the microphone.
+3. In **macOS System Settings → Sound → Input**, select **Krisp Microphone** as the default input device.
+4. The browser (or Electron kiosk shell) will use the Krisp virtual mic automatically as its default input.
+5. If needed, press `Ctrl+F` during a demo session to cycle to the Krisp mic.
+
+This is critical for booth environments where ambient noise would otherwise degrade STT accuracy.
 
 ## Getting Started
 
