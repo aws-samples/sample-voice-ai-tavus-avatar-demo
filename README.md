@@ -29,8 +29,8 @@ This demo uses a cascaded voice agent pipeline orchestrated by [Pipecat](https:/
 |---|---|---|
 | Noise Cancellation | [Krisp](https://krisp.ai) (local macOS) | Filters background noise via a virtual microphone device before audio enters the pipeline |
 | Voice Activity Detection (VAD) | Tavus Sparrow | Detects when the user starts and stops speaking to manage turn-taking and interruptions |
-| Speech-to-Text (STT) | `tavus-deepgram-medical` ([Deepgram](https://deepgram.com) via Tavus) | Transcribes speech to text in real time |
-| LLM | `tavus-claude-haiku-4.5` ([Anthropic](https://anthropic.com) via Tavus) | Reasons about user input and generates responses |
+| Speech-to-Text (STT) | `tavus-advanced` (via [Tavus](https://tavus.io)) | Transcribes speech to text in real time with higher accuracy |
+| LLM | `tavus-gpt-oss` (via [Tavus](https://tavus.io)) | Reasons about user input and generates responses |
 | Text-to-Speech (TTS) | `sonic-3` ([Cartesia](https://cartesia.ai) via Tavus) | Converts text responses into natural-sounding speech |
 
 ### STT and TTS engines
