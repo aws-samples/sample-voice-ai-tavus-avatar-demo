@@ -140,6 +140,87 @@ Three options:
 
 Point them to the QR code or the repo: https://github.com/aws-samples/sample-voice-agent
 
+## Common Use Cases by Industry
+
+When a visitor shares what industry they're in, use these talking points to make voice agents concrete and relevant. The agent knows all of these too — suggest the visitor ask *"What are the use cases for voice agents in [their industry]?"*
+
+### Financial Services & Banking
+
+- **Account servicing:** Balance inquiries, transaction disputes, card activations, wire transfers — all handled by voice with identity verification.
+- **Loan and mortgage support:** Guide applicants through document requirements, status updates, and rate inquiries without hold queues.
+- **Fraud alerts:** Proactive outbound calls to verify suspicious transactions in real time.
+- **Compliance:** SOX and PCI compliant on AWS. Full audit trails, data stays in your VPC.
+
+### Healthcare & Life Sciences
+
+- **Patient intake and triage:** Collect symptoms, medical history, medications, and insurance details before appointments. Route urgent cases to clinical staff.
+- **Clinical documentation:** Real-time transcription of doctor-patient conversations into structured clinical notes (SOAP format). Reduces after-hours charting.
+- **Appointment scheduling:** Book, reschedule, and send reminders by voice — available 24/7.
+- **Compliance:** HIPAA-eligible on AWS with a signed BAA. Data stays in your account.
+
+### Insurance
+
+- **Claims intake:** Walk claimants through First Notice of Loss, gather incident details and documentation, schedule adjusters.
+- **Policy servicing:** Answer coverage questions, process endorsements, explain bills.
+- **Proactive outreach:** Renewal reminders, claims status updates, and weather-event preparedness calls at scale.
+
+### Retail & Quick Service Restaurants
+
+- **Order taking:** Voice-driven ordering for drive-throughs, phone orders, and in-app. Handles menu navigation, customization, upsells, and payment.
+- **Customer support:** Order status, returns, refunds, and exchanges without hold times.
+- **Store operations:** Inventory checks, shift scheduling, and internal helpdesk via voice.
+
+### Telecommunications
+
+- **Technical support:** Guided diagnostics for connectivity issues, router resets, and signal troubleshooting — resolving issues without a technician visit.
+- **Account changes:** Plan upgrades, add-ons, device activations, and billing questions.
+- **Outage communication:** Automated outbound calls during service disruptions with estimated restoration times.
+
+### Travel & Hospitality
+
+- **Reservations:** Book, modify, or cancel hotel, flight, and car rental reservations with real-time availability and pricing.
+- **Disruption rebooking:** When flights cancel or hotels overbook, the agent handles rebooking with empathy and efficiency at scale.
+- **Concierge:** In-room voice assistant for room service, local recommendations, and hotel services. Multilingual for international guests.
+
+### Government & Public Sector
+
+- **Citizen services:** Benefits enrollment, permit applications, FAQ handling, and appointment scheduling for government offices.
+- **Multilingual support:** Automatic language detection across 36+ languages — critical for diverse populations.
+- **Compliance:** FedRAMP-compliant on AWS GovCloud.
+
+### Energy & Utilities
+
+- **Outage reporting:** Report outages and get estimated restoration times. Handle massive call surges during weather events without adding staff.
+- **Billing support:** Explain bills, set up payment plans, and process payments by voice.
+- **Field coordination:** Dispatch and schedule technicians, provide job details hands-free.
+
+### Education
+
+- **Student services:** Enrollment support, financial aid questions, course registration, and campus information — available around the clock during peak periods.
+- **Tutoring and language practice:** Interactive voice-based tutoring and conversation practice.
+- **Administrative automation:** Absence reporting, transcript requests, and IT helpdesk.
+
+### Cross-Industry Use Cases
+
+These apply to virtually every visitor regardless of industry:
+
+| Use case | One-liner |
+|---|---|
+| **Inbound customer support** | Answer questions, resolve issues, escalate only when needed. Complete call containment for routine requests. |
+| **Outbound engagement** | Lead qualification, appointment reminders, payment collection, surveys — thousands of concurrent calls. |
+| **Appointment scheduling** | Natural language booking that checks availability, confirms, reschedules, and sends reminders. |
+| **IT helpdesk** | Password resets, ticket creation, status checks, and common troubleshooting for employees. |
+| **Real-time transcription** | Live meeting transcription with speaker diarization, summaries, and action items. |
+| **Multilingual concierge** | Auto-detect the caller's language (36+) and respond natively. No IVR menus. |
+
+### Tailoring the Conversation
+
+When a visitor mentions their industry, connect it:
+
+> *"You're in insurance? One of the biggest use cases we see is claims intake — walking claimants through First Notice of Loss entirely by voice. The agent collects all the details, schedules an adjuster, and follows up. Ask the voice agent about insurance use cases — it can go deeper."*
+
+The goal is always to make it tangible, then point them back to the agent or the reference architecture.
+
 ## Troubleshooting During the Demo
 
 | Issue | Fix |
