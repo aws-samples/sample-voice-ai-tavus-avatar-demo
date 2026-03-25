@@ -25,7 +25,7 @@ This demo uses a cascaded voice agent pipeline: STT → LLM → TTS, orchestrate
 
 | Layer | Model | Provider |
 |---|---|---|
-| Speech-to-Text (STT) | Managed by Tavus | [Tavus](https://tavus.io) pipeline (`tavus-advanced` engine) |
+| Speech-to-Text (STT) | Managed by Tavus | [Tavus](https://tavus.io) pipeline (`tavus-deepgram-medical` engine) |
 | LLM | Configurable (Claude, Nova, Llama, Mistral, etc.) | [Amazon Bedrock](https://aws.amazon.com/bedrock/) |
 | Text-to-Speech (TTS) | Managed by Tavus | [Tavus](https://tavus.io) pipeline (`sonic-3` engine) |
 
