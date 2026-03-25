@@ -49,7 +49,7 @@ curl -X PATCH "https://tavusapi.com/v2/personas/$TAVUS_PERSONA_ID" \
 
 ### Switching the LLM
 
-The LLM is Amazon Bedrock and is configured in the Tavus persona's LLM layer settings. You can change the model (Claude, Nova, Llama, Mistral, etc.) from within the Tavus persona dashboard without any code changes.
+The LLM is managed by Tavus and configured in the persona's LLM layer. You can switch between Tavus-hosted models (e.g., `tavus-llama-4`, `tavus-gpt-4o`, `tavus-claude-haiku-4.5`) from the Tavus persona dashboard without code changes. To use Amazon Bedrock or another provider instead, configure a custom OpenAI-compatible LLM endpoint in the persona's LLM layer settings.
 
 ## Getting Started
 
