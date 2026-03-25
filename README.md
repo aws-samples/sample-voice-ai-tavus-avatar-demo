@@ -26,7 +26,7 @@ This demo uses a cascaded voice agent pipeline: STT → LLM → TTS, orchestrate
 | Layer | Engine | Provider |
 |---|---|---|
 | Speech-to-Text (STT) | `tavus-deepgram-medical` ([Deepgram](https://deepgram.com) via Tavus) | Configured in [Tavus](https://tavus.io) persona pipeline |
-| LLM | `tavus-gpt-oss` (Tavus default) | Configured in [Tavus](https://tavus.io) persona pipeline |
+| LLM | `tavus-claude-haiku-4.5` ([Anthropic](https://anthropic.com) via Tavus) | Configured in [Tavus](https://tavus.io) persona pipeline |
 | Text-to-Speech (TTS) | `sonic-3` ([Cartesia](https://cartesia.ai) via Tavus) | Configured in [Tavus](https://tavus.io) persona pipeline |
 
 ### STT and TTS engines
