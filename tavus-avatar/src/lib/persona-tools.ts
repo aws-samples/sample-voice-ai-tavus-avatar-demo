@@ -16,11 +16,10 @@ export const PERSONA_TOOL_PATCH = [
                 type: "string",
                 enum: [
                   "aws_voice_ai_overview",
-                  "daniel_voice_ai_architecture_diagram",
                   "guidance_voice_agents_aws",
                 ],
                 description:
-                  "The item to display. Options: aws_voice_ai_overview = local AWS voice AI overview page; daniel_voice_ai_architecture_diagram = Daniel's voice AI architecture diagram image; guidance_voice_agents_aws = Guidance for Voice Agents on AWS reference architecture",
+                  "The item to display. Options: aws_voice_ai_overview = local AWS voice AI overview page; guidance_voice_agents_aws = Guidance for Voice Agents on AWS reference architecture",
               },
             },
             required: ["item"],

@@ -16,33 +16,36 @@ Built for the AWS booth at AWS Summit Sydney 2026 (13–14 May, ICC Sydney).
 |---|---|---|
 | `TAVUS_API_KEY` | `tavus-avatar/.env.local` | Sign up at [platform.tavus.io](https://platform.tavus.io) |
 | `TAVUS_PERSONA_ID` | `tavus-avatar/.env.local` | Create a persona in the Tavus dashboard (default: `p2bb5fbde523`) |
-| **Deepgram API Key** | Tavus persona settings (not in `.env.local`) | Sign up at [deepgram.com](https://deepgram.com) |
 
-The **Deepgram API key** is configured inside the Tavus persona's pipeline settings, not in this app's environment variables. To set it up:
-
-1. Log in to [platform.tavus.io](https://platform.tavus.io).
-2. Navigate to your persona and open the pipeline settings.
-3. Add your Deepgram API key in the credentials section.
+STT and TTS models are managed entirely within the Tavus persona pipeline — no separate API keys are needed in this app. See [Model Configuration](#model-configuration) for details.
 
 ## Model Configuration
 
-This demo uses a cascaded voice agent pipeline: STT → LLM → TTS.
+This demo uses a cascaded voice agent pipeline: STT → LLM → TTS, orchestrated by [Pipecat](https://github.com/pipecat-ai/pipecat) inside Tavus.
 
 | Layer | Model | Provider |
 |---|---|---|
-| Speech-to-Text (STT) | Nova-3 | [Deepgram](https://deepgram.com) |
+| Speech-to-Text (STT) | Managed by Tavus | [Tavus](https://tavus.io) pipeline (`tavus-advanced` engine) |
 | LLM | Configurable (Claude, Nova, Llama, Mistral, etc.) | [Amazon Bedrock](https://aws.amazon.com/bedrock/) |
-| Text-to-Speech (TTS) | Aura | [Deepgram](https://deepgram.com) |
+| Text-to-Speech (TTS) | Managed by Tavus | [Tavus](https://tavus.io) pipeline (`sonic-3` engine) |
 
-### Switching STT and TTS to Deepgram
+### STT and TTS engines
 
-The STT and TTS models are managed through the Tavus persona configuration, not through this app's environment variables:
+The STT and TTS models are managed entirely within Tavus. You cannot select Deepgram directly as a Tavus engine — Tavus uses its own engine identifiers.
 
-1. Log in to [platform.tavus.io](https://platform.tavus.io).
-2. Navigate to your persona and open the pipeline settings.
-3. Set the **STT provider** to **Deepgram** and the model to **nova-3**.
-4. Set the **TTS provider** to **Deepgram** and select your preferred **Aura** voice.
-5. Add your **Deepgram API key** in the Tavus persona credentials section.
+**Available STT engines:** `tavus-auto`, `tavus-whisper`, `tavus-turbo`, `tavus-advanced`, `tavus-parakeet`, `tavus-deepgram-medical`, `tavus-sarvam`, `tavus-soniox`
+
+**Available TTS engines:** `elevenlabs`, `cartesia`, `inworld` (or leave blank to use the default Tavus voice)
+
+To change engines, use the Tavus dashboard or API:
+
+```bash
+# Example: change STT engine via API
+curl -X PATCH "https://tavusapi.com/v2/personas/$TAVUS_PERSONA_ID" \
+  -H "x-api-key: $TAVUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '[{"op": "replace", "path": "/layers/stt/stt_engine", "value": "tavus-advanced"}]'
+```
 
 ### Switching the LLM
 
@@ -187,14 +190,53 @@ tavus-avatar/                     # Next.js application
 - **Daily WebRTC** (`@daily-co/daily-js`, `@daily-co/daily-react`)
 - **Tavus API** for conversational video AI
 
-## TODO
+## Updating the Tavus Persona
 
-| # | Task | Where | Details |
-|---|---|---|---|
-| 1 | Upload schedule knowledge base | [platform.tavus.io](https://platform.tavus.io) | Upload `prompts/aws-summit-sydney-schedule-kb.md` as a persona document, then replace `TODO-upload-new-schedule-to-tavus` in `tavus-avatar/src/app/api/conversation/route.ts` with the new document ID |
-| 2 | Update persona system prompt | [platform.tavus.io](https://platform.tavus.io) | Copy contents of `prompts/tavus-system-instruction-1.md` into the persona's system prompt field |
-| 3 | Configure Deepgram in persona pipeline | [platform.tavus.io](https://platform.tavus.io) | Set STT to Deepgram Nova-3, TTS to Deepgram Aura, and add your Deepgram API key |
-| 4 | Push updated tool definitions | App deployment | After deploying, call `POST /api/persona/setup-tools` to sync the updated tool schema |
+The voice agent's system prompt, knowledge base, and tool definitions are managed in Tavus. Use the Tavus API or [platform.tavus.io](https://platform.tavus.io) dashboard to update them.
+
+### Upload a knowledge base document
+
+Upload a markdown file as a knowledge base document. The returned `document_id` must be set in `tavus-avatar/src/app/api/conversation/route.ts`.
+
+```bash
+curl -X POST "https://tavusapi.com/v2/documents" \
+  -H "x-api-key: $TAVUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"document_url": "https://raw.githubusercontent.com/<owner>/<repo>/main/prompts/aws-summit-sydney-schedule-kb.md", "document_name": "aws-summit-sydney-schedule-kb.md"}'
+```
+
+### Update the system prompt
+
+Patch the persona with the latest system prompt from `prompts/tavus-system-instruction-1.md`:
+
+```bash
+SYSTEM_PROMPT=$(python3 -c "import json; print(json.dumps(open('prompts/tavus-system-instruction-1.md').read()))")
+
+curl -X PATCH "https://tavusapi.com/v2/personas/$TAVUS_PERSONA_ID" \
+  -H "x-api-key: $TAVUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "[{\"op\": \"replace\", \"path\": \"/system_prompt\", \"value\": $SYSTEM_PROMPT}]"
+```
+
+### Push updated tool definitions
+
+After deploying the app, call the setup-tools endpoint to sync tool schemas with Tavus:
+
+```bash
+curl -X POST "http://localhost:3000/api/persona/setup-tools"
+```
+
+### Change STT/TTS engines or hotwords
+
+Use the Tavus API to change STT/TTS engines or update STT hotwords (see [Model Configuration](#model-configuration) for available engines):
+
+```bash
+# Update STT hotwords
+curl -X PATCH "https://tavusapi.com/v2/personas/$TAVUS_PERSONA_ID" \
+  -H "x-api-key: $TAVUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '[{"op": "replace", "path": "/layers/stt/hotwords", "value": "AWS, Deepgram, SageMaker, Bedrock, Pipecat"}]'
+```
 
 ## Production Build
 

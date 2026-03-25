@@ -3,10 +3,6 @@ export const CONTENT_ITEMS = {
     url: "/content/aws-voice-ai",
     label: "AWS Voice AI Overview",
   },
-  daniel_voice_ai_architecture_diagram: {
-    url: "/content/daniel-voice-ai-architecture-diagram",
-    label: "Daniel's Voice AI Architecture Diagram",
-  },
   guidance_voice_agents_aws: {
     url: "/content/guidance-voice-agents-aws",
     label: "Guidance for Voice Agents on AWS",
@@ -25,16 +21,6 @@ const CONTENT_ITEM_ALIASES: Record<ContentItemKey, string[]> = {
     "voice ai overview",
     "aws voice overview",
   ],
-  daniel_voice_ai_architecture_diagram: [
-    "daniel_voice_ai_architecture_diagram",
-    "daniel voice ai architecture diagram",
-    "daniel architecture diagram",
-    "daniel s voice ai architecture diagram",
-    "voice ai architecture diagram",
-    "reference architecture",
-    "pipecat architecture diagram",
-    "architecture diagram",
-  ],
   guidance_voice_agents_aws: [
     "guidance_voice_agents_aws",
     "guidance for voice agents",
@@ -44,6 +30,8 @@ const CONTENT_ITEM_ALIASES: Record<ContentItemKey, string[]> = {
     "aws guidance",
     "aws voice agent guidance",
     "sample voice agent",
+    "architecture diagram",
+    "reference architecture",
   ],
 };
 

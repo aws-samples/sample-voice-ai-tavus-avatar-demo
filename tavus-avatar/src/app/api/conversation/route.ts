@@ -6,8 +6,7 @@ import { getTavusConfig, getTavusErrorMessage, readResponsePayload, tavusFetch }
 import type { TavusConversationCreateResponse } from "@/types/tavus";
 
 // Tavus knowledge base document for the AWS Summit Sydney schedule.
-// TODO: Upload the updated Summit Sydney schedule to Tavus and replace this ID.
-const AWS_SUMMIT_SCHEDULE_DOCUMENT_ID = "TODO-upload-new-schedule-to-tavus";
+const AWS_SUMMIT_SCHEDULE_DOCUMENT_ID = "d4-c663569fd55d";
 
 export async function POST(request: Request) {
   try {
