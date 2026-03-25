@@ -21,13 +21,17 @@ STT and TTS models are managed entirely within the Tavus persona pipeline — no
 
 ## Model Configuration
 
-This demo uses a cascaded voice agent pipeline: STT → LLM → TTS, orchestrated by [Pipecat](https://github.com/pipecat-ai/pipecat) inside Tavus.
+This demo uses a cascaded voice agent pipeline orchestrated by [Pipecat](https://github.com/pipecat-ai/pipecat) inside Tavus:
 
-| Layer | Engine | Provider |
+**Audio In → Noise Cancellation → VAD → STT → LLM → TTS → Audio Out**
+
+| Layer | Engine | Role |
 |---|---|---|
-| Speech-to-Text (STT) | `tavus-deepgram-medical` ([Deepgram](https://deepgram.com) via Tavus) | Configured in [Tavus](https://tavus.io) persona pipeline |
-| LLM | `tavus-claude-haiku-4.5` ([Anthropic](https://anthropic.com) via Tavus) | Configured in [Tavus](https://tavus.io) persona pipeline |
-| Text-to-Speech (TTS) | `sonic-3` ([Cartesia](https://cartesia.ai) via Tavus) | Configured in [Tavus](https://tavus.io) persona pipeline |
+| Noise Cancellation | [Krisp](https://krisp.ai) (via Tavus) | Filters background noise server-side before audio reaches STT, critical for noisy environments like conference booths |
+| Voice Activity Detection (VAD) | Silero VAD (via Tavus/Pipecat) | Detects when the user starts and stops speaking to manage turn-taking and interruptions |
+| Speech-to-Text (STT) | `tavus-deepgram-medical` ([Deepgram](https://deepgram.com) via Tavus) | Transcribes speech to text in real time |
+| LLM | `tavus-claude-haiku-4.5` ([Anthropic](https://anthropic.com) via Tavus) | Reasons about user input and generates responses |
+| Text-to-Speech (TTS) | `sonic-3` ([Cartesia](https://cartesia.ai) via Tavus) | Converts text responses into natural-sounding speech |
 
 ### STT and TTS engines
 
