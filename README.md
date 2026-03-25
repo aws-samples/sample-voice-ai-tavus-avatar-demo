@@ -23,11 +23,11 @@ STT and TTS models are managed entirely within the Tavus persona pipeline — no
 
 This demo uses a cascaded voice agent pipeline: STT → LLM → TTS, orchestrated by [Pipecat](https://github.com/pipecat-ai/pipecat) inside Tavus.
 
-| Layer | Model | Provider |
+| Layer | Engine | Provider |
 |---|---|---|
-| Speech-to-Text (STT) | Managed by Tavus | [Tavus](https://tavus.io) pipeline (`tavus-deepgram-medical` engine) |
-| LLM | Configurable (Claude, Nova, Llama, Mistral, etc.) | [Amazon Bedrock](https://aws.amazon.com/bedrock/) |
-| Text-to-Speech (TTS) | Managed by Tavus | [Tavus](https://tavus.io) pipeline (`sonic-3` engine) |
+| Speech-to-Text (STT) | `tavus-deepgram-medical` ([Deepgram](https://deepgram.com) via Tavus) | Configured in [Tavus](https://tavus.io) persona pipeline |
+| LLM | `tavus-gpt-oss` (Tavus default) | Configured in [Tavus](https://tavus.io) persona pipeline |
+| Text-to-Speech (TTS) | `sonic-3` ([Cartesia](https://cartesia.ai) via Tavus) | Configured in [Tavus](https://tavus.io) persona pipeline |
 
 ### STT and TTS engines
 
