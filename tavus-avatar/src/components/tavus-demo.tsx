@@ -439,6 +439,7 @@ function TranscriptPanelRow({ active, label, text }: TranscriptPanelRowProps) {
 
 type FloatingMicControlProps = {
   isMuted: boolean;
+  isOverlayActive?: boolean;
   micName?: string | null;
   onToggle(): void;
   onCycleMic?(): void;
@@ -448,29 +449,40 @@ type FloatingMicControlProps = {
 
 function FloatingMicControl({
   isMuted,
+  isOverlayActive,
   micName,
   onToggle,
   onCycleMic,
   onCycleSpeaker,
   speakerName,
 }: FloatingMicControlProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const isCollapsed = isOverlayActive && !isHovered;
+
   return (
-    <div className="absolute left-4 top-4 z-40 w-[11.5rem] rounded-[1rem] border border-white/10 bg-slate-950/78 px-2.5 py-2 shadow-[0_18px_44px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+    <div
+      className="absolute left-4 top-4 z-40 overflow-hidden rounded-[1rem] border border-white/10 bg-slate-950/78 px-2.5 py-2 shadow-[0_18px_44px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all duration-200"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ width: isCollapsed ? "4.5rem" : "11.5rem" }}
+    >
       <div className="flex items-center gap-2">
         <span
-          className={isMuted ? "size-1.5 rounded-full bg-rose-400" : "size-1.5 rounded-full bg-emerald-300"}
+          className={isMuted ? "size-1.5 shrink-0 rounded-full bg-rose-400" : "size-1.5 shrink-0 rounded-full bg-emerald-300"}
         />
-        <div className="min-w-0 flex-1">
-          <p className="text-[0.45rem] uppercase tracking-[0.32em] text-slate-500">Mic</p>
-          <p className="text-[0.6rem] font-medium uppercase tracking-[0.16em] text-white">
-            {isMuted ? "Muted" : "Live"}
-          </p>
-        </div>
+        {!isCollapsed && (
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.45rem] uppercase tracking-[0.32em] text-slate-500">Mic</p>
+            <p className="text-[0.6rem] font-medium uppercase tracking-[0.16em] text-white">
+              {isMuted ? "Muted" : "Live"}
+            </p>
+          </div>
+        )}
         <button
           className={
             isMuted
-              ? "rounded-full border border-emerald-300/30 bg-emerald-400/12 px-2 py-0.5 text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-emerald-100 transition hover:bg-emerald-400/18"
-              : "rounded-full border border-rose-300/30 bg-rose-400/12 px-2 py-0.5 text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-rose-100 transition hover:bg-rose-400/18"
+              ? "shrink-0 rounded-full border border-emerald-300/30 bg-emerald-400/12 px-2 py-0.5 text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-emerald-100 transition hover:bg-emerald-400/18"
+              : "shrink-0 rounded-full border border-rose-300/30 bg-rose-400/12 px-2 py-0.5 text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-rose-100 transition hover:bg-rose-400/18"
           }
           onClick={onToggle}
           type="button"
@@ -479,37 +491,39 @@ function FloatingMicControl({
         </button>
       </div>
 
-      <div className="mt-1.5 space-y-1 border-t border-white/8 pt-1.5">
-        <button
-          className="flex w-full items-center gap-2 rounded-[0.75rem] bg-white/5 px-2 py-1 text-left transition hover:bg-white/8 disabled:cursor-default disabled:hover:bg-white/5"
-          disabled={!onCycleMic}
-          onClick={onCycleMic}
-          type="button"
-        >
-          <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.26em] text-slate-500">Mic</span>
-          <span className="min-w-0 flex-1 truncate text-[0.54rem] text-slate-200">
-            {getDeviceDisplayName(micName, "Waiting")}
-          </span>
-          <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">^F</span>
-        </button>
+      {!isCollapsed && (
+        <div className="mt-1.5 space-y-1 border-t border-white/8 pt-1.5">
+          <button
+            className="flex w-full items-center gap-2 rounded-[0.75rem] bg-white/5 px-2 py-1 text-left transition hover:bg-white/8 disabled:cursor-default disabled:hover:bg-white/5"
+            disabled={!onCycleMic}
+            onClick={onCycleMic}
+            type="button"
+          >
+            <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.26em] text-slate-500">Mic</span>
+            <span className="min-w-0 flex-1 truncate text-[0.54rem] text-slate-200">
+              {getDeviceDisplayName(micName, "Waiting")}
+            </span>
+            <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">^F</span>
+          </button>
 
-        <button
-          className="flex w-full items-center gap-2 rounded-[0.75rem] bg-white/5 px-2 py-1 text-left transition hover:bg-white/8 disabled:cursor-default disabled:hover:bg-white/5"
-          disabled={!onCycleSpeaker}
-          onClick={onCycleSpeaker}
-          type="button"
-        >
-          <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.22em] text-slate-500">Out</span>
-          <span className="min-w-0 flex-1 truncate text-[0.54rem] text-slate-200">
-            {getDeviceDisplayName(speakerName, "Waiting")}
-          </span>
-          <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">^G</span>
-        </button>
+          <button
+            className="flex w-full items-center gap-2 rounded-[0.75rem] bg-white/5 px-2 py-1 text-left transition hover:bg-white/8 disabled:cursor-default disabled:hover:bg-white/5"
+            disabled={!onCycleSpeaker}
+            onClick={onCycleSpeaker}
+            type="button"
+          >
+            <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.22em] text-slate-500">Out</span>
+            <span className="min-w-0 flex-1 truncate text-[0.54rem] text-slate-200">
+              {getDeviceDisplayName(speakerName, "Waiting")}
+            </span>
+            <span className="shrink-0 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">^G</span>
+          </button>
 
-        <p className="px-1 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">
-          Ctrl+D mute
-        </p>
-      </div>
+          <p className="px-1 text-[0.42rem] uppercase tracking-[0.16em] text-slate-500">
+            Ctrl+D mute
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -644,6 +658,7 @@ function TavusSession({
       <div className={`relative h-screen w-screen overflow-hidden ${overlayState ? "bg-slate-950" : "bg-black"}`}>
         <FloatingMicControl
           isMuted={isMicMuted}
+          isOverlayActive={Boolean(overlayState)}
           micName={currentMic?.device.label}
           onCycleMic={() => {
             void handleCycleMic();

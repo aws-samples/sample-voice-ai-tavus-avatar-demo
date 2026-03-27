@@ -7,6 +7,10 @@ export const CONTENT_ITEMS = {
     url: "/content/guidance-voice-agents-aws",
     label: "Guidance for Voice Agents on AWS",
   },
+  common_use_cases: {
+    url: "/content/common-use-cases",
+    label: "Voice AI Use Cases by Industry",
+  },
 } as const;
 
 export type ContentItemKey = keyof typeof CONTENT_ITEMS;
@@ -36,6 +40,18 @@ const CONTENT_ITEM_ALIASES: Record<ContentItemKey, string[]> = {
     "the diagram",
     "show diagram",
     "voice agent architecture",
+  ],
+  common_use_cases: [
+    "common_use_cases",
+    "common use cases",
+    "use cases",
+    "use cases by industry",
+    "industry use cases",
+    "voice ai use cases",
+    "what industries",
+    "industry examples",
+    "show use cases",
+    "use case examples",
   ],
 };
 

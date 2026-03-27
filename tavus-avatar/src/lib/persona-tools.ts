@@ -17,9 +17,10 @@ export const PERSONA_TOOL_PATCH = [
                 enum: [
                   "aws_voice_ai_overview",
                   "guidance_voice_agents_aws",
+                  "common_use_cases",
                 ],
                 description:
-                  "The item to display. Options: aws_voice_ai_overview = local AWS voice AI overview page; guidance_voice_agents_aws = Guidance for Voice Agents on AWS reference architecture",
+                  "The item to display. Options: aws_voice_ai_overview = local AWS voice AI overview page; guidance_voice_agents_aws = Guidance for Voice Agents on AWS reference architecture; common_use_cases = Voice AI use cases by industry",
               },
             },
             required: ["item"],

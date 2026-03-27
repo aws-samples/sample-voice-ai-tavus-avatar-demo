@@ -164,6 +164,21 @@ Why it matters: conference environments are noisy. Without noise cancellation, s
 
 ## 5. Voice AI Use Cases
 
+### Quick Reference: Use Cases by Industry
+
+When a visitor mentions their industry, connect to the relevant use case below, offer to go deeper, and offer to show the use cases on screen by calling show_content with item common_use_cases.
+
+Financial Services: Account servicing, wire transfers, fraud alerts. SOX and PCI compliant on AWS.
+Healthcare: Patient intake, clinical documentation, appointment scheduling. HIPAA eligible on AWS.
+Insurance: Claims intake (First Notice of Loss), policy servicing, renewal outreach.
+Retail and QSR: Drive-through ordering, customer support, returns and refunds.
+Telecom: Technical support diagnostics, plan changes, outage notifications.
+Travel and Hospitality: Reservations, disruption rebooking, multilingual concierge.
+Government: Citizen services, benefits enrollment, multilingual support. FedRAMP on GovCloud.
+Energy and Utilities: Outage reporting, billing support, surge call handling during weather events.
+Education: Enrollment support, financial aid, voice-based tutoring.
+Any Industry: Inbound support, outbound engagement, appointment booking, IT helpdesk, live transcription.
+
 ### Horizontal Use Cases Across Industries
 
 Inbound Customer Support: answers customer questions, resolves issues, and only escalates to a human when truly needed. Can look up orders, make account changes, process refunds, and handle returns using function calling to connect with backend systems. Achieves complete call containment for common request types.
@@ -308,3 +323,43 @@ Answer: We use Krisp for server-side noise cancellation. It runs inside the Pipe
 
 Question: What else should I see at the summit?
 Answer: AWS Summit Sydney features over 150 sessions across both days covering AI, machine learning, serverless, security, and more. Check the AWS Village for hands-on experiences, and visit the Training and Certification area. I can answer questions about the summit or our voice AI demo. Just ask!
+
+## 10. Voice AI Industry Landscape
+
+This section provides context on the broader voice AI industry as of 2026, based on the Voice AI and Voice Agents guide by Daily and Pipecat.
+
+### Where the Industry Is Today
+Large language models have transformed voice AI from rigid IVR menu systems into intelligent conversational agents. Voice agents can now hold natural open-ended conversations, extract structured data from speech, handle interruptions gracefully, and take real-world actions via function calling. They are deployed at scale today in healthcare, financial services, insurance, sales, call centers, scheduling, logistics, and answering the phone for small businesses. On the consumer side, conversational voice and video AI is making its way into social applications and games.
+
+### Core Architecture Pattern
+The standard production architecture is a cascaded pipeline. Speech-to-Text converts audio to text, an LLM reasons and responds, and Text-to-Speech converts the response back to audio. Open source frameworks like Pipecat orchestrate the pipeline and handle the hard real-time concerns including turn detection, interruption handling, streaming audio, and multi-model coordination. This cascaded approach gives full control over each component and lets you swap models independently. This is exactly the architecture we are demonstrating here on AWS.
+
+### Key Technical Challenges
+Latency is the defining challenge. The target for natural conversation is 500 to 800 milliseconds voice-to-voice, requiring streaming at every stage. Turn detection uses Voice Activity Detection models to know when a user has finished speaking. Interruption handling must cancel current speech output and restart the pipeline instantly. Function calling connects agents to backend systems for real actions. Multimodality is expanding voice agents to also see through cameras, understand screens, and generate dynamic interfaces.
+
+### Multiple Models Working Together
+Production voice agents increasingly use multiple specialized models in combination. Fine-tuned smaller models handle domain-specific classification and routing at lower latency. Large frontier models handle open-ended reasoning. Content guardrails run in parallel for safety. Async post-processing handles transcription, analytics, and quality scoring after each conversation turn.
+
+### Hosting and Infrastructure
+Voice agents are long-running stateful processes, not serverless functions. Each active call maintains a persistent process that holds conversation state and streams audio continuously. They run in containers on Docker or Kubernetes with horizontal scaling. AWS services like SageMaker and EKS are well suited to this pattern. Cost typically ranges from 2 cents to 20 cents US per minute depending on model choices, hosting approach, and call volume.
+
+### What Is Coming Next
+Multi-model orchestration with intelligent routing between specialized models based on query type. Robotics and physical AI using voice as the primary interface for physical systems and devices. AI-native multimodal applications combining voice, vision, and real-time action in a single agent experience. Natural language as the universal interface, replacing traditional menus and forms across enterprise software.
+
+## 11. AWS Startup Programs
+
+### AWS Activate
+AWS Activate is the program for startups building on AWS. It provides AWS credits ranging from a few thousand dollars up to 100,000 dollars or more depending on the tier, funding stage, and investor or accelerator affiliations. Activate also includes technical support from AWS, access to training resources, and go-to-market support.
+
+Activate is available to startups at any stage from pre-seed to growth stage. Eligibility depends on funding stage, association with AWS Partner organizations, and participation in recognized accelerator programs.
+
+To apply, visit aws.amazon.com/activate or ask a booth team member for a referral.
+
+### AWS Startups Team
+The AWS Startups team works directly with founders and engineering teams to architect solutions, access credits, and accelerate to production. They can connect startups with solutions architects who specialize in AI and machine learning workloads.
+
+### Why This Matters for Voice AI Startups
+Voice AI workloads involve significant model inference compute, especially during development and testing. AWS Activate credits can meaningfully offset early-stage costs for prototyping and iteration. Building on Bedrock and SageMaker from the start also positions startups for enterprise sales, since large customers frequently require AWS infrastructure for compliance, data residency, and security requirements.
+
+### When to Mention This
+When a visitor mentions they are a startup, founder, or early-stage team, briefly mention AWS Activate credits and the AWS Startups team. Offer to connect them with the team and direct them to the intake form or QR code for follow-up.
