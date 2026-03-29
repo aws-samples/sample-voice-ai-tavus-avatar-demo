@@ -162,15 +162,30 @@ aws cloudformation deploy \
 
 Note the outputs — you'll need them for GitHub Actions secrets.
 
-#### 3. Configure GitHub Actions secrets
+#### 3. Set up GitHub Actions OIDC
+
+Create a GitHub OIDC identity provider and IAM role so GitHub Actions can assume credentials without static keys:
+
+```bash
+# Create OIDC provider (one-time per account)
+aws iam create-open-id-connect-provider \
+  --url https://token.actions.githubusercontent.com \
+  --client-id-list sts.amazonaws.com \
+  --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
+
+# Create IAM role with trust policy for your repo, then attach
+# ECR, ECS, S3, and CloudFront permissions (see infra/template.yaml)
+```
+
+#### 4. Configure GitHub Actions secrets
 
 | Secret | Value (from CloudFormation outputs) |
 |---|---|
-| `AWS_ROLE_ARN` | IAM role ARN for GitHub Actions OIDC (or use access keys) |
+| `AWS_ROLE_ARN` | IAM role ARN for GitHub Actions OIDC |
 | `S3_BUCKET_NAME` | `FrontendBucketName` output |
 | `CLOUDFRONT_DISTRIBUTION_ID` | `CloudFrontDistributionId` output |
 
-#### 4. Push to deploy
+#### 5. Push to deploy
 
 The workflow at `.github/workflows/deploy-pipecat.yml` runs automatically on push to `main` when files in `tavus-pipecat-example/` or `prompts/` change. It:
 
@@ -180,6 +195,8 @@ The workflow at `.github/workflows/deploy-pipecat.yml` runs automatically on pus
 4. Syncs to S3 and invalidates the CloudFront cache
 
 The frontend and backend deploy in parallel. Access the demo at the CloudFront domain (`CloudFrontDomainName` output).
+
+> **Note:** Regenerate `frontend/package-lock.json` with Node 20 (`fnm use 20 && npm install`) to match CI. The first CloudFormation deploy is slow (~15 min) as the ECS service waits for a Docker image — subsequent deploys via CI/CD are faster.
 
 ---
 
