@@ -133,9 +133,11 @@ Resources:
       VpcId: !Ref VpcId
       TargetType: ip
       HealthCheckPath: /
-      HealthCheckIntervalSeconds: 30
+      HealthCheckIntervalSeconds: 10
+      HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 3
+      DeregistrationDelay: 30
       Matcher:
         HttpCode: '200-499'
 
@@ -209,6 +211,9 @@ Resources:
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref TaskDefinition
       DesiredCount: 1
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 0
+        MaximumPercent: 200
       LaunchType: FARGATE
       NetworkConfiguration:
         AwsvpcConfiguration:
