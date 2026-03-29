@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { WebRTCClient } from '../webrtc-client';
+import { DailyClient } from '../daily-client';
 import './VideoConversation.css';
+
+// Transport mode: "daily" for cloud (ECS), "webrtc" for local dev
+const TRANSPORT = process.env.REACT_APP_TRANSPORT || 'webrtc';
 
 // Content items matching the backend definitions
 const CONTENT_ITEMS = {
@@ -207,7 +211,9 @@ function VideoConversation() {
     setConnectionState('connecting');
     setError('');
     try {
-      webrtcClient.current = new WebRTCClient(API_URL);
+      webrtcClient.current = TRANSPORT === 'daily'
+        ? new DailyClient(API_URL)
+        : new WebRTCClient(API_URL);
 
       webrtcClient.current.on('track', (remoteStream) => {
         if (remoteVideoRef.current) {

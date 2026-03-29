@@ -83,6 +83,7 @@ jobs:
         working-directory: tavus-pipecat-example/frontend
         env:
           REACT_APP_API_URL: ''
+          REACT_APP_TRANSPORT: daily
         run: |
           npm ci
           npm run build

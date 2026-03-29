@@ -14,4 +14,4 @@ COPY prompts/ /app/prompts/
 
 EXPOSE 7860
 
-CMD ["python", "tavus-pipecat.py", "--transport", "webrtc", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["python", "tavus-pipecat.py", "--transport", "daily", "--host", "0.0.0.0", "--port", "7860"]

@@ -195,6 +195,8 @@ Resources:
               ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/TAVUS_REPLICA_ID'
             - Name: TAVUS_REPLICA_ID_NOVA_SONIC
               ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/TAVUS_REPLICA_ID_NOVA_SONIC'
+            - Name: DAILY_API_KEY
+              ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/DAILY_API_KEY'
           Environment:
             - Name: AWS_REGION_NOVA_SONIC
               Value: ap-northeast-1

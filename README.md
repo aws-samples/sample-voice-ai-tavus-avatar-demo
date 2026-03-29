@@ -120,6 +120,7 @@ Audio In -> Amazon Nova 2 Sonic (STT+LLM+TTS) -> Tavus Avatar -> Audio/Video Out
 | `TAVUS_API_KEY` | Tavus API key (avatar) |
 | `TAVUS_REPLICA_ID` | Tavus replica for cascaded mode |
 | `TAVUS_REPLICA_ID_NOVA_SONIC` | Tavus replica for Nova Sonic mode (different avatar) |
+| `DAILY_API_KEY` | Daily.co API key (required for cloud deployment with Daily transport) |
 | `AWS_REGION_NOVA_SONIC` | AWS region for Nova Sonic (default: `ap-northeast-1`) |
 | `AWS_ACCESS_KEY_ID` | AWS credentials (optional if using default credential chain) |
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials (optional if using default credential chain) |
@@ -142,6 +143,7 @@ aws ssm put-parameter --name /tavus-pipecat/CARTESIA_API_KEY --type SecureString
 aws ssm put-parameter --name /tavus-pipecat/TAVUS_API_KEY --type SecureString --value "your-key"
 aws ssm put-parameter --name /tavus-pipecat/TAVUS_REPLICA_ID --type SecureString --value "your-replica-id"
 aws ssm put-parameter --name /tavus-pipecat/TAVUS_REPLICA_ID_NOVA_SONIC --type SecureString --value "your-replica-id"
+aws ssm put-parameter --name /tavus-pipecat/DAILY_API_KEY --type SecureString --value "your-daily-api-key"
 ```
 
 #### 2. Deploy infrastructure (one-time)
