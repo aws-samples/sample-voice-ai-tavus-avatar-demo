@@ -526,14 +526,11 @@ function markdownTableToHtml(markdown) {
   headers.forEach(h => { html += `<th>${escapeHtml(h)}</th>`; });
   html += '</tr></thead>';
 
-  html += '<tbody>';
-  for (let i = 2; i < lines.length; i++) {
-    const cells = lines[i].split('|').map(c => c.trim()).filter(Boolean);
-    html += '<tr>';
-    cells.forEach(c => { html += `<td>${escapeHtml(c)}</td>`; });
-    html += '</tr>';
-  }
-  html += '</tbody></table>';
+  const rows = lines.slice(2).map(line => {
+    const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+    return '<tr>' + cells.map(c => `<td>${escapeHtml(c)}</td>`).join('') + '</tr>';
+  });
+  html += '<tbody>' + rows.join('') + '</tbody></table>';
 
   return html;
 }
