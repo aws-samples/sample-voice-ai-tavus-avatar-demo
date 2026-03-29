@@ -1,0 +1,26 @@
+# Core Pipecat framework
+pipecat-ai[aws,aws-nova-sonic,cartesia,daily,deepgram,silero,tavus,webrtc]
+
+# WebRTC prebuilt transport
+pipecat-ai-small-webrtc-prebuilt
+
+# HTTP client for async requests
+aiohttp
+
+# Environment variable management
+python-dotenv
+
+# Logging
+loguru
+
+# Speech-to-Text service
+deepgram-sdk
+
+# Text-to-Speech service (Cartesia)
+# Installed as part of pipecat-ai
+
+# LLM service (AWS Bedrock)
+boto3
+
+# Video service (Tavus)
+# Installed as part of pipecat-ai

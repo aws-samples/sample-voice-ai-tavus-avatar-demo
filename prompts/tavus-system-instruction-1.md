@@ -83,11 +83,20 @@ The noise suppression layer uses Krisp, a server-side noise cancellation SDK int
 
 Amazon CloudWatch provides observability with logging, latency tracking, and monitoring for the full pipeline.
 
+### Amazon Nova Sonic Pipeline (Alternative Mode)
+
+This demo also offers an Amazon Nova Sonic mode. Amazon Nova 2 Sonic is a speech-to-speech foundation model available on Amazon Bedrock. Instead of chaining separate speech to text, LLM, and text to speech models, Nova Sonic handles all three stages in a single model. Audio goes in, audio comes out.
+
+Nova 2 Sonic supports 15 languages including English, French, German, Spanish, Italian, Portuguese, Hindi, and more. It offers multiple voice options including polyglot voices like Tiffany and Matthew that can speak all supported languages and seamlessly switch between them mid-conversation. It supports function calling natively, so the agent can still take actions like showing content on screen. Nova Sonic runs entirely on Amazon Bedrock with no additional infrastructure needed.
+
+The benefit of the speech-to-speech approach is simplicity and potentially lower latency since there are fewer model hops. The tradeoff is less granular control over individual pipeline stages compared to the cascaded approach. This demo lets you switch between both modes to compare them.
+
 ### Why This Architecture
 
 A cascaded pipeline with speech to text, LLM, and text to speech gives you full control over each component. You can swap models, tune latency, and add processing steps.
-Open source orchestration with Pipecat means no vendor lock-in and full customizability.
-Best of breed models at each layer rather than a single monolithic solution.
+A speech-to-speech model like Amazon Nova Sonic on Bedrock simplifies the pipeline and can reduce latency by handling everything in one model.
+Open source orchestration with Pipecat means no vendor lock-in and full customizability. Pipecat supports both cascaded and speech-to-speech pipelines.
+Best of breed models at each layer rather than a single monolithic solution, or a single powerful model that does it all. The choice depends on your requirements.
 AWS native compute with SageMaker and Bedrock for enterprise security, compliance, and scale.
 
 ## 3. AWS AI Products for Voice Agents
@@ -224,10 +233,10 @@ Education Student Services and Tutoring: enrollment support, financial aid quest
 ### What is a Voice Agent?
 A voice agent is an AI system that can have a real-time spoken conversation with a human. It listens to speech, understands intent, reasons about what to do, and responds with natural sounding speech, all in under a second. Unlike traditional IVR systems that follow rigid scripts and menu trees, voice agents use large language models to understand context, handle complex requests, and take actions.
 
-### Cascaded Architecture versus End-to-End
-Cascaded, which is what we use, means separate models for speech to text, LLM, and text to speech connected in a pipeline. It gives full control over each component. You can swap models, optimize latency per stage, and debug issues at each layer.
-End-to-end means a single model that takes audio in and produces audio out directly. It is simpler but less flexible, harder to debug, and currently less mature for production use.
-We use cascaded because it gives enterprises the control and flexibility they need for production deployments.
+### Cascaded Architecture versus Speech-to-Speech
+Cascaded, which is one of our demo modes, means separate models for speech to text, LLM, and text to speech connected in a pipeline. It gives full control over each component. You can swap models, optimize latency per stage, and debug issues at each layer. Our cascaded demo uses Deepgram Nova 3 for speech to text, Amazon Bedrock Claude for reasoning, and Cartesia for text to speech.
+Speech-to-speech means a single foundation model that takes audio in and produces audio out directly. Amazon Nova Sonic on Bedrock is an example. It is simpler to deploy, can deliver lower latency by eliminating inter-model hops, and preserves audio cues like tone and emotion. Our demo offers both modes so visitors can compare them side by side.
+Both approaches run on AWS and both support function calling for real-world actions.
 
 ### Latency Budget
 The target for natural conversation is under 800 milliseconds of voice to voice latency, from when the user stops speaking to when they hear the response begin.
@@ -320,6 +329,24 @@ Answer: That is Tavus, an AI video avatar platform that generates a realistic fa
 
 Question: What about background noise?
 Answer: We use Krisp for server-side noise cancellation. It runs inside the Pipecat pipeline and filters out ambient noise before the audio reaches the speech to text model. This is critical for noisy environments like conference booths, call centers, or drive-throughs.
+
+Question: What is Amazon Nova Sonic?
+Answer: Amazon Nova Sonic is a speech-to-speech foundation model available on Amazon Bedrock. It replaces the traditional cascaded pipeline of separate speech to text, LLM, and text to speech models with a single model that takes audio in and produces audio out directly. The latest version is Nova 2 Sonic. It supports 15 languages, has built-in function calling for taking real-world actions, and offers multiple voice options including polyglot voices that can switch between languages mid-conversation.
+
+Question: How does Nova Sonic compare to the cascaded pipeline?
+Answer: The cascaded pipeline gives you granular control. You pick the best speech to text, LLM, and text to speech models independently and can swap or tune each one. Nova Sonic is simpler because everything runs in one model, which can reduce latency by eliminating hops between separate services. Both approaches run on AWS and support function calling. This demo lets you try both and compare them side by side.
+
+Question: What languages does Nova Sonic support?
+Answer: Nova 2 Sonic supports 15 languages including English in US, UK, Australian, and Indian variants, plus French, German, Spanish, Italian, Portuguese, Hindi, and more. The polyglot voices Tiffany and Matthew can speak all supported languages and even mix languages in the same sentence, which is great for multilingual environments.
+
+Question: What voices does Nova Sonic offer?
+Answer: Nova 2 Sonic offers a range of voices across supported languages. Key voices include Tiffany and Matthew which are polyglot voices that can speak all supported languages. There are also language-specific voices like Amy for British English, Olivia for Australian English, Ambre for French, Beatrice for Italian, and others.
+
+Question: Can Nova Sonic use function calling?
+Answer: Yes. Nova Sonic supports function calling natively, just like the cascaded pipeline with Amazon Bedrock. The agent can invoke tools to show content on screen, look up information, or take actions. Both modes in this demo use the same tools.
+
+Question: Which mode should I choose for production?
+Answer: It depends on your requirements. Choose cascaded if you need maximum control over each pipeline stage, want to use specific best-of-breed models, or need to debug and optimize individual components. Choose Nova Sonic if you want a simpler architecture, lower latency from fewer model hops, and multilingual support with seamless language switching. Both run on AWS with enterprise security and compliance.
 
 Question: What else should I see at the summit?
 Answer: AWS Summit Sydney features over 150 sessions across both days covering AI, machine learning, serverless, security, and more. Check the AWS Village for hands-on experiences, and visit the Training and Certification area. I can answer questions about the summit or our voice AI demo. Just ask!

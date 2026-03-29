@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>AWS Voice AI Overview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(circle at top,rgba(56,189,248,0.18),transparent 34%),linear-gradient(180deg,#f6fbff 0%,#e7f1fb 100%);color:#0f172a;min-height:100vh;padding:2.5rem 2rem}
+  .wrap{max-width:72rem;margin:0 auto;display:flex;flex-direction:column;gap:2rem}
+  .card{border-radius:2rem;border:1px solid rgba(186,216,242,0.8);background:rgba(255,255,255,0.8);padding:2rem;box-shadow:0 24px 90px rgba(7,15,43,0.12);backdrop-filter:blur(8px)}
+  .eyebrow{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.35em;color:#0369a1}
+  h1{margin-top:1.25rem;font-size:2.75rem;font-weight:600;line-height:1.15;letter-spacing:-.02em}
+  .desc{margin-top:1.25rem;font-size:1.125rem;line-height:2;color:#475569;max-width:48rem}
+  .steps{margin-top:2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1rem}
+  .step{border-radius:1.5rem;border:1px solid #e2e8f0;background:rgba(248,250,252,0.9);padding:1.25rem}
+  .step-title{font-size:.875rem;font-weight:600;text-transform:uppercase;letter-spacing:.24em;color:#64748b}
+  .step-body{margin-top:.75rem;font-size:.875rem;line-height:1.75;color:#334155}
+  .grid2{display:grid;grid-template-columns:1.4fr .85fr;gap:1.5rem}
+  @media(max-width:768px){.grid2{grid-template-columns:1fr}}
+  .dark-card{border-radius:2rem;border:1px solid rgba(226,232,240,0.15);background:#0f172a;padding:2rem;color:#fff;box-shadow:0 24px 90px rgba(7,15,43,0.24)}
+  .dark-eyebrow{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.35em;color:rgba(125,211,252,0.85)}
+  .pills{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.75rem}
+  .pill{border-radius:9999px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.08);padding:.5rem 1rem;font-size:.875rem;color:#f1f5f9}
+  .prompt-box{margin-top:2rem;border-radius:1.5rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);padding:1.25rem}
+  .prompt-title{font-size:.875rem;font-weight:600;text-transform:uppercase;letter-spacing:.24em;color:rgba(167,243,208,0.85)}
+  .prompt-list{margin-top:1rem;list-style:none;display:flex;flex-direction:column;gap:.75rem;font-size:.875rem;line-height:1.75;color:#cbd5e1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="grid2">
+    <div class="card">
+      <p class="eyebrow">AWS Voice AI Overview</p>
+      <h1>Real-time multimodal voice agents on AWS.</h1>
+      <p class="desc">This proof-of-concept page is designed for the voice AI tool-call demo. It is same-origin, safe to embed in an iframe, and concise enough to display while the avatar keeps talking in the corner overlay.</p>
+      <div class="steps">
+        <div class="step"><p class="step-title">Speech Pipeline</p><p class="step-body">Daily transports real-time audio and video, while Tavus renders the avatar and receives visual context from the camera feed.</p></div>
+        <div class="step"><p class="step-title">Reasoning Layer</p><p class="step-body">Amazon Bedrock handles language understanding and response generation with tool calls available for screen control.</p></div>
+        <div class="step"><p class="step-title">Production Pattern</p><p class="step-body">The same flow can move from a private booth demo to a local Electron app with minimal UI changes.</p></div>
+      </div>
+    </div>
+    <div class="dark-card">
+      <p class="dark-eyebrow">Demo Stack</p>
+      <div class="pills">
+        <span class="pill">Amazon SageMaker AI</span>
+        <span class="pill">Amazon Bedrock</span>
+        <span class="pill">Daily WebRTC</span>
+        <span class="pill">Tavus CVI</span>
+        <span class="pill">Deepgram speech models</span>
+        <span class="pill">Pipecat orchestration</span>
+      </div>
+      <div class="prompt-box">
+        <p class="prompt-title">Suggested prompts</p>
+        <ul class="prompt-list">
+          <li>What services are involved in this demo?</li>
+          <li>How does the avatar fit into the voice pipeline?</li>
+          <li>Can the avatar understand what it sees through the camera?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
