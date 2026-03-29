@@ -105,6 +105,9 @@ function FloatingMicControl({ isMuted, isOverlayActive, onToggle, onDisconnect }
 // Main component
 // ---------------------------------------------------------------------------
 
+// Backend URL: empty string in production (same origin via CloudFront), localhost for local dev
+const API_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:7860';
+
 const PIPELINE_CASCADED = 'cascaded';
 const PIPELINE_NOVA_SONIC = 'nova-sonic';
 
@@ -204,7 +207,7 @@ function VideoConversation() {
     setConnectionState('connecting');
     setError('');
     try {
-      webrtcClient.current = new WebRTCClient('http://localhost:7860');
+      webrtcClient.current = new WebRTCClient(API_URL);
 
       webrtcClient.current.on('track', (remoteStream) => {
         if (remoteVideoRef.current) {

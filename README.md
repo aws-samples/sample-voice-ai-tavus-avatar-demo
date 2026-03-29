@@ -124,6 +124,59 @@ Audio In -> Amazon Nova 2 Sonic (STT+LLM+TTS) -> Tavus Avatar -> Audio/Video Out
 | `AWS_ACCESS_KEY_ID` | AWS credentials (optional if using default credential chain) |
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials (optional if using default credential chain) |
 
+### Deploying to AWS
+
+The Pipecat demo deploys to AWS with a GitHub Actions CI/CD pipeline that triggers **only** on changes to `tavus-pipecat-example/` or `prompts/`.
+
+**Architecture:**
+- **Backend**: ECS Fargate (Docker container) behind an ALB
+- **Frontend**: S3 + CloudFront (static React build)
+- **CloudFront**: Serves frontend and proxies `/api/*` to the ALB (single HTTPS domain)
+- **Secrets**: SSM Parameter Store (SecureString)
+
+#### 1. Store API keys in SSM Parameter Store
+
+```bash
+aws ssm put-parameter --name /tavus-pipecat/DEEPGRAM_API_KEY --type SecureString --value "your-key"
+aws ssm put-parameter --name /tavus-pipecat/CARTESIA_API_KEY --type SecureString --value "your-key"
+aws ssm put-parameter --name /tavus-pipecat/TAVUS_API_KEY --type SecureString --value "your-key"
+aws ssm put-parameter --name /tavus-pipecat/TAVUS_REPLICA_ID --type SecureString --value "your-replica-id"
+aws ssm put-parameter --name /tavus-pipecat/TAVUS_REPLICA_ID_NOVA_SONIC --type SecureString --value "your-replica-id"
+```
+
+#### 2. Deploy infrastructure (one-time)
+
+```bash
+aws cloudformation deploy \
+  --template-file tavus-pipecat-example/infra/template.yaml \
+  --stack-name tavus-pipecat \
+  --parameter-overrides \
+    VpcId=vpc-xxx \
+    PublicSubnetIds=subnet-aaa,subnet-bbb \
+  --capabilities CAPABILITY_NAMED_IAM
+```
+
+Note the outputs — you'll need them for GitHub Actions secrets.
+
+#### 3. Configure GitHub Actions secrets
+
+| Secret | Value (from CloudFormation outputs) |
+|---|---|
+| `AWS_ROLE_ARN` | IAM role ARN for GitHub Actions OIDC (or use access keys) |
+| `S3_BUCKET_NAME` | `FrontendBucketName` output |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `CloudFrontDistributionId` output |
+
+#### 4. Push to deploy
+
+The workflow at `.github/workflows/deploy-pipecat.yml` runs automatically on push to `main` when files in `tavus-pipecat-example/` or `prompts/` change. It:
+
+1. Builds the Docker image and pushes to ECR
+2. Forces a new ECS Fargate deployment and waits for stability
+3. Builds the React frontend (with `REACT_APP_API_URL=''` for same-origin CloudFront)
+4. Syncs to S3 and invalidates the CloudFront cache
+
+The frontend and backend deploy in parallel. Access the demo at the CloudFront domain (`CloudFrontDomainName` output).
+
 ---
 
 ## Shared Resources
