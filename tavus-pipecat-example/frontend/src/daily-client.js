@@ -45,9 +45,11 @@ export class DailyClient {
   async connect(options = {}) {
     try {
       // 1. Call backend /start to create a Daily room and get credentials
-      const startBody = {};
+      const startBody = {
+        createDailyRoom: true,
+      };
       if (options.requestData) {
-        startBody.request_data = options.requestData;
+        startBody.body = options.requestData;
       }
 
       const res = await fetch(`${this.serverUrl}/start`, {
