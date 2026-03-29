@@ -93,7 +93,7 @@ cp .env.example .env   # Set API keys in .env
 cd frontend && npm install && cd ..
 
 # Run both
-python tavus-pipecat.py &   # Backend on port 7860
+python tavus-pipecat.py --transport webrtc --host 0.0.0.0 --port 7860 &
 cd frontend && npm start     # Frontend on port 3000
 ```
 
@@ -121,6 +121,7 @@ Audio In -> Amazon Nova 2 Sonic (STT+LLM+TTS) -> Tavus Avatar -> Audio/Video Out
 | `TAVUS_REPLICA_ID` | Tavus replica for cascaded mode |
 | `TAVUS_REPLICA_ID_NOVA_SONIC` | Tavus replica for Nova Sonic mode (different avatar) |
 | `DAILY_API_KEY` | Daily.co API key (required for cloud deployment with Daily transport) |
+| `REACT_APP_TRANSPORT` | WebRTC transport (`daily` or `webrtc`). Set automatically by CI/CD — not user-configured. |
 | `AWS_REGION_NOVA_SONIC` | AWS region for Nova Sonic (default: `ap-northeast-1`) |
 | `AWS_ACCESS_KEY_ID` | AWS credentials (optional if using default credential chain) |
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials (optional if using default credential chain) |
@@ -134,6 +135,7 @@ The Pipecat demo deploys to AWS with a GitHub Actions CI/CD pipeline that trigge
 - **Frontend**: S3 + CloudFront (static React build)
 - **CloudFront**: Serves frontend and proxies `/api/*` to the ALB (single HTTPS domain)
 - **Secrets**: SSM Parameter Store (SecureString)
+- **Transport**: Daily.js for cloud (reliable WebRTC relay), SmallWebRTC for local dev
 
 #### 1. Store API keys in SSM Parameter Store
 
