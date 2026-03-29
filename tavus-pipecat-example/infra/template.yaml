@@ -17,10 +17,10 @@ Parameters:
     Default: 7860
   TaskCpu:
     Type: String
-    Default: '2048'
+    Default: '4096'
   TaskMemory:
     Type: String
-    Default: '4096'
+    Default: '8192'
 
 Resources:
   # ---- ECR ----
