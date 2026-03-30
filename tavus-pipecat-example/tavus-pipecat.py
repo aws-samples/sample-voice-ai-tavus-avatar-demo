@@ -438,7 +438,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
         async def on_first_participant_joined(transport, participant):
             import asyncio
             logger.info(f"First participant joined, waiting for avatar to initialize...")
-            await asyncio.sleep(2)
+            await asyncio.sleep(6)
             logger.info(f"Sending greeting")
             messages.append(
                 {
