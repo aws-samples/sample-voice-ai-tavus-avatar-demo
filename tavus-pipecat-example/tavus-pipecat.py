@@ -166,14 +166,14 @@ class UserTranscriptForwarder(FrameProcessor):
 class AgentTranscriptForwarder(FrameProcessor):
     """Forwards agent LLM text to the frontend via data channel.
 
-    Accumulates TextFrame chunks per response and pushes transcript
-    messages downstream.  Also sends a speaking indicator when TTS
-    audio starts (useful for Nova Sonic where text arrives in sentence
-    chunks after audio has already begun playing).
+    For cascaded mode, accumulates word-level TextFrame deltas into a
+    growing buffer.  For Nova Sonic, each TextFrame already contains the
+    full accumulated text, so we forward it directly without accumulating.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, accumulate=True, **kwargs):
         super().__init__(**kwargs)
+        self._accumulate = accumulate
         self._buffer = ""
         self._sent_speaking = False
 
@@ -190,10 +190,15 @@ class AgentTranscriptForwarder(FrameProcessor):
                 ), FrameDirection.DOWNSTREAM)
                 self._sent_speaking = True
         elif isinstance(frame, TextFrame):
-            self._buffer += frame.text
-            if self._buffer.strip():
+            if self._accumulate:
+                self._buffer += frame.text
+                text = self._buffer.strip()
+            else:
+                text = frame.text.strip()
+                self._buffer = text
+            if text:
                 await self.push_frame(OutputTransportMessageUrgentFrame(
-                    message={"type": "transcript", "role": "agent", "text": self._buffer.strip(), "final": False}
+                    message={"type": "transcript", "role": "agent", "text": text, "final": False}
                 ), FrameDirection.DOWNSTREAM)
         elif isinstance(frame, LLMFullResponseEndFrame):
             if self._buffer.strip():
@@ -279,7 +284,9 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
         )
 
         user_transcript = UserTranscriptForwarder()
-        agent_transcript = AgentTranscriptForwarder()
+        agent_transcript = AgentTranscriptForwarder(
+            accumulate=(pipeline_mode != PIPELINE_NOVA_SONIC)
+        )
 
         system_prompt = SYSTEM_PROMPT
         if pipeline_mode == PIPELINE_NOVA_SONIC:
