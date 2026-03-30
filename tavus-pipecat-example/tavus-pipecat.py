@@ -43,7 +43,7 @@ load_dotenv(override=True)
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 SYSTEM_PROMPT = (PROMPTS_DIR / "tavus-system-instruction-1.md").read_text()
 CONTEXT_CASCADED = (PROMPTS_DIR / "instruction-context-cascaded.md").read_text()
-CONTEXT_NOVA_SONIC = (PROMPTS_DIR / "instruction-context-nova-sonic.md").read_text()
+CONTEXT_NOVA_SONIC = (PROMPTS_DIR / "instruction-context-speech-to-speech.md").read_text()
 
 CUSTOM_GREETING = (
     "Hi, welcome to the AWS booth at Summit Sydney! "
