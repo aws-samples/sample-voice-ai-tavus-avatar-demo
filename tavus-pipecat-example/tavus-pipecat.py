@@ -436,10 +436,10 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
 
         @transport.event_handler("on_first_participant_joined")
         async def on_first_participant_joined(transport, participant):
-            logger.info(f"First participant joined (avatar ready), sending greeting")
-            # Kick off the conversation with the custom greeting.
-            # We wait for the first participant (Tavus avatar) to join so the
-            # greeting audio doesn't get lost before the avatar is ready.
+            import asyncio
+            logger.info(f"First participant joined, waiting for avatar to initialize...")
+            await asyncio.sleep(2)
+            logger.info(f"Sending greeting")
             messages.append(
                 {
                     "role": "system",
