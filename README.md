@@ -137,6 +137,32 @@ The Pipecat demo deploys to AWS with a GitHub Actions CI/CD pipeline that trigge
 - **Secrets**: SSM Parameter Store (SecureString)
 - **Transport**: Daily.js for cloud (reliable WebRTC relay), SmallWebRTC for local dev
 
+```mermaid
+graph TD
+    User([User / Browser])
+
+    User -->|HTTPS| CF[CloudFront]
+
+    subgraph AWS Cloud
+        CF -->|Static assets| S3[S3 Bucket\nReact Frontend]
+        CF -->|/api/* and /start| ALB[Application Load Balancer]
+        ALB --> ECS[ECS Fargate\nPipecat Bot Container]
+
+        SSM[SSM Parameter Store\nSecureString secrets] -->|Secrets at startup| ECS
+        ECR[ECR\nContainer Registry] -->|Pull image| ECS
+    end
+
+    GHA[GitHub Actions\nCI/CD] -->|Push image| ECR
+    GHA -->|Sync build| S3
+
+    ECS -->|WebRTC relay| Daily[Daily.co]
+    ECS -->|Speech-to-text| Deepgram[Deepgram STT]
+    ECS -->|LLM inference| Bedrock[Bedrock Claude\nLLM]
+    ECS -->|Text-to-speech| Cartesia[Cartesia TTS]
+    ECS -->|Avatar rendering| Tavus[Tavus Avatar]
+    ECS -->|Speech-to-speech| NovaSonic[Bedrock Nova Sonic\nSpeech-to-Speech]
+```
+
 #### 1. Store API keys in SSM Parameter Store
 
 ```bash
@@ -331,6 +357,10 @@ tavus-pipecat-example/            # Self-hosted Pipecat pipeline (Python + React
     public/
       content/                    # Static content overlay pages
 ```
+
+## Future Improvements
+
+See [IMPROVEMENTS.md](IMPROVEMENTS.md) for tracked enhancements including a proper greeting handshake, configurable event context, and US region deployment for lower latency.
 
 ## Tech Stack
 
