@@ -75,18 +75,22 @@ export class DailyClient {
       });
 
       // 3. Wire up event handlers
+      // Fire "connected" on first remote video track — this means the avatar
+      // is actually streaming, not just that we joined the Daily room.
+      this._hasSignalledConnected = false;
+
       this.callObject.on('track-started', (ev) => {
         if (ev.participant && !ev.participant.local && ev.track) {
           this.remoteStream.addTrack(ev.track);
           if (this.callbacks.onTrack) {
             this.callbacks.onTrack(this.remoteStream);
           }
-        }
-      });
-
-      this.callObject.on('joined-meeting', () => {
-        if (this.callbacks.onConnectionStateChange) {
-          this.callbacks.onConnectionStateChange('connected');
+          if (!this._hasSignalledConnected && ev.track.kind === 'video') {
+            this._hasSignalledConnected = true;
+            if (this.callbacks.onConnectionStateChange) {
+              this.callbacks.onConnectionStateChange('connected');
+            }
+          }
         }
       });
 

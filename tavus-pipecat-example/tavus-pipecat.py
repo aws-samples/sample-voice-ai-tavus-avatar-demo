@@ -434,10 +434,12 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
         llm.register_function("show_schedule", handle_show_schedule)
         llm.register_function("dismiss_content", handle_dismiss_content)
 
-        @transport.event_handler("on_client_connected")
-        async def on_client_connected(transport, client):
-            logger.info(f"Client connected")
+        @transport.event_handler("on_first_participant_joined")
+        async def on_first_participant_joined(transport, participant):
+            logger.info(f"First participant joined (avatar ready), sending greeting")
             # Kick off the conversation with the custom greeting.
+            # We wait for the first participant (Tavus avatar) to join so the
+            # greeting audio doesn't get lost before the avatar is ready.
             messages.append(
                 {
                     "role": "system",
