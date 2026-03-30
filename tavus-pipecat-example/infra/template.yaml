@@ -132,11 +132,11 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VpcId
       TargetType: ip
-      HealthCheckPath: /
+      HealthCheckPath: /start
       HealthCheckIntervalSeconds: 10
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 3
+      UnhealthyThresholdCount: 5
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: '30'
