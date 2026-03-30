@@ -39,9 +39,11 @@ from pipecat.transports.daily.transport import DailyParams
 
 load_dotenv(override=True)
 
-# Load the shared system prompt from the prompts directory
+# Load the shared system prompt and architecture context from the prompts directory
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 SYSTEM_PROMPT = (PROMPTS_DIR / "tavus-system-instruction-1.md").read_text()
+CONTEXT_CASCADED = (PROMPTS_DIR / "instruction-context-cascaded.md").read_text()
+CONTEXT_NOVA_SONIC = (PROMPTS_DIR / "instruction-context-nova-sonic.md").read_text()
 
 CUSTOM_GREETING = (
     "Hi, welcome to the AWS booth at Summit Sydney! "
@@ -288,23 +290,9 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
             accumulate=(pipeline_mode != PIPELINE_NOVA_SONIC)
         )
 
-        system_prompt = SYSTEM_PROMPT
-        if pipeline_mode == PIPELINE_NOVA_SONIC:
-            system_prompt = (
-                "IMPORTANT CONTEXT: You are currently running in Amazon Nova Sonic mode. "
-                "This demo uses Amazon Nova 2 Sonic, a speech-to-speech foundation model "
-                "on Amazon Bedrock that handles speech recognition, reasoning, and speech "
-                "synthesis in a single model. Do NOT mention Deepgram, Cartesia, or any "
-                "separate STT/TTS providers when describing this demo. Instead, explain "
-                "that Nova Sonic handles the entire voice pipeline in one model. Pipecat "
-                "still orchestrates the pipeline and Tavus still renders the avatar.\n\n"
-                "MULTILINGUAL: You support 15 languages including English, French, German, "
-                "Spanish, Italian, Portuguese, Hindi, Arabic, Japanese, Korean, Dutch, "
-                "Polish, Russian, Swedish, and Turkish. If the user speaks to you in a "
-                "language other than English, detect their language and respond in that "
-                "same language naturally. You can also switch languages mid-conversation. "
-                "Keep the same helpful, enthusiastic persona regardless of language.\n\n"
-            ) + SYSTEM_PROMPT
+        # Assemble system prompt: base instructions + mode-specific architecture context
+        arch_context = CONTEXT_NOVA_SONIC if pipeline_mode == PIPELINE_NOVA_SONIC else CONTEXT_CASCADED
+        system_prompt = SYSTEM_PROMPT + "\n\n" + arch_context
 
         messages = [
             {
