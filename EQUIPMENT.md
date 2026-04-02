@@ -11,9 +11,9 @@ Use this as a reference to replicate the demo setup. All items below were used a
 | Audient iD14 MKII Audio Interface | [Amazon US](https://www.amazon.com/dp/B08SJD466P) | ~$350 | Yes | XLR input with phantom power; USB-C to Mac; clean preamp; low-latency driver support on macOS |
 | OnStage Mic Windscreen | [Amazon AU](https://www.amazon.com.au/dp/B001ANI6VQ) | ~$20 | Yes | Foam ball-type; fits standard handheld dynamic mic head |
 | Mac Mini M4 | [Apple AU](https://www.apple.com/au/shop/buy-mac/mac-mini) | $999 | Yes | macOS (required for Krisp, Audio Hijack, Loopback); M-series chip for low-latency audio processing; minimum 16GB RAM |
-| Bose S1 Pro+ Speaker | [Bose AU](https://www.bose.com.au/en_au/products/speakers/portable_pa_speakers/s1-pro-plus-system.html) | ~$1,170 | New recommendation | 3.5mm or XLR input; self-powered (no separate amp); portable/battery-powered preferred; clear mid-range for voice reproduction |
+| Bose SoundLink Flex Speaker | [Bose AU](https://www.bose.com.au/en_au/products/speakers/bluetooth_speakers/soundlink-flex.html) | ~$229 | New recommendation | 3.5mm or Bluetooth input; battery-powered; portable; clear mid-range for voice reproduction |
 
-**Total: ~$3,033 AUD**
+**Total: ~$2,092 AUD**
 
 > If the venue provides A/V, the speaker may not be needed. At GTC, the conference A/V team supplied the speaker — the Mac Mini headphone jack was plugged directly into it.
 
