@@ -294,6 +294,16 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
         arch_context = CONTEXT_NOVA_SONIC if pipeline_mode == PIPELINE_NOVA_SONIC else CONTEXT_CASCADED
         system_prompt = SYSTEM_PROMPT + "\n\n" + arch_context
 
+        # For cascaded mode, add multilingual instruction so the LLM responds
+        # in the same language the visitor speaks
+        if pipeline_mode == PIPELINE_CASCADED:
+            system_prompt += (
+                "\n\n## Language\n"
+                "If the visitor speaks a language other than English, detect their language "
+                "from the transcription and respond in that same language. Keep the same "
+                "helpful, enthusiastic persona regardless of language."
+            )
+
         messages = [
             {
                 "role": "system",
@@ -348,7 +358,12 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
             )
         else:
             # Cascaded pipeline: Deepgram STT → Bedrock Claude → Cartesia TTS
-            stt = DeepgramSTTService(api_key=os.getenv("DEEPGRAM_API_KEY"))
+            # Deepgram "multi" auto-detects language; Cartesia auto-detects when
+            # language is omitted, enabling multilingual without manual selection.
+            stt = DeepgramSTTService(
+                api_key=os.getenv("DEEPGRAM_API_KEY"),
+                language="multi",
+            )
             tts = CartesiaTTSService(
                 api_key=os.getenv("CARTESIA_API_KEY"),
                 voice_id="79a125e8-cd45-4c13-8a67-188112f4dd22",  # British Lady
