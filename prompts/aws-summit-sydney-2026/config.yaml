@@ -1,0 +1,18 @@
+# Event config — values referenced by application code
+# The system prompt itself is just a plain markdown file (system-instruction.md)
+
+greeting: >-
+  Hi, welcome to the AWS booth at Summit Sydney!
+  I am a real-time voice AI agent built entirely on AWS.
+  What is your name and which company or organization are you with?
+
+content_items:
+  aws_voice_ai_overview:
+    url: "/content/aws-voice-ai"
+    label: "AWS Voice AI Overview"
+  guidance_voice_agents_aws:
+    url: "/content/guidance-voice-agents-aws"
+    label: "Guidance for Voice Agents on AWS"
+  common_use_cases:
+    url: "/content/common-use-cases"
+    label: "Voice AI Use Cases by Industry"

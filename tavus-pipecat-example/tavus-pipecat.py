@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import aiohttp
+import yaml
 from dotenv import load_dotenv
 from loguru import logger
 
@@ -39,33 +40,32 @@ from pipecat.transports.daily.transport import DailyParams
 
 load_dotenv(override=True)
 
-# Load the shared system prompt and architecture context from the prompts directory
-PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
-SYSTEM_PROMPT = (PROMPTS_DIR / "tavus-system-instruction-1.md").read_text()
-CONTEXT_CASCADED = (PROMPTS_DIR / "instruction-context-cascaded.md").read_text()
-CONTEXT_NOVA_SONIC = (PROMPTS_DIR / "instruction-context-speech-to-speech.md").read_text()
+# ---------------------------------------------------------------------------
+# Event configuration
+# Set EVENT_CONFIG env var to switch events (default: aws-summit-sydney-2026)
+# Each event is a directory under prompts/ with its own prompt files + config.yaml
+# ---------------------------------------------------------------------------
+REPO_ROOT = Path(__file__).resolve().parent.parent
+EVENT_CONFIG = os.getenv("EVENT_CONFIG", "aws-summit-sydney-2026")
+EVENT_DIR = REPO_ROOT / "prompts" / EVENT_CONFIG
 
-CUSTOM_GREETING = (
-    "Hi, welcome to the AWS booth at Summit Sydney! "
-    "I am a real-time voice AI agent built entirely on AWS. "
-    "What is your name and which company or organization are you with?"
-)
+if not EVENT_DIR.exists():
+    available = [d.name for d in (REPO_ROOT / "prompts").iterdir() if d.is_dir() and not d.name.startswith("_")]
+    raise FileNotFoundError(f"Event config not found: {EVENT_DIR}\nAvailable: {available}")
 
-# Content items matching tavus-avatar's content-items.ts
-CONTENT_ITEMS = {
-    "aws_voice_ai_overview": {
-        "url": "/content/aws-voice-ai",
-        "label": "AWS Voice AI Overview",
-    },
-    "guidance_voice_agents_aws": {
-        "url": "/content/guidance-voice-agents-aws",
-        "label": "Guidance for Voice Agents on AWS",
-    },
-    "common_use_cases": {
-        "url": "/content/common-use-cases",
-        "label": "Voice AI Use Cases by Industry",
-    },
-}
+logger.info(f"Loading event: {EVENT_CONFIG}")
+
+# Load prompt files from the event directory
+SYSTEM_PROMPT = (EVENT_DIR / "system-instruction.md").read_text()
+CONTEXT_CASCADED = (EVENT_DIR / "context-cascaded.md").read_text()
+CONTEXT_NOVA_SONIC = (EVENT_DIR / "context-speech-to-speech.md").read_text()
+
+# Load code-referenced config (greeting, content items)
+with open(EVENT_DIR / "config.yaml") as f:
+    _config = yaml.safe_load(f)
+
+CUSTOM_GREETING = _config.get("greeting", "Hi, welcome! What is your name?").strip()
+CONTENT_ITEMS = _config.get("content_items", {})
 
 # Tool definitions in FunctionSchema format for Pipecat
 TOOLS = ToolsSchema(
@@ -81,16 +81,10 @@ TOOLS = ToolsSchema(
             properties={
                 "item": {
                     "type": "string",
-                    "enum": [
-                        "aws_voice_ai_overview",
-                        "guidance_voice_agents_aws",
-                        "common_use_cases",
-                    ],
+                    "enum": list(CONTENT_ITEMS.keys()),
                     "description": (
-                        "The item to display. Options: aws_voice_ai_overview = local AWS "
-                        "voice AI overview page; guidance_voice_agents_aws = Guidance for "
-                        "Voice Agents on AWS reference architecture; common_use_cases = "
-                        "Voice AI use cases by industry"
+                        "The item to display. Options: "
+                        + "; ".join(f"{k} = {v.get('label', k)}" for k, v in CONTENT_ITEMS.items())
                     ),
                 },
             },
