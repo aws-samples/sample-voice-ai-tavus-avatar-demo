@@ -105,12 +105,6 @@ Resources:
           ToPort: 443
           CidrIp: 0.0.0.0/0
           Description: HTTPS inbound
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: !Ref ContainerPort
-          ToPort: !Ref ContainerPort
-          DestinationSecurityGroupId: !Ref ECSSecurityGroup
-          Description: Forward traffic to ECS tasks
 
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -118,11 +112,6 @@ Resources:
       GroupDescription: ECS tasks - allow traffic from ALB and WebRTC UDP
       VpcId: !Ref VpcId
       SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: !Ref ContainerPort
-          ToPort: !Ref ContainerPort
-          SourceSecurityGroupId: !Ref ALBSecurityGroup
-          Description: App port from ALB
         - IpProtocol: udp
           FromPort: 10000
           ToPort: 65535
@@ -134,6 +123,27 @@ Resources:
           ToPort: 443
           CidrIp: 0.0.0.0/0
           Description: HTTPS outbound to AWS APIs and third-party services
+
+  # Standalone rules to break the circular dependency between ALBSecurityGroup and ECSSecurityGroup
+  ALBToECSEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref ALBSecurityGroup
+      IpProtocol: tcp
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      DestinationSecurityGroupId: !Ref ECSSecurityGroup
+      Description: Forward traffic to ECS tasks
+
+  ECSFromALBIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ECSSecurityGroup
+      IpProtocol: tcp
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      SourceSecurityGroupId: !Ref ALBSecurityGroup
+      Description: App port from ALB
 
   # ---- ALB ----
   ALB:
@@ -286,7 +296,6 @@ Resources:
       ResourceId: !Sub 'service/${ECSCluster}/${ECSService.Name}'
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
-      RoleARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService'
 
   ScalingPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
