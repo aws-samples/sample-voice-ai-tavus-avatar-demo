@@ -333,7 +333,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
                 access_key_id=_ak,
                 secret_access_key=_sk,
                 session_token=_st,
-                region=os.getenv("AWS_REGION_NOVA_SONIC", "ap-northeast-1"),
+                region=os.getenv("AWS_REGION_NOVA_SONIC", "ap-south-1"),
                 model="amazon.nova-2-sonic-v1:0",
                 voice_id=os.getenv("NOVA_SONIC_VOICE_ID", "matthew"),
                 system_instruction=system_prompt,
@@ -369,8 +369,8 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
                 voice_id="79a125e8-cd45-4c13-8a67-188112f4dd22",  # British Lady
             )
             llm = AWSBedrockLLMService(
-                model="au.anthropic.claude-haiku-4-5-20251001-v1:0",
-                aws_region="ap-southeast-2",
+                model=os.getenv("BEDROCK_MODEL_ID", "apac.anthropic.claude-haiku-4-5-20251001-v1:0"),
+                aws_region=os.getenv("BEDROCK_REGION", "ap-south-1"),
             )
 
             pipeline = Pipeline(

@@ -21,6 +21,13 @@ Parameters:
   TaskMemory:
     Type: String
     Default: '8192'
+  CertificateArn:
+    Type: String
+    Description: ARN of an ACM certificate (same region as ALB) to enable HTTPS. Leave empty to keep HTTP-only.
+    Default: ''
+
+Conditions:
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
 
 Resources:
   # ---- ECR ----
@@ -92,10 +99,18 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+          Description: HTTP inbound for redirect to HTTPS
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
+          Description: HTTPS inbound
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: !Ref ContainerPort
+          ToPort: !Ref ContainerPort
+          DestinationSecurityGroupId: !Ref ECSSecurityGroup
+          Description: Forward traffic to ECS tasks
 
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -107,11 +122,18 @@ Resources:
           FromPort: !Ref ContainerPort
           ToPort: !Ref ContainerPort
           SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: App port from ALB
         - IpProtocol: udp
           FromPort: 10000
           ToPort: 65535
           CidrIp: 0.0.0.0/0
           Description: WebRTC media (UDP)
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS outbound to AWS APIs and third-party services
 
   # ---- ALB ----
   ALB:
@@ -143,12 +165,32 @@ Resources:
       Matcher:
         HttpCode: '200-499'
 
-  ALBListener:
+  ALBHttpListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       LoadBalancerArn: !Ref ALB
       Port: 80
       Protocol: HTTP
+      DefaultActions:
+        - !If
+          - HasCertificate
+          - Type: redirect
+            RedirectConfig:
+              Protocol: HTTPS
+              Port: '443'
+              StatusCode: HTTP_301
+          - Type: forward
+            TargetGroupArn: !Ref ALBTargetGroup
+
+  ALBHttpsListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: HasCertificate
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref CertificateArn
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref ALBTargetGroup
@@ -158,6 +200,9 @@ Resources:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: !Sub '${EnvironmentName}-cluster'
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
 
   LogGroup:
     Type: AWS::Logs::LogGroup
@@ -203,11 +248,15 @@ Resources:
               ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/DAILY_API_KEY'
           Environment:
             - Name: AWS_REGION_NOVA_SONIC
-              Value: ap-northeast-1
+              Value: ap-south-1
+            - Name: BEDROCK_REGION
+              Value: ap-south-1
+            - Name: BEDROCK_MODEL_ID
+              Value: apac.anthropic.claude-haiku-4-5-20251001-v1:0
 
   ECSService:
     Type: AWS::ECS::Service
-    DependsOn: ALBListener
+    DependsOn: ALBHttpListener
     Properties:
       ServiceName: !Sub '${EnvironmentName}-service'
       Cluster: !Ref ECSCluster
@@ -257,6 +306,10 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub '${EnvironmentName}-frontend-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
 
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -292,6 +345,12 @@ Resources:
         Enabled: true
         DefaultRootObject: index.html
         Comment: !Sub '${EnvironmentName} frontend + API proxy'
+        ViewerCertificate: !If
+          - HasCertificate
+          - AcmCertificateArn: !Ref CertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt FrontendBucket.RegionalDomainName
@@ -302,7 +361,8 @@ Resources:
             DomainName: !GetAtt ALB.DNSName
             CustomOriginConfig:
               HTTPPort: 80
-              OriginProtocolPolicy: http-only
+              HTTPSPort: 443
+              OriginProtocolPolicy: !If [HasCertificate, 'https-only', 'http-only']
         DefaultCacheBehavior:
           TargetOriginId: S3Origin
           ViewerProtocolPolicy: redirect-to-https

@@ -98,7 +98,10 @@ TAVUS_REPLICA_ID=...
 # AWS credentials via ~/.aws/credentials or environment:
 # AWS_ACCESS_KEY_ID=...
 # AWS_SECRET_ACCESS_KEY=...
-# AWS_REGION=ap-southeast-2
+# AWS_REGION=ap-south-1
+# BEDROCK_REGION=ap-south-1
+# BEDROCK_MODEL_ID=apac.anthropic.claude-haiku-4-5-20251001-v1:0
+# AWS_REGION_NOVA_SONIC=ap-south-1
 ```
 
 ## Helpful Resources

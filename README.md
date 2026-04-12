@@ -156,7 +156,7 @@ CARTESIA_API_KEY=your_cartesia_key_here
 TAVUS_API_KEY=your_tavus_key_here
 TAVUS_REPLICA_ID=your_replica_id_here
 TAVUS_REPLICA_ID_NOVA_SONIC=your_nova_sonic_replica_id_here
-AWS_REGION_NOVA_SONIC=ap-northeast-1
+AWS_REGION_NOVA_SONIC=ap-south-1
 AWS_ACCESS_KEY_ID=your_aws_key_here
 AWS_SECRET_ACCESS_KEY=your_aws_secret_here
 ```
@@ -210,7 +210,7 @@ Audio In -> Amazon Nova 2 Sonic (STT+LLM+TTS) -> Tavus Avatar -> Audio/Video Out
 | `TAVUS_REPLICA_ID_NOVA_SONIC` | Tavus replica for Nova Sonic mode (different avatar) |
 | `DAILY_API_KEY` | Daily.co API key (required for cloud deployment with Daily transport) |
 | `REACT_APP_TRANSPORT` | WebRTC transport (`daily` or `webrtc`). Set automatically by CI/CD — not user-configured. |
-| `AWS_REGION_NOVA_SONIC` | AWS region for Nova Sonic (default: `ap-northeast-1`) |
+| `AWS_REGION_NOVA_SONIC` | AWS region for Nova Sonic (default: `ap-south-1`) |
 | `AWS_ACCESS_KEY_ID` | AWS credentials (optional if using default credential chain) |
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials (optional if using default credential chain) |
 
