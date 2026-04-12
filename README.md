@@ -1,4 +1,4 @@
-# Building Real-time Voice Agents Using Deepgram, Pipecat and AWS
+# Demo: Real-time Voice Agents with Video Avatar
 
 An interactive conversational video demo for AWS events and demo booths. An AI-powered video avatar engages visitors in real-time voice conversations and can display content overlays (architecture diagrams, use cases) via tool calls. Supports configurable event contexts via the `EVENT_CONFIG` environment variable.
 
