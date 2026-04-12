@@ -13,6 +13,9 @@ python-dotenv
 # Logging
 loguru
 
+# Event config
+PyYAML
+
 # Speech-to-Text service
 deepgram-sdk
 

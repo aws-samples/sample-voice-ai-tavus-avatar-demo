@@ -1,0 +1,18 @@
+# Event Template — Copy this directory for a new event
+#
+# 1. cp -r prompts/_template prompts/your-event-name
+# 2. Edit each file for your event
+# 3. Set EVENT_CONFIG=your-event-name in your environment
+
+greeting: >-
+  Hi, welcome! I am a real-time voice AI agent built entirely on AWS.
+  What is your name and which company or organization are you with?
+
+content_items:
+  aws_voice_ai_overview:
+    url: "/content/aws-voice-ai"
+    label: "AWS Voice AI Overview"
+  # Add your content items here:
+  # your_item_key:
+  #   url: "/content/your-page"
+  #   label: "Your Page Label"

@@ -1,16 +1,25 @@
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 
 import { NextResponse } from "next/server";
 
 import { getTavusConfig, getTavusErrorMessage, readResponsePayload, tavusFetch } from "@/lib/tavus-api";
 
+function getEventDir(): string {
+  const eventConfig = process.env.EVENT_CONFIG || "aws-summit-sydney-2026";
+  const eventDir = resolve(process.cwd(), `../prompts/${eventConfig}`);
+  if (!existsSync(eventDir)) {
+    throw new Error(`Event config directory not found: ${eventDir}. Set EVENT_CONFIG to a valid event name.`);
+  }
+  return eventDir;
+}
+
 export async function POST() {
   try {
     const { personaId } = getTavusConfig();
 
-    const promptPath = resolve(process.cwd(), "../prompts/tavus-system-instruction-1.md");
-    const systemPrompt = readFileSync(promptPath, "utf-8");
+    const eventDir = getEventDir();
+    const systemPrompt = readFileSync(resolve(eventDir, "system-instruction.md"), "utf-8");
 
     const response = await tavusFetch(`/personas/${personaId}`, {
       method: "PATCH",
