@@ -45,7 +45,7 @@ Resources:
   TaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub '${EnvironmentName}-task-exec'
+      RoleName: !Sub '${EnvironmentName}-${AWS::Region}-task-exec'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -69,7 +69,7 @@ Resources:
   TaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub '${EnvironmentName}-task'
+      RoleName: !Sub '${EnvironmentName}-${AWS::Region}-task'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
