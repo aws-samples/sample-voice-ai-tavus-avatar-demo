@@ -1,0 +1,211 @@
+######### START CONTENTS: ${SOURCE_DIR}/tavus-avatar/.gitignore #########
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+######### END CONTENTS: ${SOURCE_DIR}/tavus-avatar/.gitignore #########
+
+######### START CONTENTS: ${SOURCE_DIR}/tavus-pipecat-example/.gitignore #########
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Frontend build outputs
+frontend/build/
+frontend/dist/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+######### END CONTENTS: ${SOURCE_DIR}/tavus-pipecat-example/.gitignore #########
+
+######### START CONTENTS: ${SOURCE_DIR}/.gitignore #########
+.DS_Store
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+**/node_modules/
+
+# build output
+.next/
+out/
+build/
+coverage/
+dist/
+**/.next/
+**/out/
+**/build/
+**/coverage/
+**/dist/
+
+# tooling
+.vercel/
+**/.vercel/
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# local nested repo backup
+tavus-avatar/.git.local-backup/
+
+# local references not intended for deployment repo
+src-reference/
+.vercel
+
+# local Next.js starter files not used in this repo
+tavus-avatar/README.md
+tavus-avatar/public/file.svg
+tavus-avatar/public/globe.svg
+tavus-avatar/public/next.svg
+tavus-avatar/public/vercel.svg
+tavus-avatar/public/window.svg
+######### END CONTENTS: ${SOURCE_DIR}/.gitignore #########
+
+######### START CONTENTS: ASH_INCLUSIONS #########
+.git
+**/cdk.out/asset.*
+!**/*.template.json
+######### END CONTENTS: ASH_INCLUSIONS #########

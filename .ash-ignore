@@ -1,0 +1,13 @@
+# Exclude local Python virtual environment — not shipped code
+tavus-pipecat-example/env/
+
+# Exclude frontend build tooling dependencies — not runtime code
+tavus-pipecat-example/frontend/node_modules/
+tavus-avatar/node_modules/
+
+# Exclude security scan reports (contain findings data that triggers false positives)
+docs/
+
+# Exclude IDE/tooling artifacts
+.omc/
+.next/

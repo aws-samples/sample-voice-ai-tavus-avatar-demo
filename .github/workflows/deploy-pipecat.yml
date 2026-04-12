@@ -5,12 +5,17 @@ on:
     branches: [main]
     paths:
       - 'tavus-pipecat-example/**'
-      - 'prompts/tavus-system-instruction-1.md'
+      - 'prompts/**'
       - '.github/workflows/deploy-pipecat.yml'
   workflow_dispatch:
 
 env:
-  AWS_REGION: ap-south-1
+  # Set AWS_REGION and EVENT_CONFIG as GitHub repository variables (Settings > Variables)
+  # so each fork/deployment can target a different region and event without changing code.
+  # wirjo/voice-ai-demo:              AWS_REGION=ap-southeast-2, EVENT_CONFIG=aws-summit-sydney-2026
+  # aws-samples/...-demo:             AWS_REGION=ap-south-1,     EVENT_CONFIG=aws-summit-bengaluru-2026
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  EVENT_CONFIG: ${{ vars.EVENT_CONFIG || 'aws-summit-bengaluru-2026' }}
   ECR_REPOSITORY: tavus-pipecat-backend
   ECS_CLUSTER: tavus-pipecat-cluster
   ECS_SERVICE: tavus-pipecat-service

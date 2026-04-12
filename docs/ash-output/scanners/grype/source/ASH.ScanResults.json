@@ -1,0 +1,1 @@
+{"scanner_name": "grype", "target": "/src", "target_type": "source", "exit_code": 0, "finding_count": 74, "start_time": "2026-04-09T22:44:35.893507Z", "end_time": "2026-04-09T22:50:11.364861Z", "duration": 335.471354, "severity_counts": {"suppressed": 0, "critical": 34, "high": 0, "medium": 33, "low": 7, "info": 0}, "status": "FAILED"}

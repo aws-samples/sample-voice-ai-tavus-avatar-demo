@@ -1,0 +1,75 @@
+ASH SECURITY SCAN REPORT
+=======================
+Report generated: 2026-04-09T22:53:04+00:00
+Time since scan: 9 minutes
+
+SCAN METADATA
+------------
+Project: ASH
+Scan executed: 2026-04-09T22:43:50+00:00
+ASH version: 3.2.5
+
+SUMMARY
+-------
+Scanner Results:
+The table below shows findings by scanner, with status based on severity thresholds and dependencies:
+- Severity levels: Suppressed (S), Critical (C), High (H), Medium (M), Low (L), Info (I)
+- Duration: Time taken by the scanner to complete its execution
+- Actionable: Number of findings at or above the threshold severity level
+- Result:
+  - PASSED = No findings at or above threshold
+  - FAILED = Findings at or above threshold
+  - MISSING = Required dependencies not available
+  - SKIPPED = Scanner explicitly disabled
+  - ERROR = Scanner execution error
+- Note: All statistics are calculated from the final aggregated SARIF report
+- Threshold: The minimum severity level that will cause a scanner to fail (ALL, LOW, MEDIUM, HIGH, CRITICAL)
+  - Values in parentheses indicate where the threshold is set in order of precedence:
+    - 'env' (ASH_SEVERITY_THRESHOLD environment variable)
+    - 'config' (scanner config section in the ASH_CONFIG used)
+    - 'scanner' (default configuration in the plugin, if explicitly set)
+    - 'global' (global_settings section in the ASH_CONFIG used)
+- Example: With MEDIUM threshold, findings of MEDIUM, HIGH, or CRITICAL severity will cause a failure
+- Note: Suppressed findings are counted separately and do not contribute to actionable findings
+
+Scanner            Suppressed Critical     High   Medium      Low     Info   Duration Actionable Result   Threshold      
+------------------ ---------- -------- -------- -------- -------- -------- ---------- ---------- -------- ---------------
+bandit                      0        0        0        0        0        0       <1ms          0 ERROR    MEDIUM (global)
+cdk-nag                     0       13        0        2        0        9       <1ms         15 FAILED   MEDIUM (global)
+cfn-nag                     0        2        0       19        0        0       <1ms         21 FAILED   MEDIUM (global)
+checkov                     0       60        0        0        0        0       <1ms         60 FAILED   MEDIUM (global)
+detect-secrets              0        0        0        0        0        0       <1ms          0 PASSED   MEDIUM (global)
+grype                       0       34        0       33        7        0       <1ms         67 FAILED   MEDIUM (global)
+npm-audit                   0        0        0        0        0        0       <1ms          0 PASSED   MEDIUM (global)
+opengrep                    0        1        0        0        0        0       <1ms          1 FAILED   MEDIUM (global)
+semgrep                     0        1        0        0        0        0       <1ms          1 FAILED   MEDIUM (global)
+syft                        0        0        0        0        0        0       <1ms          0 PASSED   MEDIUM (global)
+
+Top 20 Hotspots:
+Files with the highest number of security findings:
+
+Finding Count File Location                                               
+------------ ------------------------------------------------------------
+          56 tavus-pipecat-example/infra/template.yaml                   
+          46 tavus-pipecat-example/frontend/package-lock.json            
+          11 tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib
+           6 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/dynamodb/2012-08-10/paginators-1.json
+           4 tavus-pipecat-example/Dockerfile                            
+           4 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/s3/2006-03-01/paginators-1.json
+           4 tavus-avatar/package-lock.json                              
+           3 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/iam/2010-05-08/examples-1.json
+           3 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/rds/2014-10-31/examples-1.json
+           3 tavus-pipecat-example/env/lib/python3.13/site-packages/av/.dylibs/libavcodec.62.11.100.dylib
+           2 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/secretsmanager/2017-10-17/examples-1.json
+           2 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/sts/2011-06-15/examples-1.json
+           1 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/ce/2017-10-25/paginators-1.json
+           1 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/cognito-idp/2016-04-18/paginators-1.json
+           1 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/efs/2015-02-01/examples-1.json
+           1 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/elastictranscoder/2012-09-25/paginators-1.json
+           1 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/kinesis/2013-12-02/paginators-1.json
+           1 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/kms/2014-11-01/examples-1.json
+           1 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/lightsail/2016-11-28/paginators-1.json
+           1 tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/omics/2022-11-28/paginators-1.json
+
+--------------------------------------------------------------------------------
+Report generated by Automated Security Helper (ASH) at 2026-04-09T22:53:04+00:00

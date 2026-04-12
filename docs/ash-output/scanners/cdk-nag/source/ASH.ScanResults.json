@@ -1,0 +1,1 @@
+{"scanner_name": "cdk-nag", "target": "/src", "target_type": "source", "exit_code": 0, "finding_count": 24, "start_time": "2026-04-09T22:44:35.888297Z", "end_time": "2026-04-09T22:45:18.850520Z", "duration": 42.962223, "severity_counts": {"suppressed": 0, "critical": 13, "high": 0, "medium": 2, "low": 0, "info": 9}, "status": "FAILED"}

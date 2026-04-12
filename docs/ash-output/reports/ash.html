@@ -1,0 +1,1710 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ASH Security Scan Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-top: 20px;
+        }
+        .summary-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .severity-error { color: #dc3545; }
+        .severity-warning { color: #fd7e14; }
+        .severity-note { color: #ffc107; }
+        .severity-none { color: #28a745; }
+        .status-passed { color: #28a745; font-weight: bold; }
+        .status-failed { color: #dc3545; font-weight: bold; }
+        .status-error { color: #dc3545; font-weight: bold; }
+        .status-skipped { color: #6c757d; font-weight: bold; }
+        .status-missing { color: #fd7e14; font-weight: bold; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .metadata-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .help-text {
+            background: #e9f5ff;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+        .help-text h4 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+        .help-text ul {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ASH Security Scan Results</h1>
+
+        <div class="metadata-section">
+            <p><strong>Project:</strong> ASH</p>
+            <p><strong>Scan executed:</strong> 2026-04-09T22:43:50+00:00</p>
+            <p><strong>Report generated:</strong> 2026-04-09T22:53:04+00:00</p>
+            <p><strong>ASH version:</strong> 3.2.5</p>
+        </div>
+
+        <h2>Scanner Results</h2>
+        <div class="help-text">
+            <h4>How to read scanner results</h4>
+            <ul>
+                <li><strong>Severity levels:</strong>
+                    <ul>
+                        <li><strong>Suppressed (S):</strong> Findings that have been explicitly suppressed and don't affect scanner status</li>
+                        <li><strong>Critical (C):</strong> Highest severity findings that require immediate attention</li>
+                        <li><strong>High (H):</strong> Serious findings that should be addressed soon</li>
+                        <li><strong>Medium (M):</strong> Moderate risk findings</li>
+                        <li><strong>Low (L):</strong> Lower risk findings</li>
+                        <li><strong>Info (I):</strong> Informational findings with minimal risk</li>
+                    </ul>
+                </li>
+                <li><strong>Duration:</strong> Time taken by the scanner to complete its execution</li>
+                <li><strong>Actionable:</strong> Number of findings at or above the threshold severity level that require attention</li>
+                <li><strong>Result:</strong>
+                    <ul>
+                        <li class="status-passed">PASSED = No findings at or above threshold</li>
+                        <li class="status-failed">FAILED = Findings at or above threshold</li>
+                        <li class="status-missing">MISSING = Required dependencies not available</li>
+                        <li class="status-skipped">SKIPPED = Scanner explicitly disabled</li>
+                        <li class="status-error">ERROR = Scanner execution error</li>
+                    </ul>
+                </li>
+                <li><strong>Threshold:</strong> The minimum severity level that will cause a scanner to fail</li>
+                <li><strong>Statistics calculation:</strong>
+                    <ul>
+                        <li>All statistics are calculated from the final aggregated SARIF report</li>
+                        <li>Suppressed findings are counted separately and do not contribute to actionable findings</li>
+                        <li>Scanner status is determined by comparing actionable findings to the threshold</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        
+        <table>
+            <tr>
+                <th>Scanner</th>
+                <th>S</th>
+                <th>C</th>
+                <th>H</th>
+                <th>M</th>
+                <th>L</th>
+                <th>I</th>
+                <th>Duration</th>
+                <th>Actionable</th>
+                <th>Result</th>
+                <th>Threshold</th>
+            </tr>
+        
+            <tr>
+                <td>bandit</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-passed">0</td>
+                <td class="status-error">ERROR</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>cdk-nag</td>
+                <td>0</td>
+                <td>13</td>
+                <td>0</td>
+                <td>2</td>
+                <td>0</td>
+                <td>9</td>
+                <td><1ms</td>
+                <td class="status-failed">15</td>
+                <td class="status-failed">FAILED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>cfn-nag</td>
+                <td>0</td>
+                <td>2</td>
+                <td>0</td>
+                <td>19</td>
+                <td>0</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-failed">21</td>
+                <td class="status-failed">FAILED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>checkov</td>
+                <td>0</td>
+                <td>60</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-failed">60</td>
+                <td class="status-failed">FAILED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>detect-secrets</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-passed">0</td>
+                <td class="status-passed">PASSED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>grype</td>
+                <td>0</td>
+                <td>34</td>
+                <td>0</td>
+                <td>33</td>
+                <td>7</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-failed">67</td>
+                <td class="status-failed">FAILED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>npm-audit</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-passed">0</td>
+                <td class="status-passed">PASSED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>opengrep</td>
+                <td>0</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-failed">1</td>
+                <td class="status-failed">FAILED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>semgrep</td>
+                <td>0</td>
+                <td>1</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-failed">1</td>
+                <td class="status-failed">FAILED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            
+            <tr>
+                <td>syft</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td><1ms</td>
+                <td class="status-passed">0</td>
+                <td class="status-passed">PASSED</td>
+                <td>MEDIUM (global)</td>
+            </tr>
+            </table>
+
+        <h2>Summary</h2>
+        <div class="summary-box">
+            <h3>Findings by Severity</h3><p>Statistics are calculated from the final aggregated SARIF report:</p><ul><li class="severity-warning"><strong>WARNING</strong>: 54 finding(s)</li><li class="severity-error"><strong>ERROR</strong>: 111 finding(s)</li><li class="severity-none"><strong>NONE</strong>: 9 finding(s)</li><li class="severity-note"><strong>NOTE</strong>: 7 finding(s)</li></ul>
+            <h3>Findings by Type</h3><ul><li>CFN_NAG_W10: 1 finding(s)</li><li>CFN_NAG_W70: 1 finding(s)</li><li>CFN_NAG_W52: 1 finding(s)</li><li>CFN_NAG_W56: 1 finding(s)</li><li>CFN_NAG_W11: 1 finding(s)</li><li>CFN_NAG_W84: 1 finding(s)</li><li>CFN_NAG_W28: 4 finding(s)</li><li>CFN_NAG_W35: 1 finding(s)</li><li>CFN_NAG_W41: 1 finding(s)</li><li>CFN_NAG_W9: 2 finding(s)</li><li>CFN_NAG_W2: 2 finding(s)</li><li>CFN_NAG_W27: 1 finding(s)</li><li>CFN_NAG_F1000: 2 finding(s)</li><li>CFN_NAG_W36: 2 finding(s)</li><li>dockerfile.security.missing-user.missing-user: 2 finding(s)</li><li>AwsSolutions-ECR1: 1 finding(s)</li><li>AwsSolutions-IAM4: 2 finding(s)</li><li>AwsSolutions-IAM5: 2 finding(s)</li><li>AwsSolutions-EC23: 2 finding(s)</li><li>AwsSolutions-EC27: 2 finding(s)</li><li>AwsSolutions-ELB2: 1 finding(s)</li><li>AwsSolutions-ECS4: 1 finding(s)</li><li>AwsSolutions-ECS2: 1 finding(s)</li><li>AwsSolutions-ECS7: 1 finding(s)</li><li>AwsSolutions-S1: 1 finding(s)</li><li>AwsSolutions-S2: 1 finding(s)</li><li>AwsSolutions-S5: 1 finding(s)</li><li>AwsSolutions-S10: 2 finding(s)</li><li>AwsSolutions-CFR1: 1 finding(s)</li><li>AwsSolutions-CFR2: 1 finding(s)</li><li>AwsSolutions-CFR3: 1 finding(s)</li><li>AwsSolutions-CFR4: 1 finding(s)</li><li>AwsSolutions-CFR5: 1 finding(s)</li><li>AwsSolutions-CFR7: 1 finding(s)</li><li>CKV_AWS_51: 1 finding(s)</li><li>CKV_AWS_136: 1 finding(s)</li><li>CKV_AWS_260: 1 finding(s)</li><li>CKV_AWS_23: 2 finding(s)</li><li>CKV_AWS_131: 1 finding(s)</li><li>CKV_AWS_91: 1 finding(s)</li><li>CKV_AWS_2: 1 finding(s)</li><li>CKV_AWS_103: 1 finding(s)</li><li>CKV_AWS_65: 1 finding(s)</li><li>CKV_AWS_158: 1 finding(s)</li><li>CKV_AWS_18: 1 finding(s)</li><li>CKV_AWS_55: 1 finding(s)</li><li>CKV_AWS_54: 1 finding(s)</li><li>CKV_AWS_53: 1 finding(s)</li><li>CKV_AWS_21: 1 finding(s)</li><li>CKV_AWS_56: 1 finding(s)</li><li>CKV_AWS_68: 1 finding(s)</li><li>CKV_AWS_174: 1 finding(s)</li><li>CKV_AWS_86: 1 finding(s)</li><li>CKV_DOCKER_3: 1 finding(s)</li><li>CKV_DOCKER_2: 1 finding(s)</li><li>CKV_SECRET_6: 32 finding(s)</li><li>CKV_SECRET_2: 5 finding(s)</li><li>CKV2_GHA_1: 1 finding(s)</li><li>GHSA-5rjg-fvgr-3xxf-setuptools: 1 finding(s)</li><li>GHSA-mw96-cpmx-2vgc-rollup: 1 finding(s)</li><li>CVE-2025-9951-ffmpeg: 1 finding(s)</li><li>GHSA-4v9v-hfq4-rm2v-webpack-dev-server: 1 finding(s)</li><li>GHSA-554w-wpv2-vw27-node-forge: 1 finding(s)</li><li>GHSA-7fh5-64p2-3v2j-postcss: 1 finding(s)</li><li>GHSA-rp65-9cf3-cjxr-nth-check: 1 finding(s)</li><li>CVE-2025-1594-ffmpeg: 1 finding(s)</li><li>GHSA-87r5-mp6g-5w5j-jsonpath: 1 finding(s)</li><li>GHSA-3v7f-55p6-f55p-picomatch: 1 finding(s)</li><li>GHSA-9jgg-88mc-972h-webpack-dev-server: 1 finding(s)</li><li>GHSA-r5fr-rjxr-66jc-lodash: 1 finding(s)</li><li>CVE-2025-22921-ffmpeg: 2 finding(s)</li><li>GHSA-5gfm-wpxj-wjgq-node-forge: 1 finding(s)</li><li>GHSA-xpqw-6gx7-v673-svgo: 1 finding(s)</li><li>GHSA-c2c7-rcm5-vvqj-picomatch: 1 finding(s)</li><li>GHSA-f23m-r3pf-42rh-lodash: 1 finding(s)</li><li>GHSA-6c59-mwgh-r2x6-jsonpath: 1 finding(s)</li><li>GHSA-5m6q-g25r-mvwx-node-forge: 1 finding(s)</li><li>GHSA-37ch-88jc-xwx2-path-to-regexp: 1 finding(s)</li><li>GHSA-ggv3-7p47-pfv8-next: 1 finding(s)</li><li>GHSA-f886-m6hf-6m8v-brace-expansion: 2 finding(s)</li><li>GHSA-5j98-mcp5-4vw2-glob: 1 finding(s)</li><li>GHSA-6rw7-vpxm-498p-qs: 1 finding(s)</li><li>GHSA-qj8w-gfj5-8c6v-serialize-javascript: 2 finding(s)</li><li>GHSA-rf6f-7fwh-wjgh-flatted: 1 finding(s)</li><li>GHSA-65ch-62r8-g69g-node-forge: 1 finding(s)</li><li>GHSA-48c2-rrv3-qjmp-yaml: 1 finding(s)</li><li>GHSA-3ppc-4f35-3m26-minimatch: 3 finding(s)</li><li>GHSA-w7fw-mjwx-w883-qs: 1 finding(s)</li><li>GHSA-q67f-28xg-22rw-node-forge: 1 finding(s)</li><li>CVE-2025-59733-ffmpeg: 1 finding(s)</li><li>GHSA-xxjr-mmjv-4gpg-lodash: 1 finding(s)</li><li>GHSA-2328-f5f3-gj25-node-forge: 1 finding(s)</li><li>GHSA-ppp5-5v6c-4jwp-node-forge: 1 finding(s)</li><li>CVE-2025-59732-ffmpeg: 1 finding(s)</li><li>CVE-2025-59734-ffmpeg: 1 finding(s)</li><li>GHSA-7r86-cg39-jmmj-minimatch: 3 finding(s)</li><li>GHSA-23c5-xmqv-rm74-minimatch: 3 finding(s)</li><li>GHSA-qpx9-hpmf-5gmw-underscore: 1 finding(s)</li><li>GHSA-3x4c-7xq6-9pq8-next: 1 finding(s)</li><li>GHSA-mh29-5h37-fv8m-js-yaml: 2 finding(s)</li><li>CVE-2025-59731-ffmpeg: 1 finding(s)</li><li>CVE-2025-59729-ffmpeg: 1 finding(s)</li><li>GHSA-4xh5-x5gv-qwph-pip: 1 finding(s)</li><li>GHSA-h27x-g6w4-24gq-next: 1 finding(s)</li><li>GHSA-25h7-pfq9-p65f-flatted: 1 finding(s)</li><li>CVE-2025-59730-ffmpeg: 1 finding(s)</li><li>GHSA-2g4f-4pwh-qvx6-ajv: 2 finding(s)</li><li>CVE-2025-69693-ffmpeg: 1 finding(s)</li><li>GHSA-6vgw-5pg2-w6jp-pip: 1 finding(s)</li><li>GHSA-vpq2-c234-7xj6-@tootallnate/once: 1 finding(s)</li><li>CVE-2025-10256-ffmpeg: 1 finding(s)</li><li>GHSA-5239-wwwm-4pmq-pygments: 1 finding(s)</li><li>GHSA-mq59-m269-xvcx-next: 1 finding(s)</li><li>GHSA-38r7-794h-5758-webpack: 1 finding(s)</li><li>GHSA-8fgc-7cc6-rx7x-webpack: 1 finding(s)</li><li>CVE-2025-12343-ffmpeg: 2 finding(s)</li><li>GHSA-jcc7-9wpm-mj36-next: 1 finding(s)</li><li>GHSA-5c6j-r48x-rmvq-serialize-javascript: 2 finding(s)</li><li>GHSA-p423-j2cm-9vmq-cryptography: 1 finding(s)</li></ul>
+            <h3>Top 10 Hotspots</h3><p>Files with the highest number of security findings:</p>
+        <table>
+            <tr>
+                <th>Finding Count</th>
+                <th>File Location</th>
+            </tr>
+        
+            <tr>
+                <td>56</td>
+                <td>tavus-pipecat-example/infra/template.yaml</td>
+            </tr>
+            
+            <tr>
+                <td>46</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json</td>
+            </tr>
+            
+            <tr>
+                <td>11</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+            </tr>
+            
+            <tr>
+                <td>6</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/dynamodb/2012-08-10/paginators-1.json</td>
+            </tr>
+            
+            <tr>
+                <td>4</td>
+                <td>tavus-pipecat-example/Dockerfile</td>
+            </tr>
+            
+            <tr>
+                <td>4</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/s3/2006-03-01/paginators-1.json</td>
+            </tr>
+            
+            <tr>
+                <td>4</td>
+                <td>tavus-avatar/package-lock.json</td>
+            </tr>
+            
+            <tr>
+                <td>3</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/iam/2010-05-08/examples-1.json</td>
+            </tr>
+            
+            <tr>
+                <td>3</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/rds/2014-10-31/examples-1.json</td>
+            </tr>
+            
+            <tr>
+                <td>3</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/av/.dylibs/libavcodec.62.11.100.dylib</td>
+            </tr>
+            </table>
+        </div>
+
+        <h2>Detailed Findings</h2>
+        
+        <table>
+            <tr>
+                <th>Severity</th>
+                <th>Rule</th>
+                <th>Message</th>
+                <th>Location</th>
+            </tr>
+        
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W10</td>
+                <td>CloudFront Distribution should enable access logging</td>
+                <td>tavus-pipecat-example/infra/template.yaml:289</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W70</td>
+                <td>Cloudfront should use minimum protocol version TLS 1.2</td>
+                <td>tavus-pipecat-example/infra/template.yaml:289</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W52</td>
+                <td>Elastic Load Balancer V2 should have access logging enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:118</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W56</td>
+                <td>Elastic Load Balancer V2 Listener Protocol should use HTTPS for ALBs</td>
+                <td>tavus-pipecat-example/infra/template.yaml:147</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W11</td>
+                <td>IAM role should not allow * resource on its permissions policy</td>
+                <td>tavus-pipecat-example/infra/template.yaml:63</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W84</td>
+                <td>CloudWatchLogs LogGroup should specify a KMS Key Id to encrypt the log data</td>
+                <td>tavus-pipecat-example/infra/template.yaml:163</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W28</td>
+                <td>Resource found with an explicit name, this disallows updates that require replacement of this resource</td>
+                <td>tavus-pipecat-example/infra/template.yaml:28</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W28</td>
+                <td>Resource found with an explicit name, this disallows updates that require replacement of this resource</td>
+                <td>tavus-pipecat-example/infra/template.yaml:118</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W28</td>
+                <td>Resource found with an explicit name, this disallows updates that require replacement of this resource</td>
+                <td>tavus-pipecat-example/infra/template.yaml:39</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W28</td>
+                <td>Resource found with an explicit name, this disallows updates that require replacement of this resource</td>
+                <td>tavus-pipecat-example/infra/template.yaml:63</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W35</td>
+                <td>S3 Bucket should have access logging configured</td>
+                <td>tavus-pipecat-example/infra/template.yaml:257</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W41</td>
+                <td>S3 Bucket should have encryption option set</td>
+                <td>tavus-pipecat-example/infra/template.yaml:257</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W9</td>
+                <td>Security Groups found with ingress cidr that is not /32</td>
+                <td>tavus-pipecat-example/infra/template.yaml:86</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W9</td>
+                <td>Security Groups found with ingress cidr that is not /32</td>
+                <td>tavus-pipecat-example/infra/template.yaml:101</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W2</td>
+                <td>Security Groups found with cidr open to world on ingress.  This should never be true on instance.  Permissible on ELB</td>
+                <td>tavus-pipecat-example/infra/template.yaml:86</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W2</td>
+                <td>Security Groups found with cidr open to world on ingress.  This should never be true on instance.  Permissible on ELB</td>
+                <td>tavus-pipecat-example/infra/template.yaml:101</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W27</td>
+                <td>Security Groups found ingress with port range instead of just a single port</td>
+                <td>tavus-pipecat-example/infra/template.yaml:101</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CFN_NAG_F1000</td>
+                <td>Missing egress rule means all traffic is allowed outbound.  Make this explicit if it is desired configuration</td>
+                <td>tavus-pipecat-example/infra/template.yaml:86</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CFN_NAG_F1000</td>
+                <td>Missing egress rule means all traffic is allowed outbound.  Make this explicit if it is desired configuration</td>
+                <td>tavus-pipecat-example/infra/template.yaml:101</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W36</td>
+                <td>Security group rules without a description obscure their purpose and may lead to bad practices in ensuring they only allow traffic from the ports and sources/destinations required.</td>
+                <td>tavus-pipecat-example/infra/template.yaml:86</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CFN_NAG_W36</td>
+                <td>Security group rules without a description obscure their purpose and may lead to bad practices in ensuring they only allow traffic from the ports and sources/destinations required.</td>
+                <td>tavus-pipecat-example/infra/template.yaml:101</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>dockerfile.security.missing-user.missing-user</td>
+                <td>By not specifying a USER, a program in the container may run as &#x27;root&#x27;. This is a security hazard. If an attacker can control a process running as root, they may have control over the container. Ensure that the last USER in a Dockerfile is a USER other than &#x27;root&#x27;.</td>
+                <td>tavus-pipecat-example/Dockerfile:17</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-ECR1</td>
+                <td>The ECR Repository allows open access.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:26</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-IAM4</td>
+                <td>The IAM user, role, or group uses AWS managed policies.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:37</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-IAM5</td>
+                <td>The IAM entity contains wildcard permissions and does not have a cdk-nag rule suppression with evidence for those permission.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:37</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-IAM4</td>
+                <td>The IAM user, role, or group uses AWS managed policies.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:61</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-IAM5</td>
+                <td>The IAM entity contains wildcard permissions and does not have a cdk-nag rule suppression with evidence for those permission.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:61</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-EC23</td>
+                <td>The Security Group allows for 0.0.0.0/0 or ::/0 inbound access.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:84</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-EC27</td>
+                <td>The Security Group does not have a description.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:84</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-EC23</td>
+                <td>The Security Group allows for 0.0.0.0/0 or ::/0 inbound access.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:99</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-EC27</td>
+                <td>The Security Group does not have a description.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:99</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-ELB2</td>
+                <td>The ELB does not have access logs enabled.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:10</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-ECS4</td>
+                <td>The ECS Cluster has CloudWatch Container Insights disabled.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:156</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-ECS2</td>
+                <td>The ECS Task Definition includes a container definition that directly specifies environment variables.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:167</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-ECS7</td>
+                <td>One or more containers in the ECS Task Definition do not have container logging enabled.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:167</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-S1</td>
+                <td>The S3 Bucket has server access logs disabled.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:255</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-S2</td>
+                <td>The S3 Bucket does not have public access restricted and blocked.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:255</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-S5</td>
+                <td>The S3 static website bucket either has an open world bucket policy or does not use a CloudFront Origin Access Identity (OAI) in the bucket policy for limited getObject and/or putObject permissions.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:255</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-S10</td>
+                <td>The S3 Bucket or bucket policy does not require requests to use SSL.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:255</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>AwsSolutions-CFR1</td>
+                <td>The CloudFront distribution may require Geo restrictions.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:275</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>AwsSolutions-CFR2</td>
+                <td>The CloudFront distribution may require integration with AWS WAF.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:275</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-CFR3</td>
+                <td>The CloudFront distribution does not have access logging enabled.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:275</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-CFR4</td>
+                <td>The CloudFront distribution allows for SSLv3 or TLSv1 for HTTPS viewer connections.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:275</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-CFR5</td>
+                <td>The CloudFront distributions uses SSLv3 or TLSv1 for communication to the origin.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:275</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-none">NONE</td>
+                <td>AwsSolutions-CFR7</td>
+                <td>The CloudFront distribution does not use an origin access control with an S3 origin.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:275</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>AwsSolutions-S10</td>
+                <td>The S3 Bucket or bucket policy does not require requests to use SSL.
+
+Exception Reason: N/A</td>
+                <td>tavus-pipecat-example/infra/template.yaml:260</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>dockerfile.security.missing-user.missing-user</td>
+                <td>By not specifying a USER, a program in the container may run as &#x27;root&#x27;. This is a security hazard. If an attacker can control a process running as root, they may have control over the container. Ensure that the last USER in a Dockerfile is a USER other than &#x27;root&#x27;.</td>
+                <td>tavus-pipecat-example/Dockerfile:17</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_51</td>
+                <td>Ensure ECR Image Tags are immutable</td>
+                <td>tavus-pipecat-example/infra/template.yaml:27</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_136</td>
+                <td>Ensure that ECR repositories are encrypted using KMS</td>
+                <td>tavus-pipecat-example/infra/template.yaml:27</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_260</td>
+                <td>Ensure no security groups allow ingress from 0.0.0.0:0 to port 80</td>
+                <td>tavus-pipecat-example/infra/template.yaml:85</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_23</td>
+                <td>Ensure every security groups rule has a description</td>
+                <td>tavus-pipecat-example/infra/template.yaml:85</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_23</td>
+                <td>Ensure every security groups rule has a description</td>
+                <td>tavus-pipecat-example/infra/template.yaml:100</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_131</td>
+                <td>Ensure that ALB drops HTTP headers</td>
+                <td>tavus-pipecat-example/infra/template.yaml:117</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_91</td>
+                <td>Ensure the ELBv2 (Application/Network) has access logging enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:117</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_2</td>
+                <td>Ensure ALB protocol is HTTPS</td>
+                <td>tavus-pipecat-example/infra/template.yaml:146</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_103</td>
+                <td>Ensure that Load Balancer Listener is using at least TLS v1.2</td>
+                <td>tavus-pipecat-example/infra/template.yaml:146</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_65</td>
+                <td>Ensure container insights are enabled on ECS cluster</td>
+                <td>tavus-pipecat-example/infra/template.yaml:157</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_158</td>
+                <td>Ensure that CloudWatch Log Group is encrypted by KMS</td>
+                <td>tavus-pipecat-example/infra/template.yaml:162</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_18</td>
+                <td>Ensure the S3 bucket has access logging enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:256</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_55</td>
+                <td>Ensure S3 bucket has ignore public ACLs enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:256</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_54</td>
+                <td>Ensure S3 bucket has block public policy enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:256</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_53</td>
+                <td>Ensure S3 bucket has block public ACLs enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:256</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_21</td>
+                <td>Ensure the S3 bucket has versioning enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:256</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_56</td>
+                <td>Ensure S3 bucket has RestrictPublicBuckets enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:256</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_68</td>
+                <td>CloudFront Distribution should have WAF enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:288</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_174</td>
+                <td>Verify CloudFront Distribution Viewer Certificate is using TLS v1.2 or higher</td>
+                <td>tavus-pipecat-example/infra/template.yaml:288</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_AWS_86</td>
+                <td>Ensure CloudFront Distribution has Access Logging enabled</td>
+                <td>tavus-pipecat-example/infra/template.yaml:288</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_DOCKER_3</td>
+                <td>Ensure that a user for the container has been created</td>
+                <td>tavus-pipecat-example/Dockerfile:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_DOCKER_2</td>
+                <td>Ensure that HEALTHCHECK instructions have been added to container images</td>
+                <td>tavus-pipecat-example/Dockerfile:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/ce/2017-10-25/paginators-1.json:4</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/cognito-idp/2016-04-18/paginators-1.json:52</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/dynamodb/2012-08-10/paginators-1.json:4</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/dynamodb/2012-08-10/paginators-1.json:5</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/dynamodb/2012-08-10/paginators-1.json:10</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/dynamodb/2012-08-10/paginators-1.json:11</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/dynamodb/2012-08-10/paginators-1.json:16</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/dynamodb/2012-08-10/paginators-1.json:17</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/efs/2015-02-01/examples-1.json:8</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/elastictranscoder/2012-09-25/paginators-1.json:5</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_2</td>
+                <td>AWS Access Key</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/iam/2010-05-08/examples-1.json:130</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_2</td>
+                <td>AWS Access Key</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/iam/2010-05-08/examples-1.json:870</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_2</td>
+                <td>AWS Access Key</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/iam/2010-05-08/examples-1.json:876</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/kinesis/2013-12-02/paginators-1.json:4</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/kms/2014-11-01/examples-1.json:100</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/lightsail/2016-11-28/paginators-1.json:5</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/omics/2022-11-28/paginators-1.json:58</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/pricing/2017-10-15/examples-1.json:13</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/rds/2014-10-31/examples-1.json:210</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/rds/2014-10-31/examples-1.json:280</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/rds/2014-10-31/examples-1.json:1308</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/resourcegroupstaggingapi/2017-01-26/paginators-1.json:4</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/route53domains/2014-05-15/paginators-1.json:7</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/s3/2006-03-01/examples-1.json:1178</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/s3/2006-03-01/paginators-1.json:49</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/s3/2006-03-01/paginators-1.json:50</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/s3/2006-03-01/paginators-1.json:59</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/s3/2006-03-01/paginators-1.json:60</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/s3tables/2018-05-10/paginators-1.json:4</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/secretsmanager/2017-10-17/examples-1.json:7</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/secretsmanager/2017-10-17/examples-1.json:72</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/servicecatalog/2015-12-10/paginators-1.json:5</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/ssm-quicksetup/2018-05-10/paginators-1.json:4</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/storagegateway/2013-06-30/examples-1.json:166</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_2</td>
+                <td>AWS Access Key</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/sts/2011-06-15/examples-1.json:36</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_2</td>
+                <td>AWS Access Key</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/sts/2011-06-15/examples-1.json:154</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV_SECRET_6</td>
+                <td>Base64 High Entropy String</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/botocore/data/swf/2012-01-25/paginators-1.json:5</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CKV2_GHA_1</td>
+                <td>Ensure top-level permissions are not set to write-all</td>
+                <td>.github/workflows/deploy-pipecat.yml:22</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-5rjg-fvgr-3xxf-setuptools</td>
+                <td>A high vulnerability in python package: setuptools, version 70.2.0 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/setuptools-70.2.0.dist-info/METADATA</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/setuptools-70.2.0.dist-info/METADATA:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-mw96-cpmx-2vgc-rollup</td>
+                <td>A high vulnerability in npm package: rollup, version 2.79.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CVE-2025-9951-ffmpeg</td>
+                <td>A high vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-4v9v-hfq4-rm2v-webpack-dev-server</td>
+                <td>A medium vulnerability in npm package: webpack-dev-server, version 4.15.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-554w-wpv2-vw27-node-forge</td>
+                <td>A high vulnerability in npm package: node-forge, version 1.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-7fh5-64p2-3v2j-postcss</td>
+                <td>A medium vulnerability in npm package: postcss, version 7.0.39 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-rp65-9cf3-cjxr-nth-check</td>
+                <td>A high vulnerability in npm package: nth-check, version 1.0.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CVE-2025-1594-ffmpeg</td>
+                <td>A high vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-87r5-mp6g-5w5j-jsonpath</td>
+                <td>A high vulnerability in npm package: jsonpath, version 1.1.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-3v7f-55p6-f55p-picomatch</td>
+                <td>A medium vulnerability in npm package: picomatch, version 2.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-9jgg-88mc-972h-webpack-dev-server</td>
+                <td>A medium vulnerability in npm package: webpack-dev-server, version 4.15.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-r5fr-rjxr-66jc-lodash</td>
+                <td>A high vulnerability in npm package: lodash, version 4.17.21 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-22921-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-22921-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 8.0.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/av/.dylibs/libavcodec.62.11.100.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/av/.dylibs/libavcodec.62.11.100.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-5gfm-wpxj-wjgq-node-forge</td>
+                <td>A high vulnerability in npm package: node-forge, version 1.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-xpqw-6gx7-v673-svgo</td>
+                <td>A high vulnerability in npm package: svgo, version 2.8.0 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-c2c7-rcm5-vvqj-picomatch</td>
+                <td>A high vulnerability in npm package: picomatch, version 2.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-f23m-r3pf-42rh-lodash</td>
+                <td>A medium vulnerability in npm package: lodash, version 4.17.21 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-6c59-mwgh-r2x6-jsonpath</td>
+                <td>A medium vulnerability in npm package: jsonpath, version 1.1.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-5m6q-g25r-mvwx-node-forge</td>
+                <td>A high vulnerability in npm package: node-forge, version 1.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-37ch-88jc-xwx2-path-to-regexp</td>
+                <td>A high vulnerability in npm package: path-to-regexp, version 0.1.12 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-ggv3-7p47-pfv8-next</td>
+                <td>A medium vulnerability in npm package: next, version 16.1.6 was found at: /tavus-avatar/package-lock.json</td>
+                <td>tavus-avatar/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-f886-m6hf-6m8v-brace-expansion</td>
+                <td>A medium vulnerability in npm package: brace-expansion, version 1.1.12 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-f886-m6hf-6m8v-brace-expansion</td>
+                <td>A medium vulnerability in npm package: brace-expansion, version 2.0.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-5j98-mcp5-4vw2-glob</td>
+                <td>A high vulnerability in npm package: glob, version 10.4.5 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-6rw7-vpxm-498p-qs</td>
+                <td>A medium vulnerability in npm package: qs, version 6.13.0 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-qj8w-gfj5-8c6v-serialize-javascript</td>
+                <td>A medium vulnerability in npm package: serialize-javascript, version 4.0.0 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-qj8w-gfj5-8c6v-serialize-javascript</td>
+                <td>A medium vulnerability in npm package: serialize-javascript, version 6.0.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-rf6f-7fwh-wjgh-flatted</td>
+                <td>A high vulnerability in npm package: flatted, version 3.3.3 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-65ch-62r8-g69g-node-forge</td>
+                <td>A medium vulnerability in npm package: node-forge, version 1.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-48c2-rrv3-qjmp-yaml</td>
+                <td>A medium vulnerability in npm package: yaml, version 1.10.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-3ppc-4f35-3m26-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 3.1.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-3ppc-4f35-3m26-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 5.1.6 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-3ppc-4f35-3m26-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 9.0.5 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-note">NOTE</td>
+                <td>GHSA-w7fw-mjwx-w883-qs</td>
+                <td>A low vulnerability in npm package: qs, version 6.13.0 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-q67f-28xg-22rw-node-forge</td>
+                <td>A high vulnerability in npm package: node-forge, version 1.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CVE-2025-59733-ffmpeg</td>
+                <td>A high vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-xxjr-mmjv-4gpg-lodash</td>
+                <td>A medium vulnerability in npm package: lodash, version 4.17.21 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-2328-f5f3-gj25-node-forge</td>
+                <td>A high vulnerability in npm package: node-forge, version 1.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-ppp5-5v6c-4jwp-node-forge</td>
+                <td>A high vulnerability in npm package: node-forge, version 1.3.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CVE-2025-59732-ffmpeg</td>
+                <td>A high vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>CVE-2025-59734-ffmpeg</td>
+                <td>A high vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-7r86-cg39-jmmj-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 3.1.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-7r86-cg39-jmmj-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 5.1.6 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-7r86-cg39-jmmj-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 9.0.5 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-23c5-xmqv-rm74-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 3.1.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-23c5-xmqv-rm74-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 5.1.6 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-23c5-xmqv-rm74-minimatch</td>
+                <td>A high vulnerability in npm package: minimatch, version 9.0.5 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-qpx9-hpmf-5gmw-underscore</td>
+                <td>A high vulnerability in npm package: underscore, version 1.12.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-3x4c-7xq6-9pq8-next</td>
+                <td>A medium vulnerability in npm package: next, version 16.1.6 was found at: /tavus-avatar/package-lock.json</td>
+                <td>tavus-avatar/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-mh29-5h37-fv8m-js-yaml</td>
+                <td>A medium vulnerability in npm package: js-yaml, version 3.14.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-mh29-5h37-fv8m-js-yaml</td>
+                <td>A medium vulnerability in npm package: js-yaml, version 4.1.0 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-59731-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-59729-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-4xh5-x5gv-qwph-pip</td>
+                <td>A medium vulnerability in python package: pip, version 24.2 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/pip-24.2.dist-info/METADATA</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/pip-24.2.dist-info/METADATA:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-h27x-g6w4-24gq-next</td>
+                <td>A medium vulnerability in npm package: next, version 16.1.6 was found at: /tavus-avatar/package-lock.json</td>
+                <td>tavus-avatar/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-25h7-pfq9-p65f-flatted</td>
+                <td>A high vulnerability in npm package: flatted, version 3.3.3 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-59730-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-2g4f-4pwh-qvx6-ajv</td>
+                <td>A medium vulnerability in npm package: ajv, version 6.12.6 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-2g4f-4pwh-qvx6-ajv</td>
+                <td>A medium vulnerability in npm package: ajv, version 8.17.1 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-69693-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 8.0.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/av/.dylibs/libavcodec.62.11.100.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/av/.dylibs/libavcodec.62.11.100.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-note">NOTE</td>
+                <td>GHSA-6vgw-5pg2-w6jp-pip</td>
+                <td>A low vulnerability in python package: pip, version 24.2 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/pip-24.2.dist-info/METADATA</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/pip-24.2.dist-info/METADATA:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-note">NOTE</td>
+                <td>GHSA-vpq2-c234-7xj6-@tootallnate/once</td>
+                <td>A low vulnerability in npm package: @tootallnate/once, version 1.1.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-10256-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-note">NOTE</td>
+                <td>GHSA-5239-wwwm-4pmq-pygments</td>
+                <td>A low vulnerability in python package: pygments, version 2.19.2 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/pygments-2.19.2.dist-info/METADATA</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/pygments-2.19.2.dist-info/METADATA:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-mq59-m269-xvcx-next</td>
+                <td>A medium vulnerability in npm package: next, version 16.1.6 was found at: /tavus-avatar/package-lock.json</td>
+                <td>tavus-avatar/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-note">NOTE</td>
+                <td>GHSA-38r7-794h-5758-webpack</td>
+                <td>A low vulnerability in npm package: webpack, version 5.102.0 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-note">NOTE</td>
+                <td>GHSA-8fgc-7cc6-rx7x-webpack</td>
+                <td>A low vulnerability in npm package: webpack, version 5.102.0 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-12343-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 7.1.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cv2/.dylibs/libavcodec.61.19.101.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>CVE-2025-12343-ffmpeg</td>
+                <td>A medium vulnerability in binary package: ffmpeg, version 8.0.1 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/av/.dylibs/libavcodec.62.11.100.dylib</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/av/.dylibs/libavcodec.62.11.100.dylib:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-note">NOTE</td>
+                <td>GHSA-jcc7-9wpm-mj36-next</td>
+                <td>A low vulnerability in npm package: next, version 16.1.6 was found at: /tavus-avatar/package-lock.json</td>
+                <td>tavus-avatar/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-5c6j-r48x-rmvq-serialize-javascript</td>
+                <td>A high vulnerability in npm package: serialize-javascript, version 4.0.0 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-error">ERROR</td>
+                <td>GHSA-5c6j-r48x-rmvq-serialize-javascript</td>
+                <td>A high vulnerability in npm package: serialize-javascript, version 6.0.2 was found at: /tavus-pipecat-example/frontend/package-lock.json</td>
+                <td>tavus-pipecat-example/frontend/package-lock.json:1</td>
+            </tr>
+            
+            <tr>
+                <td class="severity-warning">WARNING</td>
+                <td>GHSA-p423-j2cm-9vmq-cryptography</td>
+                <td>A medium vulnerability in python package: cryptography, version 46.0.6 was found at: /tavus-pipecat-example/env/lib/python3.13/site-packages/cryptography-46.0.6.dist-info/METADATA</td>
+                <td>tavus-pipecat-example/env/lib/python3.13/site-packages/cryptography-46.0.6.dist-info/METADATA:1</td>
+            </tr>
+            </table>
+
+        <h2>Scan Metadata</h2>
+        <div class='metadata-section'>
+            <div class="metadata-item">
+                <strong>report_id:</strong> ASH-20264309
+            </div>
+            
+            <div class="metadata-item">
+                <strong>generated_at:</strong> 2026-04-09T22:43:50+00:00
+            </div>
+            
+            <div class="metadata-item">
+                <strong>project_name:</strong> ASH
+            </div>
+            
+            <div class="metadata-item">
+                <strong>tool_version:</strong> 3.2.5
+            </div>
+            
+            <div class="metadata-item">
+                <strong>description:</strong> Automated Security Helper Aggregated Report Post-processor
+            </div>
+            
+            <div class="metadata-item">
+                <strong>summary_stats:</strong> {&#x27;suppressed&#x27;: 0, &#x27;critical&#x27;: 111, &#x27;high&#x27;: 0, &#x27;medium&#x27;: 54, &#x27;low&#x27;: 7, &#x27;info&#x27;: 9, &#x27;start&#x27;: None, &#x27;end&#x27;: None, &#x27;duration&#x27;: 0.0, &#x27;total&#x27;: 181, &#x27;actionable&#x27;: 165, &#x27;passed&#x27;: 3, &#x27;failed&#x27;: 6, &#x27;missing&#x27;: 0, &#x27;skipped&#x27;: 0}
+            </div>
+            
+            <div class="metadata-item">
+                <strong>validation_summary:</strong> {&#x27;scanner_tasks_validation&#x27;: {&#x27;timestamp&#x27;: &#x27;2026-04-09T22:44:35.871629&#x27;, &#x27;expected_count&#x27;: 10, &#x27;actual_count&#x27;: 10, &#x27;missing_count&#x27;: 0, &#x27;has_issues&#x27;: False, &#x27;successfully_retried&#x27;: 0}, &#x27;execution_completion_validation&#x27;: {&#x27;timestamp&#x27;: &#x27;2026-04-09T22:53:04.246508&#x27;, &#x27;expected_count&#x27;: 10, &#x27;completed_count&#x27;: 10, &#x27;missing_count&#x27;: 0, &#x27;unexpected_count&#x27;: 0, &#x27;completion_rate&#x27;: 1.0, &#x27;has_issues&#x27;: False}, &#x27;result_completeness_validation&#x27;: {&#x27;timestamp&#x27;: &#x27;2026-04-09T22:53:04.247618&#x27;, &#x27;expected_count&#x27;: 10, &#x27;final_count&#x27;: 10, &#x27;missing_count&#x27;: 0, &#x27;unexpected_count&#x27;: 0, &#x27;completeness_rate&#x27;: 1.0, &#x27;has_issues&#x27;: False}}
+            </div>
+            
+            <div class="metadata-item">
+                <strong>execution_discrepancy_report:</strong> {}
+            </div>
+            </div>
+    </div>
+</body>
+</html>

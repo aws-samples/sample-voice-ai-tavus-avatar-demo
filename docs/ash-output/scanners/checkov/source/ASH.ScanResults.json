@@ -1,0 +1,1 @@
+{"scanner_name": "checkov", "target": "/src", "target_type": "source", "exit_code": 1, "finding_count": 60, "start_time": "2026-04-09T22:44:35.883434Z", "end_time": "2026-04-09T22:48:00.917949Z", "duration": 205.034515, "severity_counts": {"suppressed": 0, "critical": 60, "high": 0, "medium": 0, "low": 0, "info": 0}, "status": "FAILED"}

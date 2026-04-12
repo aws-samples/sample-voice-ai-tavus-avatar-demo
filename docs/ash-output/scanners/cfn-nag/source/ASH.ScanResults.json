@@ -1,0 +1,1 @@
+{"scanner_name": "cfn-nag", "target": "/src", "target_type": "source", "exit_code": 2, "finding_count": 21, "start_time": "2026-04-09T22:44:35.886978Z", "end_time": "2026-04-09T22:44:38.188775Z", "duration": 2.301797, "severity_counts": {"suppressed": 0, "critical": 2, "high": 0, "medium": 19, "low": 0, "info": 0}, "status": "FAILED"}

@@ -752,6 +752,15 @@ function TavusSession({
 }
 
 // ---------------------------------------------------------------------------
+// Auth helpers
+// ---------------------------------------------------------------------------
+
+function getAuthHeaders(): HeadersInit {
+  const token = process.env.NEXT_PUBLIC_DEMO_API_TOKEN;
+  return token ? { "x-demo-token": token } : {};
+}
+
+// ---------------------------------------------------------------------------
 // TavusDemo – top-level component managing the full session lifecycle
 // ---------------------------------------------------------------------------
 
@@ -809,7 +818,7 @@ export function TavusDemo() {
     if (!showPersonaSelector) return;
 
     let cancelled = false;
-    fetch("/api/personas", { cache: "no-store" })
+    fetch("/api/personas", { cache: "no-store", headers: getAuthHeaders() })
       .then((res) => res.json())
       .then((data: { personas?: { persona_id: string; persona_name: string }[]; default_persona_id?: string }) => {
         if (cancelled) return;
@@ -1113,6 +1122,7 @@ export function TavusDemo() {
     const response = await fetch(conversationUrl, {
       method: "POST",
       cache: "no-store",
+      headers: getAuthHeaders(),
       signal,
     });
 
@@ -1138,6 +1148,7 @@ export function TavusDemo() {
         method: "DELETE",
         keepalive,
         cache: "no-store",
+        headers: getAuthHeaders(),
       });
     } catch {
       // Best effort cleanup only.

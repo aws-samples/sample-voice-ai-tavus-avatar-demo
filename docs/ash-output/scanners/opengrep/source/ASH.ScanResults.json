@@ -1,0 +1,1 @@
+{"scanner_name": "opengrep", "target": "/src", "target_type": "source", "exit_code": 0, "finding_count": 1, "start_time": "2026-04-09T22:44:35.903456Z", "end_time": "2026-04-09T22:45:11.346261Z", "duration": 35.442805, "severity_counts": {"suppressed": 0, "critical": 0, "high": 0, "medium": 0, "low": 0, "info": 1}, "status": "PASSED"}
