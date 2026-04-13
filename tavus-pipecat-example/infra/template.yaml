@@ -342,7 +342,7 @@ Resources:
               ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/DAILY_API_KEY'
           Environment:
             - Name: AWS_REGION_NOVA_SONIC
-              Value: ap-south-1
+              Value: ap-northeast-1
             - Name: BEDROCK_REGION
               Value: ap-south-1
             - Name: BEDROCK_MODEL_ID
