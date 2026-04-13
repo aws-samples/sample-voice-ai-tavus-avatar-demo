@@ -5,18 +5,30 @@ export const config = {
 };
 
 export function middleware(request: NextRequest) {
-  const token = process.env.DEMO_API_TOKEN;
-
-  // If no token is configured, pass through (local dev convenience)
-  if (!token) {
+  // The auth endpoint itself must always be reachable to set the session cookie.
+  if (request.nextUrl.pathname === "/api/auth") {
     return NextResponse.next();
   }
 
-  const provided = request.headers.get("x-demo-token");
+  const token = process.env.DEMO_API_TOKEN;
 
-  if (provided !== token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!token) {
+    // Fail closed in production — a missing token means the deployment is
+    // misconfigured, not that auth should be skipped.
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Service misconfigured: DEMO_API_TOKEN is not set" },
+        { status: 503 },
+      );
+    }
+    // Local dev convenience: skip auth when token is not configured.
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  const session = request.cookies.get("demo-session");
+  if (session?.value === token) {
+    return NextResponse.next();
+  }
+
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }

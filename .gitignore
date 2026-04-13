@@ -41,6 +41,9 @@ tavus-avatar/.git.local-backup/
 src-reference/
 .vercel
 
+# security scan archives — large zip reports, kept locally only
+docs/*.zip
+
 # local Next.js starter files not used in this repo
 tavus-avatar/README.md
 tavus-avatar/public/file.svg

@@ -54,6 +54,10 @@ Resources:
         rules_to_suppress:
           - id: W28
             reason: "Explicit role name used for auditability and cross-stack reference; name is environment+region-scoped"
+      cdk-nag:
+        rules_to_suppress:
+          - id: AwsSolutions-IAM4
+            reason: "AmazonECSTaskExecutionRolePolicy is the standard managed policy for ECS task execution; scoping it further would require manually duplicating its permissions"
     Properties:
       RoleName: !Sub '${EnvironmentName}-${AWS::Region}-task-exec'
       AssumeRolePolicyDocument:
@@ -85,6 +89,10 @@ Resources:
             reason: "Explicit role name used for auditability and cross-stack reference; name is environment+region-scoped"
           - id: W11
             reason: "Bedrock foundation model ARNs do not support resource-level conditions; wildcard is required by the service"
+      cdk-nag:
+        rules_to_suppress:
+          - id: AwsSolutions-IAM5
+            reason: "Bedrock InvokeModel requires Resource: * — foundation model ARNs do not support resource-level IAM conditions"
     Properties:
       RoleName: !Sub '${EnvironmentName}-${AWS::Region}-task'
       AssumeRolePolicyDocument:
@@ -115,6 +123,10 @@ Resources:
             reason: "ALB must accept traffic from the public internet; /0 is intentional for a public-facing load balancer"
           - id: W2
             reason: "ALB must accept traffic from the public internet; /0 is intentional for a public-facing load balancer"
+      cdk-nag:
+        rules_to_suppress:
+          - id: AwsSolutions-EC23
+            reason: "Public-facing ALB requires 0.0.0.0/0 inbound on 80/443; restricting source IPs would break public demo access"
     Properties:
       GroupDescription: ALB - allow HTTP/HTTPS inbound
       VpcId: !Ref VpcId
@@ -143,6 +155,10 @@ Resources:
             reason: "WebRTC media requires inbound UDP from the public internet; /0 is intentional for peer-to-peer media"
           - id: W27
             reason: "WebRTC requires a broad UDP port range (10000-65535) for media transport; this is the standard SRTP/ICE port range"
+      cdk-nag:
+        rules_to_suppress:
+          - id: AwsSolutions-EC23
+            reason: "WebRTC media transport requires inbound UDP 10000-65535 from 0.0.0.0/0; this is the standard SRTP/ICE port range for peer-to-peer real-time media"
     Properties:
       GroupDescription: ECS tasks - allow traffic from ALB and WebRTC UDP
       VpcId: !Ref VpcId
@@ -183,11 +199,10 @@ Resources:
   # ---- ALB ----
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    DependsOn: LogBucketPolicy
     Metadata:
       cfn_nag:
         rules_to_suppress:
-          - id: W52
-            reason: "ALB access logging omitted for this demo; adding an S3 log bucket would add cost and operational overhead disproportionate to the use case"
           - id: W28
             reason: "Explicit ALB name used for consistent DNS lookup in deployment scripts; name is environment-scoped"
     Properties:
@@ -197,6 +212,13 @@ Resources:
       Subnets: !Ref PublicSubnetIds
       SecurityGroups:
         - !Ref ALBSecurityGroup
+      LoadBalancerAttributes:
+        - Key: access_logs.s3.enabled
+          Value: 'true'
+        - Key: access_logs.s3.bucket
+          Value: !Ref LogBucket
+        - Key: access_logs.s3.prefix
+          Value: alb
 
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -279,6 +301,11 @@ Resources:
 
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
+    Metadata:
+      cdk-nag:
+        rules_to_suppress:
+          - id: AwsSolutions-ECS2
+            reason: "Non-sensitive configuration values (AWS region, Bedrock model ID) are passed as plain env vars; all secrets (API keys) are injected from SSM Parameter Store"
     Properties:
       Family: !Sub '${EnvironmentName}-task'
       Cpu: !Ref TaskCpu
@@ -367,6 +394,77 @@ Resources:
         ScaleInCooldown: 120
         ScaleOutCooldown: 60
 
+  # ---- S3 Logging Bucket ----
+  LogBucket:
+    Type: AWS::S3::Bucket
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W35
+            reason: "This IS the access log destination bucket; logging it to itself is not possible and creates a circular dependency"
+          - id: W51
+            reason: "Bucket policy is on the separate LogBucketPolicy resource below to avoid circular dependency with ALB delivery policy"
+      cdk-nag:
+        rules_to_suppress:
+          - id: AwsSolutions-S1
+            reason: "This IS the access log destination bucket; enabling server access logging on the log bucket itself is circular and not supported"
+    Properties:
+      BucketName: !Sub '${EnvironmentName}-logs-${AWS::Region}-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldLogs
+            Status: Enabled
+            ExpirationInDays: 90
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+
+  LogBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref LogBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ALBLogDelivery
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub '${LogBucket.Arn}/alb/AWSLogs/${AWS::AccountId}/*'
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+                aws:SourceAccount: !Ref AWS::AccountId
+          - Sid: ALBLogDeliveryAclCheck
+            Effect: Allow
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource: !GetAtt LogBucket.Arn
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+          - Sid: DenyNonTLS
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt LogBucket.Arn
+              - !Sub '${LogBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
   # ---- S3 Frontend Bucket ----
   FrontendBucket:
     Type: AWS::S3::Bucket
@@ -375,6 +473,10 @@ Resources:
         rules_to_suppress:
           - id: W35
             reason: "S3 access logging omitted for this demo; CloudFront access logs cover the request path; adding a separate log bucket adds cost disproportionate to the use case"
+      cdk-nag:
+        rules_to_suppress:
+          - id: AwsSolutions-S1
+            reason: "CloudFront standard logging to LogBucket covers all request-path access; S3 server access logs would be redundant for this use case"
     Properties:
       BucketName: !Sub '${EnvironmentName}-frontend-${AWS::Region}-${AWS::AccountId}'
       BucketEncryption:
@@ -398,6 +500,16 @@ Resources:
             Condition:
               StringEquals:
                 AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+          - Sid: DenyNonTLS
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt FrontendBucket.Arn
+              - !Sub '${FrontendBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: false
 
   # ---- CloudFront ----
   CloudFrontOAC:
@@ -412,15 +524,23 @@ Resources:
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Metadata:
-      cfn_nag:
+      cdk-nag:
         rules_to_suppress:
-          - id: W10
-            reason: "CloudFront access logging omitted for this demo; standard CloudFront metrics via CloudWatch cover operational visibility; log bucket adds cost disproportionate to the use case"
+          - id: AwsSolutions-CFR1
+            reason: "Geo restrictions not required for a public demo; content is intentionally globally accessible"
+          - id: AwsSolutions-CFR2
+            reason: "WAF not warranted for a kiosk demo with no user data or financial transactions; cost disproportionate to risk"
+          - id: AwsSolutions-CFR4
+            reason: "When no ACM certificate is provided the CloudFront default certificate is used and TLS version cannot be customised; when a cert is provided TLSv1.2_2021 is enforced via MinimumProtocolVersion"
     Properties:
       DistributionConfig:
         Enabled: true
         DefaultRootObject: index.html
         Comment: !Sub '${EnvironmentName} frontend + API proxy'
+        Logging:
+          Bucket: !GetAtt LogBucket.DomainName
+          IncludeCookies: false
+          Prefix: cloudfront/
         ViewerCertificate: !If
           - HasCertificate
           - AcmCertificateArn: !Ref CertificateArn
