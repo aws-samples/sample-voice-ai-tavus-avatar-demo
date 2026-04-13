@@ -435,6 +435,29 @@ Resources:
                 aws:SecureTransport: false
 
   # ---- CloudFront ----
+  # Viewer-request function: rewrite /content/foo → /content/foo/index.html
+  # so S3 serves the correct file instead of returning 403 (which triggers
+  # the SPA fallback and breaks iframe content overlays).
+  ContentRewriteFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub '${EnvironmentName}-content-rewrite'
+      AutoPublish: true
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+          // If the URI ends without a file extension and without a trailing slash,
+          // append /index.html so S3 resolves the directory index.
+          if (uri.startsWith('/content/') && !uri.endsWith('/') && uri.lastIndexOf('.') <= uri.lastIndexOf('/')) {
+            request.uri = uri + '/index.html';
+          }
+          return request;
+        }
+      FunctionConfig:
+        Comment: 'Rewrite /content/* directory paths to /index.html for S3'
+        Runtime: cloudfront-js-2.0
+
   CloudFrontOAC:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
@@ -484,6 +507,14 @@ Resources:
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
           Compress: true
         CacheBehaviors:
+          - PathPattern: '/content/*'
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+            Compress: true
+            FunctionAssociations:
+              - EventType: viewer-request
+                FunctionARN: !GetAtt ContentRewriteFunction.FunctionARN
           - PathPattern: '/api/*'
             TargetOriginId: ALBOrigin
             ViewerProtocolPolicy: redirect-to-https
