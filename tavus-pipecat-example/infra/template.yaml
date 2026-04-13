@@ -173,11 +173,9 @@ Resources:
           CidrIp: 0.0.0.0/0
           Description: WebRTC media (UDP)
       SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
+        - IpProtocol: '-1'
           CidrIp: 0.0.0.0/0
-          Description: HTTPS outbound to AWS APIs and third-party services
+          Description: Allow all outbound (SSM, ECR, WebRTC UDP, third-party APIs)
 
   # Standalone rules to break the circular dependency between ALBSecurityGroup and ECSSecurityGroup
   ALBToECSEgress:
