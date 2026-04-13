@@ -39,15 +39,16 @@ jobs:
 
       - name: Deploy CloudFormation stack
         run: |
+          # Reuse existing parameter values from the running stack
           aws cloudformation deploy \
             --template-file tavus-pipecat-example/infra/template.yaml \
             --stack-name $CFN_STACK_NAME \
-            --parameter-overrides \
-              VpcId=${{ secrets.CFN_VPC_ID }} \
-              PublicSubnetIds=${{ secrets.CFN_SUBNET_IDS }} \
-              CertificateArn=${{ secrets.CFN_CERTIFICATE_ARN || '' }} \
             --capabilities CAPABILITY_NAMED_IAM \
-            --no-fail-on-empty-changeset
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              $(aws cloudformation describe-stacks --stack-name $CFN_STACK_NAME \
+                --query 'Stacks[0].Parameters[].{K:ParameterKey,V:ParameterValue}' \
+                --output text | awk '{print $1"="$2}')
 
   deploy-backend:
     name: Build & deploy backend
