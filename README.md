@@ -42,7 +42,7 @@ This repo contains two independent implementations of the same demo:
 | **When to choose** | Quick demos, minimal setup, managed infrastructure | Custom pipelines, multi-model support, full control |
 | **Best for** | Prototyping, simple use cases | Production, complex workflows, experimentation |
 
-Both share the same system prompt (`prompts/tavus-system-instruction-1.md`), tool definitions, and content overlays.
+Both share the same tool definitions and content overlays. System prompts are isolated per event in `prompts/{EVENT_CONFIG}/`.
 
 ```mermaid
 graph LR
@@ -157,6 +157,8 @@ TAVUS_API_KEY=your_tavus_key_here
 TAVUS_REPLICA_ID=your_replica_id_here
 TAVUS_REPLICA_ID_NOVA_SONIC=your_nova_sonic_replica_id_here
 AWS_REGION_NOVA_SONIC=ap-south-1
+NOVA_SONIC_VOICE_ID=matthew
+CARTESIA_VOICE_ID=79a125e8-cd45-4c13-8a67-188112f4dd22
 AWS_ACCESS_KEY_ID=your_aws_key_here
 AWS_SECRET_ACCESS_KEY=your_aws_secret_here
 ```
@@ -211,6 +213,8 @@ Audio In -> Amazon Nova 2 Sonic (STT+LLM+TTS) -> Tavus Avatar -> Audio/Video Out
 | `DAILY_API_KEY` | Daily.co API key (required for cloud deployment with Daily transport) |
 | `REACT_APP_TRANSPORT` | WebRTC transport (`daily` or `webrtc`). Set automatically by CI/CD — not user-configured. |
 | `AWS_REGION_NOVA_SONIC` | AWS region for Nova Sonic (default: `ap-south-1`) |
+| `NOVA_SONIC_VOICE_ID` | Nova Sonic voice ID (default: `matthew`; use `arjun` for Hindi) |
+| `CARTESIA_VOICE_ID` | Cartesia voice UUID (default: `79a125e8-...` British Lady) |
 | `AWS_ACCESS_KEY_ID` | AWS credentials (optional if using default credential chain) |
 | `AWS_SECRET_ACCESS_KEY` | AWS credentials (optional if using default credential chain) |
 
@@ -298,6 +302,15 @@ aws iam create-open-id-connect-provider \
 | `AWS_ROLE_ARN` | IAM role ARN for GitHub Actions OIDC |
 | `S3_BUCKET_NAME` | `FrontendBucketName` output |
 | `CLOUDFRONT_DISTRIBUTION_ID` | `CloudFrontDistributionId` output |
+
+Also set these **repository variables** (Settings → Variables → Actions) to configure the event and voices per deployment:
+
+| Variable | Example (Sydney) | Example (Bengaluru) |
+|---|---|---|
+| `AWS_REGION` | `ap-southeast-2` | `ap-south-1` |
+| `EVENT_CONFIG` | `aws-summit-sydney-2026` | `aws-summit-bengaluru-2026` |
+| `NOVA_SONIC_VOICE_ID` | `matthew` | `arjun` |
+| `CARTESIA_VOICE_ID` | `79a125e8-cd45-4c13-8a67-188112f4dd22` | `7f423809-0011-4658-ba48-a411f5e516ba` |
 
 #### 5. Push to deploy
 
@@ -468,7 +481,8 @@ For `tavus-avatar` only. The persona's system prompt, tools, and engines are man
 #### Update the system prompt
 
 ```bash
-SYSTEM_PROMPT=$(python3 -c "import json; print(json.dumps(open('prompts/tavus-system-instruction-1.md').read()))")
+# Set EVENT_CONFIG to match your event (e.g. aws-summit-bengaluru-2026)
+SYSTEM_PROMPT=$(python3 -c "import json; print(json.dumps(open('prompts/$EVENT_CONFIG/system-instruction.md').read()))")
 
 curl -X PATCH "https://tavusapi.com/v2/personas/$TAVUS_PERSONA_ID" \
   -H "x-api-key: $TAVUS_API_KEY" \
@@ -525,7 +539,7 @@ Noise cancellation runs locally on the kiosk Mac using [Krisp](https://krisp.ai)
 
 #### System Prompt
 
-Both implementations use `prompts/tavus-system-instruction-1.md` as the system prompt. It contains booth context, demo architecture knowledge, AWS services info, voice AI use cases, FAQs, and Nova Sonic details.
+Both implementations load the system prompt from `prompts/{EVENT_CONFIG}/system-instruction.md`. Set `EVENT_CONFIG` to the event directory name (e.g. `aws-summit-bengaluru-2026`) to switch event context — prompts, greetings, voice IDs, and content items are all isolated per event. Copy `prompts/_template/` to add a new event.
 
 #### Tool Calls
 
