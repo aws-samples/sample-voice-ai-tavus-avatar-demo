@@ -29,6 +29,14 @@ Parameters:
     Type: String
     Default: 'aws-summit-bengaluru-2026'
     Description: Event directory under prompts/ (e.g. aws-summit-bengaluru-2026)
+  NovaSonicVoiceId:
+    Type: String
+    Default: matthew
+    Description: Nova Sonic voice ID (e.g. matthew, arjun)
+  CartesiaVoiceId:
+    Type: String
+    Default: '79a125e8-cd45-4c13-8a67-188112f4dd22'
+    Description: Cartesia voice UUID
 
 Conditions:
   HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
@@ -345,6 +353,10 @@ Resources:
               Value: apac.anthropic.claude-haiku-4-5-20251001-v1:0
             - Name: EVENT_CONFIG
               Value: !Ref EventConfig
+            - Name: NOVA_SONIC_VOICE_ID
+              Value: !Ref NovaSonicVoiceId
+            - Name: CARTESIA_VOICE_ID
+              Value: !Ref CartesiaVoiceId
 
   ECSService:
     Type: AWS::ECS::Service

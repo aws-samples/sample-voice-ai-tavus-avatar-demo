@@ -360,7 +360,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
             )
             tts = CartesiaTTSService(
                 api_key=os.getenv("CARTESIA_API_KEY"),
-                voice_id="79a125e8-cd45-4c13-8a67-188112f4dd22",  # British Lady
+                voice_id=os.getenv("CARTESIA_VOICE_ID", "79a125e8-cd45-4c13-8a67-188112f4dd22"),  # British Lady default
             )
             llm = AWSBedrockLLMService(
                 model=os.getenv("BEDROCK_MODEL_ID", "apac.anthropic.claude-haiku-4-5-20251001-v1:0"),
