@@ -14,6 +14,7 @@ An interactive conversational video demo for AWS events and demo booths. An AI-p
 - [Troubleshooting](#troubleshooting)
 - [Monitoring & Debugging](#monitoring--debugging)
 - [Advanced Topics](#advanced-topics)
+  - [Available Tavus Avatars](#available-tavus-avatars)
 - [Glossary](#glossary)
 
 ## Quick Start
@@ -208,8 +209,8 @@ Audio In -> Amazon Nova 2 Sonic (STT+LLM+TTS) -> Tavus Avatar -> Audio/Video Out
 | `DEEPGRAM_API_KEY` | Deepgram API key (cascaded STT²) |
 | `CARTESIA_API_KEY` | Cartesia API key (cascaded TTS⁴) |
 | `TAVUS_API_KEY` | Tavus API key (avatar) |
-| `TAVUS_REPLICA_ID` | Tavus replica for cascaded mode |
-| `TAVUS_REPLICA_ID_NOVA_SONIC` | Tavus replica for Nova Sonic mode (different avatar) |
+| `TAVUS_REPLICA_ID` | Tavus replica ID for cascaded mode (see [Available Avatars](#available-tavus-avatars)) |
+| `TAVUS_REPLICA_ID_NOVA_SONIC` | Tavus replica ID for Nova Sonic mode — use a different avatar to visually distinguish the two modes |
 | `DAILY_API_KEY` | Daily.co API key (required for cloud deployment with Daily transport) |
 | `REACT_APP_TRANSPORT` | WebRTC transport (`daily` or `webrtc`). Set automatically by CI/CD — not user-configured. |
 | `AWS_REGION_NOVA_SONIC` | AWS region for Nova Sonic (default: `ap-south-1`) |
@@ -565,6 +566,72 @@ Static HTML content pages are served from `tavus-pipecat-example/frontend/public
 - `Ctrl+D` — Toggle microphone mute
 - `Ctrl+F` — Cycle microphone devices (tavus-avatar only)
 - `Ctrl+G` — Cycle speaker devices (tavus-avatar only)
+
+### Available Tavus Avatars
+
+Tavus provides stock replicas usable without custom recordings. Set `TAVUS_REPLICA_ID` and `TAVUS_REPLICA_ID_NOVA_SONIC` in SSM Parameter Store to change the avatar per deployment.
+
+**Female replicas:**
+
+| Name | Replica ID | Setting |
+|---|---|---|
+| Olivia | `rc2146c13e81` | Neutral background |
+| Olivia - Office | `r9fa0878977a` | Office setting |
+| Anna | `r6ae5b6efc9d` | Neutral background |
+| Anna - Office | `r4dcf31b60e1` | Office setting |
+| Julia | `rdc96ac37313` | Neutral background |
+| Julia - Home Office | `rb43357fb2ee` | Home office |
+| Gloria - Conversational | `rbe2c395e725` | Conversational style |
+| Rose | `r1af76e94d00` | Neutral background |
+| Luna | `r9d30b0e55ac` | Neutral background |
+| Helen - Casual | `r12d3eb75ec2` | Casual setting |
+| Lucy - Studio | `r53a461095cf` | Studio setting |
+| Samantha - Office V2 | `r38e4c3bc562` | Office setting |
+| Gabby | `rdf61be0d4e1` | Neutral background |
+| Ruby | `re3a705cf66a` | Neutral background |
+| Destiny | `r38a383b0173` | Neutral background |
+| Celine - Studio | `r4f5b5ef55c8` | Studio setting |
+
+**Male replicas:**
+
+| Name | Replica ID | Setting |
+|---|---|---|
+| Charlie | `rf4703150052` | Neutral background |
+| Benjamin | `r1a4e22fa0d9` | Neutral background |
+| Raj | `ra066ab28864` | Neutral background |
+| Raj - Doctor | `r18e9aebdc33` | Doctor setting |
+| Daniel - Office | `r72f7f7f7c8b` | Office setting |
+| Owen | `r9458111c64a` | Neutral background |
+| Carter | `rca8a38779a8` | Neutral background |
+| Liam | `r90a0339d496` | Neutral background |
+| Diego - Office V2 | `r044d76f4490` | Office setting |
+| Danny | `r62baeccd777` | Neutral background |
+| James | `r92debe21318` | Neutral background |
+| Nathan - Bookshelf | `rfe12d8b9597` | Bookshelf setting |
+| Lucas - Studio | `r5f0577fc829` | Studio setting |
+| Victor - Casual | `r1d7cf9edbb4` | Casual setting |
+| Kai | `r31e11adf1d3` | Neutral background |
+| Zane | `r24efb3b9bef` | Neutral background |
+
+**To update the avatar for a deployment:**
+```bash
+# Example: switch Sydney Nova Sonic to Olivia - Office
+aws ssm put-parameter \
+  --name /tavus-pipecat/TAVUS_REPLICA_ID_NOVA_SONIC \
+  --type SecureString --value "r9fa0878977a" --overwrite \
+  --region ap-southeast-2
+```
+
+**Current per-deployment config:**
+
+| Deployment | Pipeline | Avatar | Voice |
+|---|---|---|---|
+| Sydney (`ap-southeast-2`) | Cascaded | Olivia (`rc2146c13e81`) | Cartesia British Lady |
+| Sydney (`ap-southeast-2`) | Nova Sonic | Olivia - Office (`r9fa0878977a`) | olivia (Australian English) |
+| Bengaluru (`ap-south-1`) | Cascaded | *(set in SSM)* | Cartesia Hindi |
+| Bengaluru (`ap-south-1`) | Nova Sonic | *(set in SSM)* | arjun (Hindi) |
+
+**Available Nova Sonic voices:** `matthew` (polyglot), `tiffany` (polyglot), `amy` (British English), `olivia` (Australian English), `ambre` (French), `beatrice` (Italian), `arjun` (Hindi), and others. See [Amazon Nova Sonic docs](https://docs.aws.amazon.com/nova/latest/userguide/nova-sonic-voice-options.html) for the full list.
 
 ### Guidance for Voice Agents
 
