@@ -235,7 +235,7 @@ Resources:
       Matcher:
         HttpCode: '200-499'
 
-  ALBHttpListener:
+  ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Metadata:
       cfn_nag:
@@ -348,7 +348,7 @@ Resources:
 
   ECSService:
     Type: AWS::ECS::Service
-    DependsOn: ALBHttpListener
+    DependsOn: ALBListener
     Properties:
       ServiceName: !Sub '${EnvironmentName}-service'
       Cluster: !Ref ECSCluster
