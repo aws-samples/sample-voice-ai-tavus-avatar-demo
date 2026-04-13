@@ -25,6 +25,10 @@ Parameters:
     Type: String
     Description: ARN of an ACM certificate (same region as ALB) to enable HTTPS. Leave empty to keep HTTP-only.
     Default: ''
+  EventConfig:
+    Type: String
+    Default: 'aws-summit-bengaluru-2026'
+    Description: Event directory under prompts/ (e.g. aws-summit-bengaluru-2026)
 
 Conditions:
   HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
@@ -341,6 +345,8 @@ Resources:
               Value: ap-south-1
             - Name: BEDROCK_MODEL_ID
               Value: apac.anthropic.claude-haiku-4-5-20251001-v1:0
+            - Name: EVENT_CONFIG
+              Value: !Ref EventConfig
 
   ECSService:
     Type: AWS::ECS::Service

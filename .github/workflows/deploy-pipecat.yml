@@ -56,7 +56,7 @@ jobs:
             --stack-name $CFN_STACK_NAME \
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset \
-            --parameter-overrides $PARAMS
+            --parameter-overrides $PARAMS EventConfig=$EVENT_CONFIG
 
   deploy-backend:
     name: Build & deploy backend
