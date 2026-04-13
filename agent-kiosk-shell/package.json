@@ -9,6 +9,6 @@
     "lint": "node --check src/main.cjs"
   },
   "devDependencies": {
-    "electron": "^39.0.0"
+    "electron": "^39.8.5"
   }
 }
