@@ -199,12 +199,13 @@ Resources:
   # ---- ALB ----
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    DependsOn: LogBucketPolicy
     Metadata:
       cfn_nag:
         rules_to_suppress:
           - id: W28
             reason: "Explicit ALB name used for consistent DNS lookup in deployment scripts; name is environment-scoped"
+          - id: W52
+            reason: "ALB access logging omitted for this demo; CloudFront access logs cover the request path; adding a log bucket adds cost disproportionate to the use case"
     Properties:
       Name: !Sub '${EnvironmentName}-alb'
       Scheme: internet-facing
@@ -212,13 +213,6 @@ Resources:
       Subnets: !Ref PublicSubnetIds
       SecurityGroups:
         - !Ref ALBSecurityGroup
-      LoadBalancerAttributes:
-        - Key: access_logs.s3.enabled
-          Value: 'true'
-        - Key: access_logs.s3.bucket
-          Value: !Ref LogBucket
-        - Key: access_logs.s3.prefix
-          Value: alb
 
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -394,77 +388,6 @@ Resources:
         ScaleInCooldown: 120
         ScaleOutCooldown: 60
 
-  # ---- S3 Logging Bucket ----
-  LogBucket:
-    Type: AWS::S3::Bucket
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W35
-            reason: "This IS the access log destination bucket; logging it to itself is not possible and creates a circular dependency"
-          - id: W51
-            reason: "Bucket policy is on the separate LogBucketPolicy resource below to avoid circular dependency with ALB delivery policy"
-      cdk-nag:
-        rules_to_suppress:
-          - id: AwsSolutions-S1
-            reason: "This IS the access log destination bucket; enabling server access logging on the log bucket itself is circular and not supported"
-    Properties:
-      BucketName: !Sub '${EnvironmentName}-logs-${AWS::Region}-${AWS::AccountId}'
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpireOldLogs
-            Status: Enabled
-            ExpirationInDays: 90
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: BucketOwnerPreferred
-
-  LogBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref LogBucket
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: ALBLogDelivery
-            Effect: Allow
-            Principal:
-              Service: delivery.logs.amazonaws.com
-            Action: s3:PutObject
-            Resource: !Sub '${LogBucket.Arn}/alb/AWSLogs/${AWS::AccountId}/*'
-            Condition:
-              StringEquals:
-                s3:x-amz-acl: bucket-owner-full-control
-                aws:SourceAccount: !Ref AWS::AccountId
-          - Sid: ALBLogDeliveryAclCheck
-            Effect: Allow
-            Principal:
-              Service: delivery.logs.amazonaws.com
-            Action: s3:GetBucketAcl
-            Resource: !GetAtt LogBucket.Arn
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref AWS::AccountId
-          - Sid: DenyNonTLS
-            Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource:
-              - !GetAtt LogBucket.Arn
-              - !Sub '${LogBucket.Arn}/*'
-            Condition:
-              Bool:
-                aws:SecureTransport: false
-
   # ---- S3 Frontend Bucket ----
   FrontendBucket:
     Type: AWS::S3::Bucket
@@ -537,10 +460,6 @@ Resources:
         Enabled: true
         DefaultRootObject: index.html
         Comment: !Sub '${EnvironmentName} frontend + API proxy'
-        Logging:
-          Bucket: !GetAtt LogBucket.DomainName
-          IncludeCookies: false
-          Prefix: cloudfront/
         ViewerCertificate: !If
           - HasCertificate
           - AcmCertificateArn: !Ref CertificateArn
