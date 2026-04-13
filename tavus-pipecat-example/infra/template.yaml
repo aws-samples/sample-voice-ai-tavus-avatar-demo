@@ -447,7 +447,7 @@ Resources:
   ContentRewriteFunction:
     Type: AWS::CloudFront::Function
     Properties:
-      Name: !Sub '${EnvironmentName}-content-rewrite'
+      Name: !Sub '${EnvironmentName}-${AWS::Region}-content-rewrite'
       AutoPublish: true
       FunctionCode: |
         function handler(event) {
