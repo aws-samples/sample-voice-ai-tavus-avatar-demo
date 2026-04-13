@@ -19,9 +19,39 @@ env:
   ECR_REPOSITORY: tavus-pipecat-backend
   ECS_CLUSTER: tavus-pipecat-cluster
   ECS_SERVICE: tavus-pipecat-service
+  CFN_STACK_NAME: tavus-pipecat
 
 jobs:
+  deploy-infra:
+    name: Deploy infrastructure
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy CloudFormation stack
+        run: |
+          aws cloudformation deploy \
+            --template-file tavus-pipecat-example/infra/template.yaml \
+            --stack-name $CFN_STACK_NAME \
+            --parameter-overrides \
+              VpcId=${{ secrets.CFN_VPC_ID }} \
+              PublicSubnetIds=${{ secrets.CFN_SUBNET_IDS }} \
+              CertificateArn=${{ secrets.CFN_CERTIFICATE_ARN || '' }} \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
+
   deploy-backend:
+    name: Build & deploy backend
+    needs: deploy-infra
     name: Build & deploy backend
     runs-on: ubuntu-latest
     permissions:
@@ -72,6 +102,7 @@ jobs:
 
   deploy-frontend:
     name: Build & deploy frontend
+    needs: deploy-infra
     runs-on: ubuntu-latest
     permissions:
       id-token: write
