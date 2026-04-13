@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 
 # Copy application code
 COPY tavus-pipecat-example/tavus-pipecat.py .
+COPY tavus-pipecat-example/server.py .
 
 # Copy shared prompts (tavus-pipecat.py reads from ../prompts/)
 COPY prompts/ /app/prompts/
@@ -21,4 +22,4 @@ USER appuser
 
 EXPOSE 7860
 
-CMD ["python", "tavus-pipecat.py", "--transport", "daily", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["python", "server.py", "--transport", "daily", "--host", "0.0.0.0", "--port", "7860"]
