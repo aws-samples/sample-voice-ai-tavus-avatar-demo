@@ -282,7 +282,7 @@ function VideoConversation() {
         <div className="start-inner">
           <header className="start-header">
             <div>
-              <p className="eyebrow">AWS Booth Demo</p>
+              <p className="eyebrow">{({'aws-summit-sydney-2026':'AWS Summit Sydney 2026','aws-summit-bengaluru-2026':'AWS Summit Bengaluru 2026'})[process.env.REACT_APP_EVENT_CONFIG] || 'AWS Booth Demo'}</p>
               <h1>Real-Time Voice AI on AWS</h1>
             </div>
             <div className="start-header-right">

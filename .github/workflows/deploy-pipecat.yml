@@ -91,6 +91,7 @@ jobs:
         env:
           REACT_APP_API_URL: ''
           REACT_APP_TRANSPORT: daily
+          REACT_APP_EVENT_CONFIG: ${{ env.EVENT_CONFIG }}
         run: |
           npm ci
           npm run build
