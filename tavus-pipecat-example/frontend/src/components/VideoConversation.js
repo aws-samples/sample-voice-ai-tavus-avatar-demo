@@ -282,7 +282,7 @@ function VideoConversation() {
         <div className="start-inner">
           <header className="start-header">
             <div>
-              <p className="eyebrow">AWS Summit Sydney 2026</p>
+              <p className="eyebrow">AWS Booth Demo</p>
               <h1>Real-Time Voice AI on AWS</h1>
             </div>
             <div className="start-header-right">
