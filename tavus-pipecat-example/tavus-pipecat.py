@@ -276,6 +276,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
         tavus = TavusVideoService(
             api_key=os.getenv("TAVUS_API_KEY"),
             replica_id=replica_id,
+            persona_id=os.getenv("TAVUS_PERSONA_ID", "paaee96e4f87"),
             session=session,
         )
 
