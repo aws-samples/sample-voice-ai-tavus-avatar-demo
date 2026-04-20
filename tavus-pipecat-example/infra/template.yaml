@@ -37,9 +37,23 @@ Parameters:
     Type: String
     Default: '79a125e8-cd45-4c13-8a67-188112f4dd22'
     Description: Cartesia voice UUID
+  CloudFrontOriginVerifySecret:
+    Type: String
+    NoEcho: true
+    Default: ''
+    Description: >
+      Secret value added by CloudFront as the X-Origin-Verify header on every
+      request to the ALB origin. When set, the ALB rejects any request that
+      does not carry this header, blocking direct ALB access that bypasses
+      CloudFront. Leave empty to skip this protection (not recommended for
+      production).
 
 Conditions:
   HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+  HasOriginVerifySecret: !Not [!Equals [!Ref CloudFrontOriginVerifySecret, '']]
+  HasCertificateAndSecret: !And
+    - !Condition HasCertificate
+    - !Condition HasOriginVerifySecret
 
 Resources:
   # ---- ECR ----
@@ -232,7 +246,7 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VpcId
       TargetType: ip
-      HealthCheckPath: /start
+      HealthCheckPath: /health
       HealthCheckIntervalSeconds: 10
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
@@ -280,6 +294,31 @@ Resources:
       Certificates:
         - CertificateArn: !Ref CertificateArn
       DefaultActions:
+        - !If
+          - HasOriginVerifySecret
+          - Type: fixed-response
+            FixedResponseConfig:
+              StatusCode: '403'
+              ContentType: application/json
+              MessageBody: '{"error":"Forbidden: direct ALB access is not allowed"}'
+          - Type: forward
+            TargetGroupArn: !Ref ALBTargetGroup
+
+  # When CloudFrontOriginVerifySecret is set, only forward requests that carry
+  # the matching X-Origin-Verify header (i.e. requests routed through CloudFront).
+  ALBHttpsOriginVerifyRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Condition: HasCertificateAndSecret
+    Properties:
+      ListenerArn: !Ref ALBHttpsListener
+      Priority: 1
+      Conditions:
+        - Field: http-header
+          HttpHeaderConfig:
+            HttpHeaderName: X-Origin-Verify
+            Values:
+              - !Ref CloudFrontOriginVerifySecret
+      Actions:
         - Type: forward
           TargetGroupArn: !Ref ALBTargetGroup
 
@@ -515,6 +554,11 @@ Resources:
               OriginAccessIdentity: ''
           - Id: ALBOrigin
             DomainName: !GetAtt ALB.DNSName
+            OriginCustomHeaders: !If
+              - HasOriginVerifySecret
+              - - HeaderName: X-Origin-Verify
+                  HeaderValue: !Ref CloudFrontOriginVerifySecret
+              - !Ref AWS::NoValue
             CustomOriginConfig:
               HTTPPort: 80
               HTTPSPort: 443

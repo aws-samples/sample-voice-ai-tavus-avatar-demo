@@ -44,10 +44,15 @@ jobs:
       - name: Deploy CloudFormation stack
         continue-on-error: true
         run: |
-          # Fetch existing parameter values from the running stack
+          # Fetch existing parameter values from the running stack.
+          # Strip CloudFrontOriginVerifySecret — it is NoEcho so describe-stacks
+          # returns "****", which would corrupt the value on re-deploy. We read it
+          # from SSM directly instead.
           PARAMS=$(aws cloudformation describe-stacks --stack-name $CFN_STACK_NAME \
             --query 'Stacks[0].Parameters[].{K:ParameterKey,V:ParameterValue}' \
-            --output text 2>/dev/null | awk '{print $1"="$2}')
+            --output text 2>/dev/null \
+            | awk '{print $1"="$2}' \
+            | grep -v "^CloudFrontOriginVerifySecret=")
 
           if [ -z "$PARAMS" ]; then
             echo "::warning::Could not fetch existing stack parameters. Skipping CFN deploy."
@@ -55,12 +60,25 @@ jobs:
             exit 0
           fi
 
+          # Read the CloudFront origin-verify secret from SSM (SecureString).
+          # If the parameter does not exist yet the secret defaults to empty,
+          # which leaves the ALB listener in pass-through mode.
+          ORIGIN_SECRET=$(aws ssm get-parameter \
+            --name "/${CFN_STACK_NAME}/CLOUDFRONT_ORIGIN_VERIFY_SECRET" \
+            --with-decryption \
+            --query Parameter.Value \
+            --output text 2>/dev/null || echo "")
+
           aws cloudformation deploy \
             --template-file tavus-pipecat-example/infra/template.yaml \
             --stack-name $CFN_STACK_NAME \
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset \
-            --parameter-overrides $PARAMS EventConfig=$EVENT_CONFIG NovaSonicVoiceId=$NOVA_SONIC_VOICE_ID CartesiaVoiceId=$CARTESIA_VOICE_ID
+            --parameter-overrides $PARAMS \
+              EventConfig=$EVENT_CONFIG \
+              NovaSonicVoiceId=$NOVA_SONIC_VOICE_ID \
+              CartesiaVoiceId=$CARTESIA_VOICE_ID \
+              CloudFrontOriginVerifySecret="$ORIGIN_SECRET"
 
   deploy-backend:
     name: Build & deploy backend

@@ -2,7 +2,8 @@
 Auth wrapper around the Pipecat runner.
 
 Adds a DEMO_API_TOKEN cookie gate to protect POST /start from unauthorized
-usage. GET /start is left unprotected so the ALB health check keeps passing.
+usage. GET /health is the ALB health check target and is always reachable
+without auth. All other non-API paths also pass through (static assets etc.).
 
 Run the same way as the bare runner:
     python server.py --transport daily --host 0.0.0.0 --port 7860
@@ -26,6 +27,12 @@ COOKIE_MAX_AGE = 8 * 60 * 60  # 8 hours
 
 def create_app(args: argparse.Namespace):
     app = _create_server_app(args)
+
+    # ── Health check ─────────────────────────────────────────────────────────
+
+    @app.get("/health")
+    async def health():
+        return {"status": "ok"}
 
     # ── Auth endpoints ────────────────────────────────────────────────────────
 

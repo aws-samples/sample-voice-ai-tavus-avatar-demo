@@ -73,6 +73,7 @@ const REPLICA_READY_EVENT_TYPES = new Set([
 ]);
 
 const START_TIMEOUT_MS = 30_000;
+const ACTIVE_CONVERSATION_STORAGE_KEY = "tavus_active_conversation_id";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -1181,6 +1182,7 @@ export function TavusDemo() {
       const currentCallObject = callObjectRef.current;
 
       conversationIdRef.current = null;
+      localStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
       dispatch({ type: "CLEAR_SESSION" });
 
       if (!currentCallObject) {
@@ -1253,6 +1255,14 @@ export function TavusDemo() {
         await teardownDemo();
       }
 
+      // Recover any conversation ID that survived a previous crash or failed pagehide.
+      // End it before starting a new one to avoid accumulating orphaned billable sessions.
+      const storedConversationId = localStorage.getItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+      if (storedConversationId) {
+        localStorage.removeItem(ACTIVE_CONVERSATION_STORAGE_KEY);
+        await endConversation(storedConversationId);
+      }
+
       nextCallObject = DailyIframe.createCallObject();
       callObjectRef.current = nextCallObject;
       dispatch({ type: "SET_CALL_OBJECT", callObject: nextCallObject });
@@ -1280,6 +1290,7 @@ export function TavusDemo() {
       dispatch({ type: "SET_STATUS", status: "loading" });
       const conversation = await createConversation(abortController.signal);
       nextConversationId = conversation.conversation_id;
+      localStorage.setItem(ACTIVE_CONVERSATION_STORAGE_KEY, nextConversationId);
       conversationIdRef.current = conversation.conversation_id;
       dispatch({ type: "SET_CONVERSATION_ID", id: conversation.conversation_id });
 
