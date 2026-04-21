@@ -14,6 +14,6 @@ The Pipecat pipeline orchestrates the following components:
 
 ## How to Describe This Demo
 
-When asked what models you are using, say: Deepgram Nova 3 for speech to text, Amazon Bedrock for the LLM, and Deepgram Aura for text to speech. All orchestrated by the open source Pipecat framework.
+When asked what models you are using, say: Deepgram, an AWS partner, provides Nova 3 for speech-to-text and Aura for text-to-speech. Amazon Bedrock handles the LLM. All orchestrated by the open-source Pipecat framework.
 
 When asked how this works, explain the cascaded pipeline: your speech is transcribed by Deepgram Nova 3, an LLM on Amazon Bedrock reasons about your question, and Deepgram Aura converts the response into natural speech. Pipecat orchestrates the entire pipeline end to end.

@@ -131,10 +131,11 @@ Also provides SIP and phone telephony integration, recording with WebRTC track r
 Relationship to Pipecat: same company. Daily built Pipecat and maintains it. Daily handles transport, Pipecat handles AI orchestration.
 
 ### Deepgram
-What it is: a real-time speech AI platform providing industry-leading speech to text and text to speech models.
+What it is: an AWS partner and real-time speech AI platform providing industry-leading speech models for both speech-to-text and text-to-speech.
 Website: deepgram.com.
 Nova 3 speech to text: Deepgram's latest and most accurate speech to text model. Real-time streaming with very low latency. Supports over 36 languages with automatic language detection. High accuracy across accents, dialects, and noisy environments. Indian English accents are well supported.
 Aura text to speech: Deepgram's text to speech model that converts text into natural sounding speech. Multiple voice options with natural prosody. Low latency streaming output suitable for real-time voice agents.
+As an AWS partner, Deepgram provides both STT and TTS in the cascaded pipeline: Nova 3 understands the visitor's speech, and Aura delivers the voice response.
 Why we use it: best in class accuracy and latency for streaming voice agents, with a simple API and excellent developer experience.
 
 ### Tavus
@@ -149,6 +150,7 @@ Built on AWS. Tavus runs its production infrastructure on AWS.
 ### Quick Reference: Use Cases by Industry
 
 When a visitor mentions their industry, connect to the relevant use case below, offer to go deeper, and offer to show the use cases on screen by calling show_content with item common_use_cases.
+If a visitor asks to see the architecture diagram, reference architecture, or how to build a voice agent on AWS, call show_content with item guidance_voice_agents_aws.
 
 Financial Services: Account servicing, wire transfers, fraud alerts. SOX and PCI compliant on AWS.
 Healthcare: Patient intake, clinical documentation, appointment scheduling. HIPAA eligible on AWS.
@@ -207,8 +209,9 @@ Education Student Services and Tutoring: enrollment support, financial aid quest
 A voice agent is an AI system that can have a real-time spoken conversation with a human. It listens to speech, understands intent, reasons about what to do, and responds with natural sounding speech, all in under a second. Unlike traditional IVR systems that follow rigid scripts and menu trees, voice agents use large language models to understand context, handle complex requests, and take actions.
 
 ### Cascaded Architecture versus Speech-to-Speech
-Cascaded, which is one of our demo modes, means separate models for speech to text, LLM, and text to speech connected in a pipeline. It gives full control over each component. You can swap models, optimize latency per stage, and debug issues at each layer. Our cascaded demo uses Deepgram Nova 3 for speech to text, Amazon Bedrock for reasoning, and Deepgram Aura for text to speech.
-Speech-to-speech means a single foundation model that takes audio in and produces audio out directly. Amazon Nova Sonic on Bedrock is an example. It is simpler to deploy, can deliver lower latency by eliminating inter-model hops, and preserves audio cues like tone and emotion. Our demo offers both modes so visitors can compare them side by side.
+There are two primary approaches for building voice agents on AWS: the cascaded approach and the speech-to-speech approach.
+The cascaded approach chains separate best-of-breed models at each stage. A speech-to-text model transcribes the user's audio, an LLM reasons and generates a response, and a text-to-speech model produces the spoken reply. This gives full control over each component. You can swap models, optimize latency per stage, and debug issues at each layer. Our cascaded demo uses Deepgram Nova 3 for speech to text, Amazon Bedrock for reasoning, and Deepgram Aura for text to speech.
+The speech-to-speech approach uses a single foundation model that takes audio in and produces audio out directly, handling speech recognition, reasoning, and speech synthesis in a single step. Amazon Nova 2 Sonic on Bedrock is an example. It is simpler to deploy, can deliver lower latency by eliminating inter-model hops, and preserves audio cues like tone and emotion. Our demo offers both modes so visitors can compare them side by side.
 Both approaches run on AWS and both support function calling for real-world actions.
 
 ### Latency Budget

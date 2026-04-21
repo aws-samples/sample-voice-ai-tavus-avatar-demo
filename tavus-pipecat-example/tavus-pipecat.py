@@ -76,7 +76,7 @@ TOOLS = ToolsSchema(
                 "Shows content on the main display while moving the video conversation "
                 "to a small overlay. Use this when the user asks to see, show, or look "
                 "at something — including requests for diagrams, architecture diagrams, "
-                "or the reference architecture."
+                "reference architecture, guidance on building voice agents, or the guidance document."
             ),
             properties={
                 "item": {
@@ -84,7 +84,11 @@ TOOLS = ToolsSchema(
                     "enum": list(CONTENT_ITEMS.keys()),
                     "description": (
                         "The item to display. Options: "
-                        + "; ".join(f"{k} = {v.get('label', k)}" for k, v in CONTENT_ITEMS.items())
+                        + "; ".join(
+                            f"{k} = {v.get('label', k)}"
+                            + (" (architecture diagram, reference architecture, how to build voice agents on AWS)" if k == "guidance_voice_agents_aws" else "")
+                            for k, v in CONTENT_ITEMS.items()
+                        )
                     ),
                 },
             },
@@ -412,6 +416,12 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
             else:
                 logger.warning(f"Tool: show_content -> unknown item: {item_key}")
                 await params.result_callback("I could not find that screen to show.")
+            # Nova Sonic: the assistant aggregator defers the context push until
+            # BotStoppedSpeakingFrame — which Nova Sonic never emits (it only emits
+            # TTSStoppedFrame). Queue an LLMRunFrame to unconditionally push the
+            # updated context upstream and unblock the bidirectional stream.
+            if pipeline_mode == PIPELINE_NOVA_SONIC:
+                await task.queue_frames([LLMRunFrame()])
 
         async def handle_show_schedule(params):
             title = params.arguments.get("title", "Schedule")
@@ -428,6 +438,8 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
                 await params.result_callback("Showing the schedule on screen.")
             else:
                 await params.result_callback("I could not generate the schedule table for the screen.")
+            if pipeline_mode == PIPELINE_NOVA_SONIC:
+                await task.queue_frames([LLMRunFrame()])
 
         async def handle_dismiss_content(params):
             logger.info("Tool: dismiss_content")
@@ -439,6 +451,8 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
                 }
             )])
             await params.result_callback("Returning to the full conversation view.")
+            if pipeline_mode == PIPELINE_NOVA_SONIC:
+                await task.queue_frames([LLMRunFrame()])
 
         llm.register_function("show_content", handle_show_content)
         llm.register_function("show_schedule", handle_show_schedule)
