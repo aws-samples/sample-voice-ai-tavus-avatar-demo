@@ -410,6 +410,8 @@ Resources:
               ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/TAVUS_REPLICA_ID'
             - Name: TAVUS_REPLICA_ID_NOVA_SONIC
               ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/TAVUS_REPLICA_ID_NOVA_SONIC'
+            - Name: TAVUS_PERSONA_ID
+              ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/TAVUS_PERSONA_ID'
             - Name: DAILY_API_KEY
               ValueFrom: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${EnvironmentName}/DAILY_API_KEY'
             - Name: DEMO_API_TOKEN
@@ -420,7 +422,7 @@ Resources:
             - Name: BEDROCK_REGION
               Value: ap-south-1
             - Name: BEDROCK_MODEL_ID
-              Value: apac.anthropic.claude-haiku-4-5-20251001-v1:0
+              Value: global.anthropic.claude-haiku-4-5-20251001-v1:0
             - Name: EVENT_CONFIG
               Value: !Ref EventConfig
             - Name: NOVA_SONIC_VOICE_ID
