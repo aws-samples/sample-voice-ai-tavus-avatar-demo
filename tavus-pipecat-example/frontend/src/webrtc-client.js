@@ -148,8 +148,12 @@ export class WebRTCClient {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Server error:', errorText);
-        throw new Error(`Server error: ${response.status} - ${errorText}`);
+        console.error('Server error:', response.status, errorText);
+        // ALB/proxy returns HTML for 502/503 — show a user-friendly message
+        const message = errorText.trim().startsWith('<')
+          ? 'Service temporarily unavailable. Please try again in a moment.'
+          : errorText;
+        throw new Error(`Server error: ${response.status} - ${message}`);
       }
 
       const answer = await response.json();
