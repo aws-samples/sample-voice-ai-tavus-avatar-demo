@@ -50,10 +50,14 @@ Parameters:
 
 Conditions:
   HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+  NoCertificate: !Equals [!Ref CertificateArn, '']
   HasOriginVerifySecret: !Not [!Equals [!Ref CloudFrontOriginVerifySecret, '']]
   HasCertificateAndSecret: !And
     - !Condition HasCertificate
     - !Condition HasOriginVerifySecret
+  HasSecretNoCert: !And
+    - !Condition HasOriginVerifySecret
+    - !Condition NoCertificate
 
 Resources:
   # ---- ECR ----
@@ -276,8 +280,15 @@ Resources:
               Protocol: HTTPS
               Port: '443'
               StatusCode: HTTP_301
-          - Type: forward
-            TargetGroupArn: !Ref ALBTargetGroup
+          - !If
+            - HasOriginVerifySecret
+            - Type: fixed-response
+              FixedResponseConfig:
+                StatusCode: '403'
+                ContentType: application/json
+                MessageBody: '{"error":"Forbidden: direct ALB access is not allowed"}'
+            - Type: forward
+              TargetGroupArn: !Ref ALBTargetGroup
 
   ALBHttpsListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -304,7 +315,25 @@ Resources:
           - Type: forward
             TargetGroupArn: !Ref ALBTargetGroup
 
-  # When CloudFrontOriginVerifySecret is set, only forward requests that carry
+  # HTTP listener rule (no-cert deployments): only forward requests that carry
+  # the matching X-Origin-Verify header injected by CloudFront.
+  ALBHttpOriginVerifyRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Condition: HasSecretNoCert
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 1
+      Conditions:
+        - Field: http-header
+          HttpHeaderConfig:
+            HttpHeaderName: X-Origin-Verify
+            Values:
+              - !Ref CloudFrontOriginVerifySecret
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+
+  # HTTPS listener rule (cert deployments): only forward requests that carry
   # the matching X-Origin-Verify header (i.e. requests routed through CloudFront).
   ALBHttpsOriginVerifyRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
