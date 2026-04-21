@@ -418,7 +418,11 @@ function VideoConversation() {
               </g>
             </svg>
           </div>
-          <span className="connecting-text">Connecting</span>
+          <div className="connecting-text-cycle">
+            <span className="ct-a">Connecting...</span>
+            <span className="ct-b">Loading Tavus video avatar...</span>
+          </div>
+          <img src="/tavus-logo.svg" alt="Tavus" className="connecting-tavus-logo" />
         </div>
       )}
 

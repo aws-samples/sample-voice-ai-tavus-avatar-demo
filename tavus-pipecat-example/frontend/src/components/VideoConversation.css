@@ -685,6 +685,55 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+/* Alternating connecting text */
+.connecting-text-cycle {
+  position: relative;
+  height: 1.1rem;
+}
+
+.connecting-text-cycle .ct-a,
+.connecting-text-cycle .ct-b {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes ctFadeA {
+  0%, 40%   { opacity: 1; }
+  50%, 90%  { opacity: 0; }
+  100%      { opacity: 1; }
+}
+
+@keyframes ctFadeB {
+  0%, 40%   { opacity: 0; }
+  50%, 90%  { opacity: 1; }
+  100%      { opacity: 0; }
+}
+
+.connecting-text-cycle .ct-a {
+  animation: ctFadeA 5s ease-in-out infinite;
+}
+
+.connecting-text-cycle .ct-b {
+  animation: ctFadeB 5s ease-in-out infinite;
+}
+
+/* Tavus logo — bottom-right of connecting overlay */
+.connecting-tavus-logo {
+  position: absolute;
+  bottom: 1.25rem;
+  right: 1.5rem;
+  height: 1.25rem;
+  width: auto;
+  opacity: 0.5;
+}
+
 /* Waiting for avatar (no video yet) */
 .waiting-text {
   display: flex;
