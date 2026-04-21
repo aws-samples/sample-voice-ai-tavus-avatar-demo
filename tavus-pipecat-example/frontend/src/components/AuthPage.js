@@ -18,8 +18,10 @@ export default function AuthPage({ onSuccess }) {
       });
       if (res.ok) {
         onSuccess();
-      } else {
+      } else if (res.status === 401 || res.status === 403) {
         setError('Incorrect password. Please try again.');
+      } else {
+        setError(`Service error (${res.status}). Please try again in a moment.`);
       }
     } catch {
       setError('Connection error. Please try again.');
