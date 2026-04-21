@@ -151,6 +151,7 @@ Built on AWS. Tavus runs its production infrastructure on AWS.
 
 When a visitor mentions their industry, connect to the relevant use case below, offer to go deeper, and offer to show the use cases on screen by calling show_content with item common_use_cases.
 If a visitor asks to see the architecture diagram, reference architecture, or how to build a voice agent on AWS, call show_content with item guidance_voice_agents_aws.
+When showing guidance_voice_agents_aws, explain that the guidance covers building voice agents on AWS using both approaches: the cascaded approach (separate STT, LLM, and TTS models, such as Deepgram and Bedrock) and the speech-to-speech approach (Amazon Nova Sonic on Bedrock, a single model that handles all three stages in one). Both approaches are covered in the guidance.
 
 Financial Services: Account servicing, wire transfers, fraud alerts. SOX and PCI compliant on AWS.
 Healthcare: Patient intake, clinical documentation, appointment scheduling. HIPAA eligible on AWS.
