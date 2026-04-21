@@ -213,6 +213,25 @@
 .info-eyebrow.sky   { color: rgba(125, 211, 252, 0.7); }
 .info-eyebrow.green { color: rgba(167, 243, 208, 0.7); }
 .info-eyebrow.violet { color: rgba(196, 181, 253, 0.7); }
+.info-eyebrow.amber { color: rgba(252, 211, 77, 0.7); }
+
+.qr-box .qr-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.qr-box .qr-img {
+  width: 4.5rem;
+  height: 4.5rem;
+  flex-shrink: 0;
+  border-radius: 0.375rem;
+}
+
+.qr-box .qr-label {
+  margin-top: 0 !important;
+}
 
 .info-box ol,
 .info-box p.info-text {
@@ -265,7 +284,7 @@
 /* Footer */
 .start-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   gap: 2rem;
   padding-bottom: 1rem;
@@ -279,6 +298,18 @@
 
 .footer-logo-img {
   filter: invert(1);
+}
+
+.footer-logo-img.no-invert {
+  filter: none;
+}
+
+.footer-logo.logo-deepgram {
+  height: 3rem;
+}
+
+.footer-logo.logo-tavus {
+  height: 1.75rem;
 }
 
 /* ================================================================
@@ -555,9 +586,9 @@
 }
 
 .content-overlay-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   padding: 0.75rem 1.25rem;
   background: rgba(15, 23, 42, 0.95);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -565,6 +596,8 @@
 }
 
 .content-overlay-title {
+  grid-column: 2;
+  text-align: center;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.3em;
@@ -573,6 +606,8 @@
 }
 
 .content-overlay-close {
+  grid-column: 3;
+  justify-self: end;
   padding: 0.375rem 1rem;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -856,6 +891,18 @@
 
 .pipeline-modal-go:hover {
   background: #7dd3fc;
+}
+
+/* ----- Tavus watermark (bottom-right, during active session without overlay) ----- */
+.tavus-watermark {
+  position: absolute;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 15;
+  height: 1.5rem;
+  width: auto;
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 /* ----- AWS watermark (top-right, during active session without overlay) ----- */

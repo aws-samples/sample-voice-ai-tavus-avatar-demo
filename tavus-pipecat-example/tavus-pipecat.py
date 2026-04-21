@@ -416,12 +416,14 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
             else:
                 logger.warning(f"Tool: show_content -> unknown item: {item_key}")
                 await params.result_callback("I could not find that screen to show.")
-            # Nova Sonic: the assistant aggregator defers the context push until
-            # BotStoppedSpeakingFrame — which Nova Sonic never emits (it only emits
-            # TTSStoppedFrame). Queue an LLMRunFrame to unconditionally push the
-            # updated context upstream and unblock the bidirectional stream.
+            # Nova Sonic: the standard aggregator path defers sending the tool
+            # result until BotStoppedSpeakingFrame, which Nova Sonic never emits.
+            # Directly send the result to the bidirectional stream and mark it
+            # complete so the aggregator path skips it (no double-send).
             if pipeline_mode == PIPELINE_NOVA_SONIC:
-                await task.queue_frames([LLMRunFrame()])
+                result_text = f"Showing {item['label']}." if item else "I could not find that screen to show."
+                await llm._send_tool_result(params.tool_call_id, result_text)
+                llm._completed_tool_calls.add(params.tool_call_id)
 
         async def handle_show_schedule(params):
             title = params.arguments.get("title", "Schedule")
@@ -439,7 +441,9 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
             else:
                 await params.result_callback("I could not generate the schedule table for the screen.")
             if pipeline_mode == PIPELINE_NOVA_SONIC:
-                await task.queue_frames([LLMRunFrame()])
+                result_text = "Showing the schedule on screen." if columns else "I could not generate the schedule table for the screen."
+                await llm._send_tool_result(params.tool_call_id, result_text)
+                llm._completed_tool_calls.add(params.tool_call_id)
 
         async def handle_dismiss_content(params):
             logger.info("Tool: dismiss_content")
@@ -452,7 +456,8 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
             )])
             await params.result_callback("Returning to the full conversation view.")
             if pipeline_mode == PIPELINE_NOVA_SONIC:
-                await task.queue_frames([LLMRunFrame()])
+                await llm._send_tool_result(params.tool_call_id, "Returning to the full conversation view.")
+                llm._completed_tool_calls.add(params.tool_call_id)
 
         llm.register_function("show_content", handle_show_content)
         llm.register_function("show_schedule", handle_show_schedule)

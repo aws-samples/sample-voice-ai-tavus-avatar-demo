@@ -19,7 +19,7 @@ Next.js app (`tavus-avatar/`) for an AWS Summit Sydney booth demo. Real-time con
 
 ## Environment Variables
 - `TAVUS_API_KEY` - API key for Tavus
-- `TAVUS_PERSONA_ID` - Default persona ID
+- `TAVUS_PERSONA_ID` - Default persona ID. **For Pipecat integrations, always use `pipecat-stream`** — this is a special Tavus persona (pipeline_mode: echo) that disables Tavus's own greeting and LLM, letting Pipecat handle all AI orchestration. It will NOT appear in `GET /v2/personas` list but is valid and available on all accounts.
 
 ## Architecture
 - Frontend creates conversation via Next.js API route -> Tavus API
