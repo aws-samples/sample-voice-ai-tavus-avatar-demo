@@ -18,7 +18,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from loguru import logger
 
-from pipecat.runner.run import _create_server_app
+from pipecat.runner.run import app as _pipecat_app, _configure_server_app
 
 DEMO_API_TOKEN = os.getenv("DEMO_API_TOKEN")
 COOKIE_NAME = "demo-session"
@@ -26,7 +26,8 @@ COOKIE_MAX_AGE = 8 * 60 * 60  # 8 hours
 
 
 def create_app(args: argparse.Namespace):
-    app = _create_server_app(args)
+    app = _pipecat_app
+    _configure_server_app(args)
 
     # ── Health check ─────────────────────────────────────────────────────────
 
