@@ -1,5 +1,5 @@
 # Core Pipecat framework
-pipecat-ai[aws,aws-nova-sonic,cartesia,daily,deepgram,silero,tavus,webrtc]<1.0.0
+pipecat-ai[aws,aws-nova-sonic,cartesia,daily,deepgram,silero,tavus,webrtc]
 
 # WebRTC prebuilt transport
 pipecat-ai-small-webrtc-prebuilt
