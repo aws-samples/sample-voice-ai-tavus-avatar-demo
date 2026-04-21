@@ -225,7 +225,7 @@ transport_params_cascaded = {
         video_out_is_live=True,
         video_out_width=1280,
         video_out_height=720,
-        vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.2)),
+        vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.8)),
         turn_analyzer=LocalSmartTurnAnalyzerV3(params=SmartTurnParams()),
     ),
     "webrtc": lambda: TransportParams(
@@ -235,7 +235,7 @@ transport_params_cascaded = {
         video_out_is_live=True,
         video_out_width=1280,
         video_out_height=720,
-        vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.2)),
+        vad_analyzer=SileroVADAnalyzer(params=VADParams(stop_secs=0.8)),
         turn_analyzer=LocalSmartTurnAnalyzerV3(params=SmartTurnParams()),
     ),
 }
