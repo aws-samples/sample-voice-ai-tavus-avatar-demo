@@ -427,7 +427,8 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
                             f"responding={llm._assistant_is_responding}")
                 if params.tool_call_id not in llm._completed_tool_calls:
                     try:
-                        await llm._send_tool_result(params.tool_call_id, result_text)
+                        # Nova Sonic requires JSON content — pass dict so _send_tool_result json.dumps it
+                        await llm._send_tool_result(params.tool_call_id, {"result": result_text})
                         llm._completed_tool_calls.add(params.tool_call_id)
                         logger.info("Nova Sonic show_content: tool result sent OK")
                     except Exception as e:
@@ -453,7 +454,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
                 logger.info(f"Nova Sonic show_schedule: tool_call_id={params.tool_call_id}, stream_alive={llm._stream is not None}")
                 if params.tool_call_id not in llm._completed_tool_calls:
                     try:
-                        await llm._send_tool_result(params.tool_call_id, result_text)
+                        await llm._send_tool_result(params.tool_call_id, {"result": result_text})
                         llm._completed_tool_calls.add(params.tool_call_id)
                         logger.info("Nova Sonic show_schedule: tool result sent OK")
                     except Exception as e:
@@ -473,7 +474,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
                 logger.info(f"Nova Sonic dismiss_content: tool_call_id={params.tool_call_id}, stream_alive={llm._stream is not None}")
                 if params.tool_call_id not in llm._completed_tool_calls:
                     try:
-                        await llm._send_tool_result(params.tool_call_id, "Returning to the full conversation view.")
+                        await llm._send_tool_result(params.tool_call_id, {"result": "Returning to the full conversation view."})
                         llm._completed_tool_calls.add(params.tool_call_id)
                         logger.info("Nova Sonic dismiss_content: tool result sent OK")
                     except Exception as e:
