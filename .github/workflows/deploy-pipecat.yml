@@ -178,30 +178,15 @@ jobs:
 
       - name: Ensure S3 bucket policy for CloudFront OAC
         run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           BUCKET="${{ secrets.S3_BUCKET_NAME }}"
+          DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
           echo "Bucket: ${BUCKET}"
-          cat <<EOF > /tmp/bucket-policy.json
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Sid": "AllowCloudFrontServicePrincipal",
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "cloudfront.amazonaws.com"
-                },
-                "Action": "s3:GetObject",
-                "Resource": "arn:aws:s3:::${BUCKET}/*"
-              }
-            ]
-          }
-          EOF
-          aws s3api put-bucket-policy --bucket "${BUCKET}" --policy file:///tmp/bucket-policy.json
-          echo "Minimal bucket policy applied"
-          echo "=== Verify policy ==="
-          aws s3api get-bucket-policy --bucket "${BUCKET}" --query Policy --output text | python3 -m json.tool
-          echo "=== Check Block Public Access ==="
-          aws s3api get-public-access-block --bucket "${BUCKET}" || echo "No BPA config"
-          echo "=== List objects (verify content) ==="
-          aws s3api list-objects-v2 --bucket "${BUCKET}" --max-keys 5 --query 'Contents[].Key' --output text
+          echo "Distribution ID: ${DIST_ID}"
+          echo "=== Distribution domain name ==="
+          aws cloudfront get-distribution --id "${DIST_ID}" --query 'Distribution.DomainName' --output text
+          echo ""
+          echo "=== All distributions ==="
+          aws cloudfront list-distributions --query 'DistributionList.Items[].{Id:Id,Domain:DomainName,Origin:Origins.Items[0].DomainName}' --output table
+          echo ""
+          echo "=== Origin bucket from distribution ==="
+          aws cloudfront get-distribution --id "${DIST_ID}" --query 'Distribution.DistributionConfig.Origins.Items[?Id==`S3Origin`].DomainName' --output text
