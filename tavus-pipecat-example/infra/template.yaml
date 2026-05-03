@@ -501,6 +501,8 @@ Resources:
 
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
+    Metadata:
+      Note: Force re-apply - policy was deleted outside CloudFormation (2026-05-03)
     Properties:
       Bucket: !Ref FrontendBucket
       PolicyDocument:
