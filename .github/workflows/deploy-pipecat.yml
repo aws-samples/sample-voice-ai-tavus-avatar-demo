@@ -181,6 +181,8 @@ jobs:
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           DIST_ARN="arn:aws:cloudfront::${ACCOUNT_ID}:distribution/${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
           BUCKET="${{ secrets.S3_BUCKET_NAME }}"
+          echo "Distribution ARN: ${DIST_ARN}"
+          echo "Bucket: ${BUCKET}"
           cat <<EOF > /tmp/bucket-policy.json
           {
             "Version": "2012-10-17",
@@ -192,12 +194,7 @@ jobs:
                   "Service": "cloudfront.amazonaws.com"
                 },
                 "Action": "s3:GetObject",
-                "Resource": "arn:aws:s3:::${BUCKET}/*",
-                "Condition": {
-                  "StringEquals": {
-                    "AWS:SourceArn": "${DIST_ARN}"
-                  }
-                }
+                "Resource": "arn:aws:s3:::${BUCKET}/*"
               },
               {
                 "Sid": "DenyNonTLS",
@@ -218,4 +215,4 @@ jobs:
           }
           EOF
           aws s3api put-bucket-policy --bucket "${BUCKET}" --policy file:///tmp/bucket-policy.json
-          echo "Bucket policy applied successfully"
+          echo "Bucket policy applied successfully (no SourceArn condition for debugging)"
