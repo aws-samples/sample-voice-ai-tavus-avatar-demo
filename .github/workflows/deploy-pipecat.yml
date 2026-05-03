@@ -178,15 +178,65 @@ jobs:
 
       - name: Ensure S3 bucket policy for CloudFront OAC
         run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           BUCKET="${{ secrets.S3_BUCKET_NAME }}"
           DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
-          echo "Bucket: ${BUCKET}"
-          echo "Distribution ID: ${DIST_ID}"
-          echo "=== Distribution domain name ==="
-          aws cloudfront get-distribution --id "${DIST_ID}" --query 'Distribution.DomainName' --output text
-          echo ""
-          echo "=== All distributions ==="
-          aws cloudfront list-distributions --query 'DistributionList.Items[].{Id:Id,Domain:DomainName,Origin:Origins.Items[0].DomainName}' --output table
-          echo ""
-          echo "=== Origin bucket from distribution ==="
-          aws cloudfront get-distribution --id "${DIST_ID}" --query 'Distribution.DistributionConfig.Origins.Items[?Id==`S3Origin`].DomainName' --output text
+          DIST_ARN="arn:aws:cloudfront::${ACCOUNT_ID}:distribution/${DIST_ID}"
+          echo "Applying bucket policy with SourceArn: ${DIST_ARN}"
+          
+          # RestrictPublicBuckets blocks policies without SourceArn condition,
+          # so we MUST include the condition for OAC to work.
+          POLICY=$(cat <<PEOF
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "AllowCloudFrontOACRead",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "cloudfront.amazonaws.com"
+                },
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::${BUCKET}/*",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceArn": "${DIST_ARN}"
+                  }
+                }
+              },
+              {
+                "Sid": "DenyNonTLS",
+                "Effect": "Deny",
+                "Principal": "*",
+                "Action": "s3:*",
+                "Resource": [
+                  "arn:aws:s3:::${BUCKET}",
+                  "arn:aws:s3:::${BUCKET}/*"
+                ],
+                "Condition": {
+                  "Bool": {
+                    "aws:SecureTransport": "false"
+                  }
+                }
+              }
+            ]
+          }
+          PEOF
+          )
+          echo "${POLICY}" > /tmp/bucket-policy.json
+          
+          # First disable Block Public Access temporarily to ensure policy applies
+          aws s3api delete-public-access-block --bucket "${BUCKET}"
+          sleep 2
+          
+          # Apply the policy
+          aws s3api put-bucket-policy --bucket "${BUCKET}" --policy file:///tmp/bucket-policy.json
+          echo "Policy applied"
+          
+          # Re-enable Block Public Access
+          aws s3api put-public-access-block --bucket "${BUCKET}" --public-access-block-configuration 'BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=false,RestrictPublicBuckets=false'
+          echo "Block Public Access re-configured (BlockPublicPolicy=false, RestrictPublicBuckets=false for OAC)"
+          
+          # Verify
+          echo "=== Final bucket policy ==="
+          aws s3api get-bucket-policy --bucket "${BUCKET}" --query Policy --output text | python3 -m json.tool
