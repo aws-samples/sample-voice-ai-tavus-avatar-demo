@@ -175,3 +175,47 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
+
+      - name: Ensure S3 bucket policy for CloudFront OAC
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          DIST_ARN="arn:aws:cloudfront::${ACCOUNT_ID}:distribution/${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
+          BUCKET="${{ secrets.S3_BUCKET_NAME }}"
+          cat <<EOF > /tmp/bucket-policy.json
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "AllowCloudFrontOACRead",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "cloudfront.amazonaws.com"
+                },
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::${BUCKET}/*",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceArn": "${DIST_ARN}"
+                  }
+                }
+              },
+              {
+                "Sid": "DenyNonTLS",
+                "Effect": "Deny",
+                "Principal": "*",
+                "Action": "s3:*",
+                "Resource": [
+                  "arn:aws:s3:::${BUCKET}",
+                  "arn:aws:s3:::${BUCKET}/*"
+                ],
+                "Condition": {
+                  "Bool": {
+                    "aws:SecureTransport": "false"
+                  }
+                }
+              }
+            ]
+          }
+          EOF
+          aws s3api put-bucket-policy --bucket "${BUCKET}" --policy file:///tmp/bucket-policy.json
+          echo "Bucket policy applied successfully"
