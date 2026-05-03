@@ -179,40 +179,29 @@ jobs:
       - name: Ensure S3 bucket policy for CloudFront OAC
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          DIST_ARN="arn:aws:cloudfront::${ACCOUNT_ID}:distribution/${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
           BUCKET="${{ secrets.S3_BUCKET_NAME }}"
-          echo "Distribution ARN: ${DIST_ARN}"
           echo "Bucket: ${BUCKET}"
           cat <<EOF > /tmp/bucket-policy.json
           {
             "Version": "2012-10-17",
             "Statement": [
               {
-                "Sid": "AllowCloudFrontOACRead",
+                "Sid": "AllowCloudFrontServicePrincipal",
                 "Effect": "Allow",
                 "Principal": {
                   "Service": "cloudfront.amazonaws.com"
                 },
                 "Action": "s3:GetObject",
                 "Resource": "arn:aws:s3:::${BUCKET}/*"
-              },
-              {
-                "Sid": "DenyNonTLS",
-                "Effect": "Deny",
-                "Principal": "*",
-                "Action": "s3:*",
-                "Resource": [
-                  "arn:aws:s3:::${BUCKET}",
-                  "arn:aws:s3:::${BUCKET}/*"
-                ],
-                "Condition": {
-                  "Bool": {
-                    "aws:SecureTransport": "false"
-                  }
-                }
               }
             ]
           }
           EOF
           aws s3api put-bucket-policy --bucket "${BUCKET}" --policy file:///tmp/bucket-policy.json
-          echo "Bucket policy applied successfully (no SourceArn condition for debugging)"
+          echo "Minimal bucket policy applied"
+          echo "=== Verify policy ==="
+          aws s3api get-bucket-policy --bucket "${BUCKET}" --query Policy --output text | python3 -m json.tool
+          echo "=== Check Block Public Access ==="
+          aws s3api get-public-access-block --bucket "${BUCKET}" || echo "No BPA config"
+          echo "=== List objects (verify content) ==="
+          aws s3api list-objects-v2 --bucket "${BUCKET}" --max-keys 5 --query 'Contents[].Key' --output text
