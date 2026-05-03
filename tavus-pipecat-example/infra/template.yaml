@@ -508,7 +508,7 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Sid: AllowCloudFrontOAC
+          - Sid: AllowCloudFrontOACRead
             Effect: Allow
             Principal:
               Service: cloudfront.amazonaws.com
