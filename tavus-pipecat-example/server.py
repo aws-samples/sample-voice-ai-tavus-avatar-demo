@@ -12,6 +12,7 @@ Run the same way as the bare runner:
 import argparse
 import os
 import sys
+import time
 
 import uvicorn
 from fastapi import Request
@@ -23,6 +24,10 @@ from pipecat.runner.run import app as _pipecat_app, _configure_server_app
 DEMO_API_TOKEN = os.getenv("DEMO_API_TOKEN")
 COOKIE_NAME = "demo-session"
 COOKIE_MAX_AGE = 8 * 60 * 60  # 8 hours
+RATE_LIMIT_SECS = 90  # minimum seconds between /start calls per session
+
+# session token → last /start timestamp
+_last_start: dict[str, float] = {}
 
 
 def create_app(args: argparse.Namespace):
@@ -86,7 +91,22 @@ def create_app(args: argparse.Namespace):
             logger.warning("DEMO_API_TOKEN not set — rejecting request (fail-closed)")
             return JSONResponse({"error": "Service misconfigured"}, status_code=503)
 
-        if request.cookies.get(COOKIE_NAME) == DEMO_API_TOKEN:
+        cookie = request.cookies.get(COOKIE_NAME)
+        if cookie == DEMO_API_TOKEN:
+            # Rate-limit POST /start to prevent accidental conversation storms.
+            if path == "/start" and method == "POST":
+                now = time.monotonic()
+                last = _last_start.get(cookie, 0)
+                wait = RATE_LIMIT_SECS - (now - last)
+                if wait > 0:
+                    retry_after = int(wait) + 1
+                    logger.warning(f"Rate limit: /start blocked, retry in {retry_after}s")
+                    return JSONResponse(
+                        {"error": f"Please wait {retry_after} seconds before starting a new conversation."},
+                        status_code=429,
+                        headers={"Retry-After": str(retry_after)},
+                    )
+                _last_start[cookie] = now
             return await call_next(request)
 
         return JSONResponse({"error": "Unauthorized"}, status_code=401)
