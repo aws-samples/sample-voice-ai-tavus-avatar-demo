@@ -78,7 +78,12 @@ def create_app(args: argparse.Namespace):
         path = request.url.path
         method = request.method
 
-        # Always allow: auth endpoints, GET /start (ALB health check), all other GETs
+        # Block Pipecat's dev-only GET / handler — it auto-starts a bot with no
+        # auth, causing a Tavus conversation on every browser hit or probe.
+        if path == "/" and method == "GET":
+            return JSONResponse({"error": "Not found"}, status_code=404)
+
+        # Always allow: auth endpoints, health check, all other non-API GETs
         if path.startswith("/api/auth"):
             return await call_next(request)
         if path == "/start" and method != "POST":
