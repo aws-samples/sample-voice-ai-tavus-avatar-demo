@@ -1,33 +1,41 @@
 # Demo: Real-time Voice Agents with Video Avatar
 
-An interactive conversational video demo for AWS events and demo booths. An AI-powered video avatar engages visitors in real-time voice conversations and can display content overlays (architecture diagrams, use cases) via tool calls. Supports configurable event contexts via the `EVENT_CONFIG` environment variable.
+An AI-powered video avatar that engages visitors in real-time voice conversations at AWS events. Supports content overlays (architecture diagrams, use cases) via tool calls.
 
-## Table of Contents
+## Prerequisites
 
-- [Quick Start](#quick-start)
-- [Choose Your Implementation](#choose-your-implementation)
-- [Run Tavus Avatar Demo](#run-tavus-avatar-demo)
-- [Run Pipecat Demo](#run-pipecat-demo)
-- [Browser Compatibility](#browser-compatibility)
-- [Performance Considerations](#performance-considerations)
-- [Security](#security)
-- [Troubleshooting](#troubleshooting)
-- [Monitoring & Debugging](#monitoring--debugging)
-- [Advanced Topics](#advanced-topics)
-  - [Available Tavus Avatars](#available-tavus-avatars)
-- [Glossary](#glossary)
+| Requirement | Version | Notes |
+|---|---|---|
+| Node.js | 18+ | Required for both demos |
+| npm | 9+ | Comes with Node.js |
+| Python | 3.11+ | Pipecat demo only |
+| AWS CLI | 2.x | For deployment and Bedrock access |
+| AWS credentials | — | Configured via `aws configure` or env vars |
+
+**API keys from AWS Partners** (also available on [AWS Marketplace](https://aws.amazon.com/marketplace)):
+
+| Key | Required for | AWS Partner |
+|---|---|---|
+| `TAVUS_API_KEY` | Both demos | [Tavus](https://tavus.io) |
+| `DEEPGRAM_API_KEY` | Pipecat demo | [Deepgram](https://deepgram.com) |
+| `CARTESIA_API_KEY` | Pipecat demo | [Cartesia](https://cartesia.ai) |
+| `DAILY_API_KEY` | Pipecat cloud deploy | [Daily](https://daily.co) |
 
 ## Quick Start
 
-**Fastest path to run each demo:**
-
 ```bash
 # Tavus Avatar (managed pipeline)
-cd tavus-avatar && npm run dev:all
+cd tavus-avatar && cp env.example .env.local
+# Edit .env.local with your TAVUS_API_KEY and TAVUS_PERSONA_ID
+npm install && npm run dev:all
 
-# Pipecat (self-hosted pipeline)  
-cd tavus-pipecat-example && npm run dev:all
+# Pipecat (self-hosted pipeline)
+cd tavus-pipecat-example && cp .env.example .env
+# Edit .env with your API keys
+pip install -r requirements.txt && npm run dev:all
 ```
+
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Choose Your Implementation
 
@@ -306,12 +314,12 @@ aws iam create-open-id-connect-provider \
 
 Also set these **repository variables** (Settings → Variables → Actions) to configure the event and voices per deployment:
 
-| Variable | Example (Sydney) | Example (Bengaluru) |
+| Variable | Example (Mumbai) | Example (Sydney) |
 |---|---|---|
-| `AWS_REGION` | `ap-southeast-2` | `ap-south-1` |
-| `EVENT_CONFIG` | `aws-summit-sydney-2026` | `aws-summit-bengaluru-2026` |
-| `NOVA_SONIC_VOICE_ID` | `matthew` | `arjun` |
-| `CARTESIA_VOICE_ID` | `79a125e8-cd45-4c13-8a67-188112f4dd22` | `7f423809-0011-4658-ba48-a411f5e516ba` |
+| `AWS_REGION` | `ap-south-1` | `ap-southeast-2` |
+| `EVENT_CONFIG` | `aws-summit-mumbai-2026` | `aws-summit-sydney-2026` |
+| `NOVA_SONIC_VOICE_ID` | `matthew` | `matthew` |
+| `CARTESIA_VOICE_ID` | `79a125e8-cd45-4c13-8a67-188112f4dd22` | `79a125e8-cd45-4c13-8a67-188112f4dd22` |
 
 #### 5. Push to deploy
 
@@ -482,7 +490,7 @@ For `tavus-avatar` only. The persona's system prompt, tools, and engines are man
 #### Update the system prompt
 
 ```bash
-# Set EVENT_CONFIG to match your event (e.g. aws-summit-bengaluru-2026)
+# Set EVENT_CONFIG to match your event (e.g. aws-summit-mumbai-2026)
 SYSTEM_PROMPT=$(python3 -c "import json; print(json.dumps(open('prompts/$EVENT_CONFIG/system-instruction.md').read()))")
 
 curl -X PATCH "https://tavusapi.com/v2/personas/$TAVUS_PERSONA_ID" \
@@ -540,7 +548,7 @@ Noise cancellation runs locally on the kiosk Mac using [Krisp](https://krisp.ai)
 
 #### System Prompt
 
-Both implementations load the system prompt from `prompts/{EVENT_CONFIG}/system-instruction.md`. Set `EVENT_CONFIG` to the event directory name (e.g. `aws-summit-bengaluru-2026`) to switch event context — prompts, greetings, voice IDs, and content items are all isolated per event. Copy `prompts/_template/` to add a new event.
+Both implementations load the system prompt from `prompts/{EVENT_CONFIG}/system-instruction.md`. Set `EVENT_CONFIG` to the event directory name (e.g. `aws-summit-mumbai-2026`) to switch event context — prompts, greetings, voice IDs, and content items are all isolated per event. Copy `prompts/_template/` to add a new event.
 
 #### Tool Calls
 
