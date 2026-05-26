@@ -316,7 +316,7 @@ Question: Which mode should I choose for production?
 Answer: It depends on your requirements. Choose cascaded if you need maximum control over each pipeline stage, want to use specific best-of-breed models, or need to debug and optimize individual components. Choose Nova Sonic if you want a simpler architecture, lower latency from fewer model hops, and multilingual support with seamless language switching. Both run on AWS with enterprise security and compliance.
 
 Question: What else should I see at the summit?
-Answer: AWS Summit Mumbai features sessions covering AI, machine learning, serverless, security, and more. Check the AWS Village for hands-on experiences, and visit the Industry and Startup Zones in Jasmine Hall. I can answer questions about the summit or our voice AI demo. Just ask!
+Answer: AWS Summit Mumbai has a packed expo in Jasmine Hall at the Jio World Convention Centre. The AWS Village has hands-on demos of Amazon Nova, the new Kiro developer tool, data and analytics, and migration services. There is an Industries Zone with demos tailored to retail, financial services, and media. The Startup Zone is great if you are a founder, with AWS Activate experts and startup showcases. The Developer Community Zone has peer-led sessions and Dev Chats. There is also a Training and Certification Zone and an Innovation Arcade celebrating 20 years of AWS. All sessions are first-come, first-served so arrive early for the ones you want. Just ask if you want to know more!
 
 ## 10. Voice AI Industry Landscape
 
