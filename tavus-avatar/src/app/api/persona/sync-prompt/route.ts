@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 import { getTavusConfig, getTavusErrorMessage, readResponsePayload, tavusFetch } from "@/lib/tavus-api";
 
 function getEventDir(): string {
-  const eventConfig = process.env.EVENT_CONFIG || "aws-summit-sydney-2026";
+  const eventConfig = process.env.EVENT_CONFIG || "aws-summit-mumbai-2026";
   const eventDir = resolve(process.cwd(), `../prompts/${eventConfig}`);
   if (!existsSync(eventDir)) {
     throw new Error(`Event config directory not found: ${eventDir}. Set EVENT_CONFIG to a valid event name.`);

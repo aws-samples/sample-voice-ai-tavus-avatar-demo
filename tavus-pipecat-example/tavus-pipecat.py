@@ -42,11 +42,11 @@ load_dotenv(override=True)
 
 # ---------------------------------------------------------------------------
 # Event configuration
-# Set EVENT_CONFIG env var to switch events (default: aws-summit-sydney-2026)
+# Set EVENT_CONFIG env var to switch events (default: aws-summit-mumbai-2026)
 # Each event is a directory under prompts/ with its own prompt files + config.yaml
 # ---------------------------------------------------------------------------
 REPO_ROOT = Path(__file__).resolve().parent.parent
-EVENT_CONFIG = os.getenv("EVENT_CONFIG", "aws-summit-sydney-2026")
+EVENT_CONFIG = os.getenv("EVENT_CONFIG", "aws-summit-mumbai-2026")
 EVENT_DIR = REPO_ROOT / "prompts" / EVENT_CONFIG
 
 if not EVENT_DIR.exists():
@@ -99,7 +99,7 @@ TOOLS = ToolsSchema(
             description=(
                 "Shows one to three schedule boxes on the main display while moving the "
                 "video conversation to a small overlay. Use this when the user asks about "
-                "the AWS Summit Sydney schedule, booth sessions, what is happening on a "
+                "the AWS Summit schedule, booth sessions, what is happening on a "
                 "given day, or which sessions to visit."
             ),
             properties={
@@ -280,7 +280,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments, pipeli
         tavus = TavusVideoService(
             api_key=os.getenv("TAVUS_API_KEY"),
             replica_id=replica_id,
-            persona_id=os.getenv("TAVUS_PERSONA_ID", "paaee96e4f87"),
+            persona_id=os.getenv("TAVUS_PERSONA_ID", "pipecat-stream"),
             session=session,
         )
 

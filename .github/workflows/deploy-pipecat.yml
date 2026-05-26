@@ -12,12 +12,10 @@ on:
 env:
   # Set these as GitHub repository variables (Settings > Variables)
   # so each fork/deployment can target a different region and event without changing code.
-  # wirjo/voice-ai-demo:    AWS_REGION=ap-southeast-2, EVENT_CONFIG=aws-summit-sydney-2026
+  # wirjo/voice-ai-demo:    AWS_REGION=ap-south-1, EVENT_CONFIG=aws-summit-mumbai-2026
   #                         NOVA_SONIC_VOICE_ID=matthew, CARTESIA_VOICE_ID=79a125e8-cd45-4c13-8a67-188112f4dd22
-  # aws-samples/...-demo:   AWS_REGION=ap-south-1,     EVENT_CONFIG=aws-summit-bengaluru-2026
-  #                         NOVA_SONIC_VOICE_ID=arjun,  CARTESIA_VOICE_ID=7f423809-0011-4658-ba48-a411f5e516ba
   AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
-  EVENT_CONFIG: ${{ vars.EVENT_CONFIG || 'aws-summit-bengaluru-2026' }}
+  EVENT_CONFIG: ${{ vars.EVENT_CONFIG || 'aws-summit-mumbai-2026' }}
   NOVA_SONIC_VOICE_ID: ${{ vars.NOVA_SONIC_VOICE_ID || 'matthew' }}
   CARTESIA_VOICE_ID: ${{ vars.CARTESIA_VOICE_ID || '79a125e8-cd45-4c13-8a67-188112f4dd22' }}
   ECR_REPOSITORY: tavus-pipecat-backend

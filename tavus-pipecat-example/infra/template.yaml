@@ -27,8 +27,8 @@ Parameters:
     Default: ''
   EventConfig:
     Type: String
-    Default: 'aws-summit-bengaluru-2026'
-    Description: Event directory under prompts/ (e.g. aws-summit-bengaluru-2026)
+    Default: 'aws-summit-mumbai-2026'
+    Description: Event directory under prompts/ (e.g. aws-summit-mumbai-2026)
   NovaSonicVoiceId:
     Type: String
     Default: matthew
@@ -39,7 +39,7 @@ Parameters:
     Description: Cartesia voice UUID
   TavusPersonaId:
     Type: String
-    Default: 'paaee96e4f87'
+    Default: 'pipecat-stream'
     Description: Tavus persona ID (overridable per deployment)
   CloudFrontOriginVerifySecret:
     Type: String
