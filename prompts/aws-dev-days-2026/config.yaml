@@ -2,9 +2,9 @@
 # The system prompt itself is just a plain markdown file (system-instruction.md)
 
 greeting: >-
-  Hi, welcome to AWS Startup Dev Days!
+  Hi, welcome to AWS Startup Dev Day in Melbourne!
   I am a real-time voice AI agent built entirely on AWS.
-  What is your name and which company or organization are you with?
+  What is your name and which company or startup are you with?
 
 content_items:
   aws_voice_ai_overview:
