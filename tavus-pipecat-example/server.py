@@ -136,6 +136,7 @@ def main():
     parser.add_argument("--dialin", action="store_true", default=False)
     parser.add_argument("--esp32", action="store_true", default=False)
     parser.add_argument("--whatsapp", action="store_true", default=False)
+    parser.add_argument("--allowed-origins", nargs="*", default=None)
 
     args = parser.parse_args()
 
