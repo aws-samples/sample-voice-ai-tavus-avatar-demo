@@ -2,9 +2,10 @@ FROM python:3.13-slim
 
 WORKDIR /app/tavus-pipecat-example
 
-# Install dependencies first for better layer caching
-COPY tavus-pipecat-example/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
+# Install dependencies first for better layer caching.
+# constraints.txt pins every package so a rebuild matches the last known-good image.
+COPY tavus-pipecat-example/requirements.txt tavus-pipecat-example/constraints.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -c constraints.txt && \
     python -c "import nltk; nltk.download('punkt_tab', download_dir='/usr/local/share/nltk_data')"
 
 # Copy application code
